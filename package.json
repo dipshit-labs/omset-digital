@@ -1,0 +1,38 @@
+{
+  "name": "omset-digital",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*",
+      "packages/themes/*"
+    ],
+    "catalog": {
+      "typescript": "7.0.2"
+    }
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "check": "ultracite check",
+    "dev": "turbo run dev",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12",
+    "lefthook": "^2.1.12",
+    "turbo": "^2.10.12",
+    "typescript": "catalog:",
+    "ultracite": "7.10.7"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@repo/theme-default",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/types": "*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@types/react": "19.2.18",
+    "react": "19.2.8",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

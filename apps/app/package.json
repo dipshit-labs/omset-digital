@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "private": true,
+  "scripts": {
+    "build": "bun --bun next build",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "bun --bun next dev -p 3000",
+    "start": "bun --bun next start",
+    "typecheck": "bun --bun next typegen && tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@repo/theme-default": "*",
+    "@repo/theme-minimal": "*",
+    "@repo/types": "*",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.6",
+    "babel-plugin-react-compiler": "1.0.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "catalog:"
+  }
+}
