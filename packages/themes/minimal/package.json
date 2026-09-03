@@ -13,10 +13,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/types": "*"
+    "@repo/types": "workspace:*"
   },
   "devDependencies": {
-    "@repo/typescript-config": "*",
+    "@repo/typescript-config": "workspace:*",
     "@types/react": "19.2.18",
     "react": "19.2.8",
     "typescript": "catalog:"

@@ -9,15 +9,15 @@
     "typecheck": "bun --bun next typegen && tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@repo/theme-default": "*",
-    "@repo/theme-minimal": "*",
-    "@repo/types": "*",
+    "@repo/theme-default": "workspace:*",
+    "@repo/theme-minimal": "workspace:*",
+    "@repo/types": "workspace:*",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@repo/typescript-config": "*",
+    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.4.1",
     "@types/react": "19.2.18",
