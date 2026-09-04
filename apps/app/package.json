@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "bun --bun next build",
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "dev": "bun --bun next dev -p 3000",
     "start": "bun --bun next start",
     "typecheck": "bun --bun next typegen && tsc --noEmit --emitDeclarationOnly false"

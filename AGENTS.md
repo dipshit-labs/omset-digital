@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues live in GitHub Issues on `ashtrath/omset-digital`. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues on `dipshit-labs/omset-digital`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

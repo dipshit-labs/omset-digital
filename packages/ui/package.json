@@ -12,7 +12,7 @@
     "./postcss": "./postcss.config.mjs"
   },
   "scripts": {
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

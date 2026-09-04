@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues on `ashtrath/omset-digital`. Use the `gh` CLI for all operations.
+Issues and specs for this repo live as GitHub issues on `dipshit-labs/omset-digital`. Use the `gh` CLI for all operations.
 
 ## Conventions
 
