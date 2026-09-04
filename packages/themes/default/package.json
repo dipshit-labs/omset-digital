@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/types": "workspace:*"
+    "@repo/types": "workspace:*",
+    "@repo/ui": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
