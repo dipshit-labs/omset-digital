@@ -1,5 +1,12 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@payload-config": ["./src/payload/payload.config.ts"]
+    }
+  },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -8,5 +15,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }

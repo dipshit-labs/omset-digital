@@ -3,12 +3,30 @@
   "extends": [
     "ultracite/biome/core",
     "ultracite/biome/react",
-    "ultracite/biome/next"
+    "ultracite/biome/next",
+    "ultracite/biome/vitest"
   ],
+
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedKeys": {
+          "level": "on",
+          "options": {
+            "groupByNesting": true
+          }
+        }
+      }
+    }
+  },
+
   "linter": {
     "rules": {
       "performance": {
         "noBarrelFile": "off"
+      },
+      "style": {
+        "useFilenamingConvention": "off"
       }
     }
   }

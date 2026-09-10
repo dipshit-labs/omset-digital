@@ -1,8 +1,10 @@
 # Generic PaymentProvider interface for multi-gateway support
 
-The payment integration layer is designed around a `PaymentProvider` interface rather than being coupled to Xendit directly. Each gateway (Xendit, Midtrans, Stripe, etc.) is implemented as an adapter registered in a static provider map. A Tenant has one active provider at a time, selected via a Payload `blocks` field where each block type represents one provider and carries that provider's specific credentials as named, access-restricted fields. The webhook route is `/api/webhooks/[provider]/[tenantSlug]` so each adapter's verification logic runs in isolation.
+The payment integration layer is designed around a `PaymentProvider` interface rather than being coupled to Xendit directly. Each gateway (Xendit, Midtrans, Stripe, etc.) is implemented as an adapter registered in a static provider map. A Tenant has one active provider at a time, selected via a `paymentProvider` select field inside a `paymentConfig` group on the Tenant document. Each provider's credentials live in a named sub-group (`xenditConfig`, etc.) that is conditionally shown in the Payload admin UI via `admin.condition` keyed to the `paymentProvider` value. The webhook route is `/api/webhooks/[provider]/[tenantSlug]` so each adapter's verification logic runs in isolation.
 
 The interface exposes two methods: `createSession(order)` and `parseWebhook(request)`. Status mapping from provider-specific values to the platform's canonical Payment Status (`pending | paid | expired | failed | cancelled`) is a private implementation detail of each adapter — it is not part of the public interface. `parseWebhook` handles signature verification internally and returns a `ParsedWebhookEvent` (platform Order ID, canonical status, provider event ID, optional metadata); it throws on verification failure.
+
+The same pattern applies to shipping: a `shippingProvider` select inside a `shippingConfig` group, with per-provider credential sub-groups conditionally shown. RajaOngkir is the only v1 provider; its `originSubdistrictId` field is further conditioned on `accountType === 'pro'`.
 
 ## Considered Options
 
@@ -10,7 +12,9 @@ The interface exposes two methods: `createSession(order)` and `parseWebhook(requ
 
 **Generic JSON credential bag**: rejected because field-level access control (hiding secret keys from non-owners) requires named fields, not a JSON blob.
 
-**Payload `blocks` (chosen)**: one block type per provider, each with its own typed and access-restricted fields. Adding a new provider adds a new block type — no schema changes to existing blocks, and access control is per-field within each block.
+**Payload `blocks`**: one block type per provider, each with its own typed and access-restricted fields. Rejected because the blocks UX is designed for repeatable content, not mutually exclusive configuration — Merchants found it confusing to "add a block" to configure their payment provider.
+
+**Conditional groups with a provider select (chosen)**: a single `paymentProvider` select drives `admin.condition` on each provider's credential sub-group. Only the active provider's fields are visible in the UI. Access restriction (owner + Platform Admin only) still applies at the field level on sensitive credentials. Adding a new provider adds a new sub-group and a new select option — no structural changes to existing sub-groups.
 
 ## Consequences
 

@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+  "root": false,
+  "extends": "//",
+
+  "files": {
+    "includes": ["!!**/payload-types.ts", "!!src/app/(payload)"]
+  },
+
+  "plugins": [
+    "./node_modules/biome-plugin-payload/rules/no-find-without-select.grit",
+    "./node_modules/biome-plugin-payload/rules/no-find-without-depth.grit",
+    "./node_modules/biome-plugin-payload/rules/no-missing-override-access.grit",
+    "./node_modules/biome-plugin-payload/rules/prefer-explicit-populate.grit",
+    "./node_modules/biome-plugin-payload/rules/require-user-with-override-false.grit"
+  ]
+}
