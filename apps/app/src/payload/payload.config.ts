@@ -9,6 +9,7 @@ import { env } from "@/env";
 import { isSuperAdmin } from "./access/access";
 import { Tenants } from "./collections/tenants";
 import { Users } from "./collections/users";
+import { seed } from "./seed";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -31,6 +32,11 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  onInit: async (args) => {
+    if (env.PAYLOAD_SEED) {
+      await seed(args);
+    }
   },
   plugins: [
     multiTenantPlugin({

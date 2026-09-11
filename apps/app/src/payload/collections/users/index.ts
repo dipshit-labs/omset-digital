@@ -24,24 +24,4 @@ export const Users: CollectionConfig = {
       ],
     },
   ],
-  hooks: {
-    beforeChange: [
-      async ({ operation, req, data }) => {
-        if (operation === "create") {
-          const userCount = await req.payload.count({
-            collection: "users",
-            overrideAccess: false,
-            req,
-          });
-          if (userCount.totalDocs === 0) {
-            return {
-              ...data,
-              roles: ["super-admin"],
-            };
-          }
-        }
-        return data;
-      },
-    ],
-  },
 };
