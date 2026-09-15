@@ -6,9 +6,11 @@ import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { env } from "@/env";
-import { isSuperAdmin } from "./access/access";
+import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Tenants } from "./collections/tenants";
 import { Users } from "./collections/users";
+import { getUserTenantIDs } from "./lib/ids";
+import type { Config } from "./payload-types";
 import { seed } from "./seed";
 
 const filename = fileURLToPath(import.meta.url);
@@ -39,24 +41,22 @@ export default buildConfig({
     }
   },
   plugins: [
-    multiTenantPlugin({
+    multiTenantPlugin<Config>({
       collections: {},
-      tenantsSlug: "tenants",
-      tenantsArrayField: {
-        includeDefaultField: true,
-        rowFields: [
-          {
-            defaultValue: ["owner"],
-            hasMany: true,
-            name: "roles",
-            required: true,
-            type: "select",
-            options: [
-              { label: "Owner", value: "owner" },
-              { label: "Manager", value: "manager" },
-            ],
+      tenantField: {
+        access: {
+          read: () => true,
+          update: ({ req }) => {
+            if (isSuperAdmin(req.user)) {
+              return true;
+            }
+
+            return getUserTenantIDs(req.user).length > 0;
           },
-        ],
+        },
+      },
+      tenantsArrayField: {
+        includeDefaultField: false,
       },
       userHasAccessToAllTenants: (user) => isSuperAdmin(user),
     }),

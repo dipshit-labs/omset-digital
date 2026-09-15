@@ -1,7 +1,7 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
   "compilerOptions": {
-    "types": ["bun"],
+    "types": ["bun", "react", "react-dom"],
     "paths": {
       "@/*": ["./src/*"],
       "@payload-config": ["./src/payload/payload.config.ts"]

@@ -1,13 +1,9 @@
 import type { CollectionConfig, TextField } from "payload";
 import { validateSlug } from "@/lib/utils";
-import {
-  canMutateTenant,
-  canReadRestrictedField,
-  canReadTenant,
-  isTenantOwnerOrSuperAdmin,
-} from "@/payload/access/access";
+import { canReadRestrictedField } from "@/payload/access/canReadRestrictedField";
+import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
+import { updateAndDeleteTenantAccess } from "./access/updateAndDelete";
 
-/** Credential field restricted to tenant owner and super-admin. */
 const restrictedTextField = (name: string): TextField => ({
   name,
   access: { read: canReadRestrictedField },
@@ -18,10 +14,10 @@ const restrictedTextField = (name: string): TextField => ({
 export const Tenants: CollectionConfig = {
   slug: "tenants",
   access: {
-    create: canMutateTenant,
-    delete: canMutateTenant,
-    read: canReadTenant,
-    update: ({ req: { user }, id }) => isTenantOwnerOrSuperAdmin(user, id),
+    create: isSuperAdminAccess,
+    delete: updateAndDeleteTenantAccess,
+    update: updateAndDeleteTenantAccess,
+    read: ({ req }) => Boolean(req.user),
   },
   admin: {
     defaultColumns: ["name", "slug", "customDomain", "theme"],

@@ -123,7 +123,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  roles: ('super-admin' | 'user')[];
+  username?: string | null;
+  password?: string | null;
+  roles?: ('super-admin' | 'user')[] | null;
   tenants?:
     | {
         tenant: number | Tenant;
@@ -147,7 +149,6 @@ export interface User {
         expiresAt: string;
       }[]
     | null;
-  password?: string | null;
   collection: 'users';
 }
 /**
@@ -328,6 +329,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  username?: T;
+  password?: T;
   roles?: T;
   tenants?:
     | T
