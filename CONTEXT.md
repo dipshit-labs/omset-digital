@@ -65,13 +65,16 @@ A sellable item listed on the Storefront. Has one or more SKUs.
 _Avoid_: Item, listing, goods
 
 **SKU**:
-A specific purchasable variant of a Product — the leaf node of the variant tree. Carries its own price (optional override), stock, and weight.
+A specific purchasable variant of a Product, representing the leaf node of the variant tree. Carries its own price, stock, weight, and barcode. Linked to a Product and its selected Variant Options.
 _Avoid_: Variant, option, item
 
 **Variant Axis**:
 A named dimension of Product variation (e.g. Color, Size). A Product's SKUs are the Cartesian product of its Variant Axes.
 _Avoid_: Attribute, option group, dimension
 
+**Variant Option**:
+A discrete choice on a Variant Axis (e.g. Red, Blue, Small, Large). Linked to a Variant Axis.
+_Avoid_: Value, choice, attribute value
 **Digital Asset**:
 A file attached to a Product of type `digital`, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
 _Avoid_: Download, file, attachment
