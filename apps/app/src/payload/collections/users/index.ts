@@ -72,6 +72,7 @@ export const Users: CollectionConfig = {
       hasMany: true,
       name: "roles",
       options: ["super-admin", "user"],
+      saveToJWT: true,
       type: "select",
       access: {
         update: ({ req }) => isSuperAdmin(req.user),

@@ -1,7 +1,8 @@
-import type { CollectionConfig, TextField } from "payload";
+import type { Block, CollectionConfig, TextField } from "payload";
 import { validateSlug } from "@/lib/utils";
-import { canReadRestrictedField } from "@/payload/access/canReadRestrictedField";
 import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
+import { encryptedField } from "@/payload/fields/encrypted";
+import { canReadRestrictedField } from "./access/canReadRestrictedField";
 import { updateAndDeleteTenantAccess } from "./access/updateAndDelete";
 
 const restrictedTextField = (name: string): TextField => ({
@@ -10,6 +11,35 @@ const restrictedTextField = (name: string): TextField => ({
   admin: { description: "Restricted to tenant owner and super-admin" },
   type: "text",
 });
+
+const XenditBlock: Block = {
+  labels: { plural: "Xendit", singular: "Xendit" },
+  slug: "xendit",
+  fields: [
+    encryptedField("secretKey", {
+      access: { read: canReadRestrictedField },
+      admin: {
+        placeholder: "xnd_production_...",
+      },
+    }),
+    encryptedField("webhookToken", {
+      access: { read: canReadRestrictedField },
+      admin: {
+        description: "Callback token from Xendit Dashboard → Webhooks settings",
+      },
+    }),
+    {
+      defaultValue: "test",
+      name: "mode",
+      required: true,
+      type: "select",
+      options: [
+        { label: "Test", value: "test" },
+        { label: "Live", value: "live" },
+      ],
+    },
+  ],
+};
 
 export const Tenants: CollectionConfig = {
   slug: "tenants",
@@ -74,6 +104,9 @@ export const Tenants: CollectionConfig = {
     {
       name: "subscription",
       type: "group",
+      access: {
+        update: isSuperAdminAccess,
+      },
       fields: [
         {
           defaultValue: "trial",
@@ -97,54 +130,16 @@ export const Tenants: CollectionConfig = {
         },
       ],
     },
-    // Payment config — ADR-0001: conditional groups keyed to paymentProvider select
+    // Payment providers — polymorphic blocks, one block type per gateway (ADR-0001)
     {
-      name: "paymentConfig",
-      type: "group",
+      blocks: [XenditBlock],
+      maxRows: 1,
+      name: "paymentProviders",
+      type: "blocks",
       admin: {
-        description: "Payment gateway credentials (ADR-0001)",
+        description:
+          "Active payment gateway. Add one block and fill in your credentials.",
       },
-      fields: [
-        {
-          defaultValue: "none",
-          name: "paymentProvider",
-          type: "select",
-          admin: {
-            description: "Active payment gateway provider",
-          },
-          options: [
-            { label: "None", value: "none" },
-            { label: "Xendit", value: "xendit" },
-            { label: "Midtrans", value: "midtrans" },
-          ],
-        },
-        // Xendit credentials — visible only when paymentProvider === 'xendit'
-        {
-          name: "xenditConfig",
-          type: "group",
-          admin: {
-            condition: (_, siblingData) =>
-              siblingData?.paymentProvider === "xendit",
-          },
-          fields: [
-            restrictedTextField("secretKey"),
-            restrictedTextField("webhookSecret"),
-          ],
-        },
-        // Midtrans credentials — visible only when paymentProvider === 'midtrans'
-        {
-          name: "midtransConfig",
-          type: "group",
-          admin: {
-            condition: (_, siblingData) =>
-              siblingData?.paymentProvider === "midtrans",
-          },
-          fields: [
-            restrictedTextField("serverKey"),
-            restrictedTextField("clientKey"),
-          ],
-        },
-      ],
     },
     // Shipping config — same conditional pattern as paymentConfig
     {

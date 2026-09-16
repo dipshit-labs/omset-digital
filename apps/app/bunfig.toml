@@ -1,0 +1,5 @@
+[test]
+preload = []
+
+[define]
+# no-op — path aliases handled by tsconfig paths via Bun's native resolution

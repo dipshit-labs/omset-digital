@@ -3,10 +3,14 @@ import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
+import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { env } from "@/env";
 import { isSuperAdmin } from "./access/isSuperAdmin";
+import { Categories } from "./collections/categories";
+import { Media } from "./collections/media";
+import { Products } from "./collections/products";
 import { Tenants } from "./collections/tenants";
 import { Users } from "./collections/users";
 import { getUserTenantIDs } from "./lib/ids";
@@ -17,12 +21,13 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
-  collections: [Users, Tenants],
+  collections: [Users, Tenants, Categories, Products, Media],
   db: postgresAdapter({
     pool: {
       connectionString: env.DATABASE_URL,
     },
   }),
+  editor: lexicalEditor({}),
   email: resendAdapter({
     apiKey: env.RESEND_API_KEY,
     defaultFromAddress: "noreply@omsetdigital.com",
@@ -42,7 +47,11 @@ export default buildConfig({
   },
   plugins: [
     multiTenantPlugin<Config>({
-      collections: {},
+      collections: {
+        categories: { isGlobal: false },
+        media: { isGlobal: false },
+        products: { isGlobal: false },
+      },
       tenantField: {
         access: {
           read: () => true,

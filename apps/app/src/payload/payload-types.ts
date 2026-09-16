@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     users: User;
     tenants: Tenant;
+    categories: Category;
+    products: Product;
+    media: Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +81,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -191,34 +197,21 @@ export interface Tenant {
     currentPeriodEnd?: string | null;
   };
   /**
-   * Payment gateway credentials (ADR-0001)
+   * Active payment gateway. Add one block and fill in your credentials.
    */
-  paymentConfig?: {
-    /**
-     * Active payment gateway provider
-     */
-    paymentProvider?: ('none' | 'xendit' | 'midtrans') | null;
-    xenditConfig?: {
-      /**
-       * Restricted to tenant owner and super-admin
-       */
-      secretKey?: string | null;
-      /**
-       * Restricted to tenant owner and super-admin
-       */
-      webhookSecret?: string | null;
-    };
-    midtransConfig?: {
-      /**
-       * Restricted to tenant owner and super-admin
-       */
-      serverKey?: string | null;
-      /**
-       * Restricted to tenant owner and super-admin
-       */
-      clientKey?: string | null;
-    };
-  };
+  paymentProviders?:
+    | {
+        secretKey?: string | null;
+        /**
+         * Callback token from Xendit Dashboard → Webhooks settings
+         */
+        webhookToken?: string | null;
+        mode: 'test' | 'live';
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'xendit';
+      }[]
+    | null;
   /**
    * Shipping provider credentials and origin configuration
    */
@@ -252,6 +245,116 @@ export interface Tenant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  images?: (number | Media)[] | null;
+  category?: (number | null) | Category;
+  status: 'draft' | 'published';
+  /**
+   * Define variant dimensions (e.g. Color, Size). Leave empty for simple products.
+   */
+  variantAxes?:
+    | {
+        name: string;
+        /**
+         * Press Enter to add each value (e.g. Red, Blue, Green).
+         */
+        values: string[];
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Use 'Build Variants' above to generate rows from axes. Each row is one purchasable variant.
+   */
+  variants: {
+    /**
+     * Auto-populated by 'Generate Variants'. Empty for simple products.
+     */
+    options?:
+      | {
+          option: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Price in IDR.
+     */
+    price: number;
+    /**
+     * Available stock count.
+     */
+    stock?: number | null;
+    /**
+     * Weight in grams. Required for shipping.
+     */
+    weight: number;
+    /**
+     * Optional SKU / barcode code.
+     */
+    sku?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -281,6 +384,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tenants';
         value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -373,21 +488,17 @@ export interface TenantsSelect<T extends boolean = true> {
         trialEndsAt?: T;
         currentPeriodEnd?: T;
       };
-  paymentConfig?:
+  paymentProviders?:
     | T
     | {
-        paymentProvider?: T;
-        xenditConfig?:
+        xendit?:
           | T
           | {
               secretKey?: T;
-              webhookSecret?: T;
-            };
-        midtransConfig?:
-          | T
-          | {
-              serverKey?: T;
-              clientKey?: T;
+              webhookToken?: T;
+              mode?: T;
+              id?: T;
+              blockName?: T;
             };
       };
   shippingConfig?:
@@ -411,6 +522,77 @@ export interface TenantsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  description?: T;
+  images?: T;
+  category?: T;
+  status?: T;
+  variantAxes?:
+    | T
+    | {
+        name?: T;
+        values?: T;
+        id?: T;
+      };
+  variants?:
+    | T
+    | {
+        options?:
+          | T
+          | {
+              option?: T;
+              value?: T;
+              id?: T;
+            };
+        price?: T;
+        stock?: T;
+        weight?: T;
+        sku?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  tenant?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
