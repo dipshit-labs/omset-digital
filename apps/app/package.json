@@ -10,7 +10,8 @@
     "generate:types": "payload generate:types",
     "payload": "payload",
     "test": "bun test",
-    "typecheck": "next typegen && tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "next typegen && tsc --noEmit --emitDeclarationOnly false",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.89.0",

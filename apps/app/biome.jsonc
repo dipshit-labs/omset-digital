@@ -3,8 +3,27 @@
   "root": false,
   "extends": "//",
 
+  // We need to re-include the base ignore patterns from ultracite plus
+  // app-specific ones for PayloadCMS-generated files.
+  // * See: https://github.com/haydenbleasel/ultracite/issues/679
   "files": {
-    "includes": ["!!**/payload-types.ts", "!!src/app/(payload)"]
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!!**/node_modules",
+      "!!**/.git",
+      "!!**/dist",
+      "!!**/build",
+      "!!**/out",
+      "!!**/.next",
+      "!!**/.turbo",
+      "!!**/payload-types.ts",
+      "!!**/next-env.d.ts",
+
+      // PayloadCMS
+      "!!**/src/app/(payload)",
+      "**/src/app/(payload)/custom.scss"
+    ]
   },
 
   "plugins": [

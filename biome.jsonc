@@ -7,6 +7,10 @@
     "ultracite/biome/vitest"
   ],
 
+  "files": {
+    "includes": ["!!**/.agents", "!!**/docs"]
+  },
+
   "assist": {
     "actions": {
       "source": {
