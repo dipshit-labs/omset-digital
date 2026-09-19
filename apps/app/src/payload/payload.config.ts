@@ -82,6 +82,9 @@ export default buildConfig({
         categories: { isGlobal: false },
         media: { isGlobal: false },
         products: { isGlobal: false },
+        variantOptions: { isGlobal: false },
+        variants: { isGlobal: false },
+        variantTypes: { isGlobal: false },
       },
       tenantField: {
         access: {

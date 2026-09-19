@@ -9,7 +9,7 @@ import { getUserTenantIDs } from "@/payload/lib/ids";
  */
 const readProductAccess: Access = ({ req }): Where | boolean => {
   if (!req.user) {
-    return { status: { equals: "published" } };
+    return { _status: { equals: "published" } };
   }
 
   if (isSuperAdmin(req.user)) {
@@ -22,11 +22,11 @@ const readProductAccess: Access = ({ req }): Where | boolean => {
   ];
 
   if (ids.length === 0) {
-    return { status: { equals: "published" } };
+    return { _status: { equals: "published" } };
   }
 
   return {
-    or: [{ status: { equals: "published" } }, { tenant: { in: ids } }],
+    or: [{ _status: { equals: "published" } }, { tenant: { in: ids } }],
   };
 };
 

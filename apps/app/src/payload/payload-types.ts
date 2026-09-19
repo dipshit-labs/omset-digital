@@ -159,6 +159,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -350,6 +351,7 @@ export interface Media {
  */
 export interface VariantType {
   id: number;
+  tenant?: (number | null) | Tenant;
   label: string;
   name: string;
   options?: {
@@ -368,6 +370,7 @@ export interface VariantType {
 export interface VariantOption {
   id: number;
   _variantOptions_options_order?: string | null;
+  tenant?: (number | null) | Tenant;
   variantType: number | VariantType;
   label: string;
   /**
@@ -384,6 +387,7 @@ export interface VariantOption {
  */
 export interface Variant {
   id: number;
+  tenant?: (number | null) | Tenant;
   /**
    * Generated administrative title, such as Small / Red.
    */
@@ -515,6 +519,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -646,6 +651,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "variants_select".
  */
 export interface VariantsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   product?: T;
   options?: T;
@@ -660,6 +666,7 @@ export interface VariantsSelect<T extends boolean = true> {
  */
 export interface VariantOptionsSelect<T extends boolean = true> {
   _variantOptions_options_order?: T;
+  tenant?: T;
   variantType?: T;
   label?: T;
   value?: T;
@@ -672,6 +679,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  * via the `definition` "variantTypes_select".
  */
 export interface VariantTypesSelect<T extends boolean = true> {
+  tenant?: T;
   label?: T;
   name?: T;
   options?: T;

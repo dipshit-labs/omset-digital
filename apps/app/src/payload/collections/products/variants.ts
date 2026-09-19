@@ -1,10 +1,18 @@
 import type { CollectionConfig } from "payload";
+import { canWrite } from "@/payload/access/canWrite";
+import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { readProductAccess } from "./access/read";
 import { variantOptionsSelectorField } from "./fields/variant-options-selector";
 import { generateVariantTitle } from "./hooks/generateVariantTitle";
-
 export const VariantTypes: CollectionConfig = {
   slug: "variantTypes",
   trash: true,
+  access: {
+    create: canWrite,
+    delete: canWrite,
+    update: canWrite,
+    read: () => true,
+  },
   admin: {
     group: false,
     useAsTitle: "label",
@@ -29,11 +37,20 @@ export const VariantTypes: CollectionConfig = {
       type: "join",
     },
   ],
+  hooks: {
+    beforeChange: [enforceTenantOnCreate],
+  },
 };
 
 export const VariantOptions: CollectionConfig = {
   slug: "variantOptions",
   trash: true,
+  access: {
+    create: canWrite,
+    delete: canWrite,
+    update: canWrite,
+    read: () => true,
+  },
   admin: {
     group: false,
     useAsTitle: "label",
@@ -62,11 +79,20 @@ export const VariantOptions: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeChange: [enforceTenantOnCreate],
+  },
 };
 
 export const Variants: CollectionConfig = {
   slug: "variants",
   trash: true,
+  access: {
+    create: canWrite,
+    delete: canWrite,
+    read: readProductAccess,
+    update: canWrite,
+  },
   admin: {
     group: false,
     useAsTitle: "title",
@@ -93,7 +119,7 @@ export const Variants: CollectionConfig = {
     variantOptionsSelectorField(),
   ],
   hooks: {
-    beforeChange: [generateVariantTitle],
+    beforeChange: [enforceTenantOnCreate, generateVariantTitle],
   },
   versions: {
     drafts: {
