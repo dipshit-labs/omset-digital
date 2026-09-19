@@ -19,16 +19,21 @@ interface OptionsSelectProps {
 
 function OptionsSelect({ label, options, path, required }: OptionsSelectProps) {
   const id = useId();
-  const { setValue, value } = useField<(number | string)[]>({ path });
+  const { setValue, value } = useField<
+    (number | string | { id: number | string })[]
+  >({ path });
 
   const rawValues = useMemo(() => {
     if (!Array.isArray(value)) {
       return [];
     }
 
-    return value.map((v) =>
-      typeof v === "object" && v !== null ? (v as any).id : v
-    );
+    return value.map((v) => {
+      if (typeof v === "object" && v !== null && "id" in v) {
+        return v.id;
+      }
+      return v;
+    });
   }, [value]);
 
   const selectedValue = useMemo<ReactSelectOption | undefined>(() => {
@@ -38,15 +43,22 @@ function OptionsSelect({ label, options, path, required }: OptionsSelectProps) {
   }, [options, rawValues]);
 
   const handleChange = useCallback(
-    (selected: any) => {
-      if (!selected) {
+    (selected: ReactSelectOption | ReactSelectOption[] | null) => {
+      if (
+        !selected ||
+        Array.isArray(selected) ||
+        (typeof selected.value !== "string" &&
+          typeof selected.value !== "number")
+      ) {
         return;
       }
 
       const current = [...rawValues];
       const optionValues = new Set(options.map((o) => String(o.value)));
 
-      const filtered = current.filter((id) => !optionValues.has(String(id)));
+      const filtered = current.filter(
+        (item) => !optionValues.has(String(item))
+      );
       filtered.push(selected.value);
 
       setValue(filtered);

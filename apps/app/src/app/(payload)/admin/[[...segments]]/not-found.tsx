@@ -21,7 +21,7 @@ export const generateMetadata = ({
 }: Args): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams });
 
-const NotFound = ({ params, searchParams }: Args) =>
+const NotFound = ({ params, searchParams }: Args): Promise<React.JSX.Element> =>
   NotFoundPage({ config, params, searchParams, importMap });
 
 export default NotFound;
