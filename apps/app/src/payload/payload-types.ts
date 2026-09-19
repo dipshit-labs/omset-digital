@@ -72,18 +72,31 @@ export interface Config {
     categories: Category;
     products: Product;
     media: Media;
+    variants: Variant;
+    variantOptions: VariantOption;
+    variantTypes: VariantType;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    products: {
+      variants: 'variants';
+    };
+    variantTypes: {
+      options: 'variantOptions';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    variants: VariantsSelect<false> | VariantsSelect<true>;
+    variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
+    variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -264,9 +277,7 @@ export interface Category {
 export interface Product {
   id: number;
   tenant?: (number | null) | Tenant;
-  name: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
+  title: string;
   description?: {
     root: {
       type: string;
@@ -282,56 +293,36 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
-  images?: (number | Media)[] | null;
-  category?: (number | null) | Category;
-  status: 'draft' | 'published';
-  /**
-   * Define variant dimensions (e.g. Color, Size). Leave empty for simple products.
-   */
-  variantAxes?:
+  media?:
     | {
-        name: string;
-        /**
-         * Press Enter to add each value (e.g. Red, Blue, Green).
-         */
-        values: string[];
+        asset: number | Media;
         id?: string | null;
       }[]
     | null;
+  price: number;
+  sku?: string | null;
+  barcodes?: string | null;
+  allowBackorder?: boolean | null;
+  package?: ('package1' | 'package2') | null;
+  weight?: number | null;
+  variantTypes?: (number | VariantType)[] | null;
+  variants?: {
+    docs?: (number | Variant)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  meta?: {};
   /**
-   * Use 'Build Variants' above to generate rows from axes. Each row is one purchasable variant.
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  variants: {
-    /**
-     * Auto-populated by 'Generate Variants'. Empty for simple products.
-     */
-    options?:
-      | {
-          option: string;
-          value: string;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Price in IDR.
-     */
-    price: number;
-    /**
-     * Available stock count.
-     */
-    stock?: number | null;
-    /**
-     * Weight in grams. Required for shipping.
-     */
-    weight: number;
-    /**
-     * Optional SKU / barcode code.
-     */
-    sku?: string | null;
-    id?: string | null;
-  }[];
+  generateSlug?: boolean | null;
+  slug: string;
+  category?: (number | null) | Category;
+  relatedProducts?: (number | Product)[] | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -352,6 +343,57 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantTypes".
+ */
+export interface VariantType {
+  id: number;
+  label: string;
+  name: string;
+  options?: {
+    docs?: (number | VariantOption)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantOptions".
+ */
+export interface VariantOption {
+  id: number;
+  _variantOptions_options_order?: string | null;
+  variantType: number | VariantType;
+  label: string;
+  /**
+   * Machine-readable value, such as "small" or "red".
+   */
+  value: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variants".
+ */
+export interface Variant {
+  id: number;
+  /**
+   * Generated administrative title, such as Small / Red.
+   */
+  title?: string | null;
+  product: number | Product;
+  options: (number | VariantOption)[];
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -396,6 +438,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'variants';
+        value: number | Variant;
+      } | null)
+    | ({
+        relationTo: 'variantOptions';
+        value: number | VariantOption;
+      } | null)
+    | ({
+        relationTo: 'variantTypes';
+        value: number | VariantType;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -542,38 +596,31 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   tenant?: T;
-  name?: T;
-  slug?: T;
-  slugLock?: T;
+  title?: T;
   description?: T;
-  images?: T;
+  media?:
+    | T
+    | {
+        asset?: T;
+        id?: T;
+      };
+  price?: T;
+  sku?: T;
+  barcodes?: T;
+  allowBackorder?: T;
+  package?: T;
+  weight?: T;
+  variantTypes?: T;
+  variants?: T;
+  meta?: T | {};
+  generateSlug?: T;
+  slug?: T;
   category?: T;
-  status?: T;
-  variantAxes?:
-    | T
-    | {
-        name?: T;
-        values?: T;
-        id?: T;
-      };
-  variants?:
-    | T
-    | {
-        options?:
-          | T
-          | {
-              option?: T;
-              value?: T;
-              id?: T;
-            };
-        price?: T;
-        stock?: T;
-        weight?: T;
-        sku?: T;
-        id?: T;
-      };
+  relatedProducts?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -593,6 +640,44 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variants_select".
+ */
+export interface VariantsSelect<T extends boolean = true> {
+  title?: T;
+  product?: T;
+  options?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantOptions_select".
+ */
+export interface VariantOptionsSelect<T extends boolean = true> {
+  _variantOptions_options_order?: T;
+  variantType?: T;
+  label?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variantTypes_select".
+ */
+export interface VariantTypesSelect<T extends boolean = true> {
+  label?: T;
+  name?: T;
+  options?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

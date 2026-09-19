@@ -1,8 +1,8 @@
 # Normalized Collections with Payload Join Fields for Product Variants
 
-Product variants are modeled across four dedicated collections scoped to Tenant rather than an embedded array in the product document: `products`, `variantAxes`, `variantOptions`, and `skus`. The `skus`, `variantAxes`, and `variantOptions` collections are hidden from the admin sidebar navigation via `admin.group: false`. The `products` collection displays linked SKUs directly within the product edit form using a Payload 3.x `join` field (`on: 'product'`).
+Product variants are modeled across four dedicated collections scoped to Tenant rather than an embedded array in the product document: `products`, `variantTypes`, `variantOptions`, and `variants`. The `variants`, `variantTypes`, and `variantOptions` collections are hidden from the admin sidebar navigation via `admin.group: false`. The `products` collection displays linked variants directly within the product edit form using a Payload 3.x `join` field (`on: 'product'`).
 
-This model provides row-level inventory locking in PostgreSQL during checkout so concurrent purchases of different variants never lock the parent product row. Order and Cart line items reference both `product` and `sku` as relational foreign keys with price and weight snapshots. To preserve admin editing speed for SME merchants, a custom Cartesian generation button on the `products` form calculates the product of selected axes and batch-creates SKU records in a single action, eliminating repetitive modal submissions. On the storefront, variant selection is driven by URL search parameters (`?size=<id>&color=<id>&variant=<id>`) to keep theme components stateless, shareable, and compatible with React Server Components.
+This model provides row-level inventory locking in PostgreSQL during checkout so concurrent purchases of different variants never lock the parent product row. Order and Cart line items reference both `product` and `variant` as relational foreign keys with price and weight snapshots. In the admin UI, merchants create variants via the join table drawer (with automated generation deferred to a future iteration). On the storefront, variant selection is driven by URL search parameters (`?size=<id>&color=<id>&variant=<id>`) to keep theme components stateless, shareable, and compatible with React Server Components.
 
 ## Considered Options
 
@@ -14,6 +14,6 @@ This model provides row-level inventory locking in PostgreSQL during checkout so
 
 ## Consequences
 
-1. Every variant collection (`variantAxes`, `variantOptions`, `skus`) must include a `tenant` relationship and enforce tenant scoping via `enforceTenantOnCreate` and read/write access control.
+1. Every variant collection (`variantTypes`, `variantOptions`, `variants`) must include a `tenant` relationship and enforce tenant scoping via `enforceTenantOnCreate` and read/write access control.
 2. The product gallery array includes an optional relationship to `variantOptions`, allowing storefront themes to reactively focus the carousel on the selected color or style.
-3. Every SKU row must hold a `weight` field in grams alongside `price` and `stock` to support dynamic shipping cost calculation via RajaOngkir.
+3. Every Variant row must hold a `weight` field in grams alongside `price` and `stock` to support dynamic shipping cost calculation via RajaOngkir.

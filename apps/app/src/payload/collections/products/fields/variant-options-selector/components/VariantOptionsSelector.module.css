@@ -1,0 +1,23 @@
+@layer payload-default {
+  .wrapper {
+    margin-top: calc(var(--spacing-field) * 2);
+    margin-bottom: calc(var(--spacing-field) * 2);
+  }
+
+  .heading {
+    margin-bottom: calc(var(--base) * 0.5);
+    font-size: calc(var(--base) * 1);
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.75);
+  }
+
+  .error {
+    position: relative;
+  }
+}

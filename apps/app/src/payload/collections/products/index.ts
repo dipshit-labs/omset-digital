@@ -1,13 +1,12 @@
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
-import type { CollectionConfig } from "payload";
+import { type CollectionConfig, slugField } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
-import { slugField } from "@/payload/fields/slug";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import { readProductAccess } from "./access/read";
-import { regenerateVariants } from "./hooks/regenerateVariants";
 
+// TODO: Add variant fields
 export const Products: CollectionConfig = {
   slug: "products",
+  trash: true,
   access: {
     create: canWrite,
     delete: canWrite,
@@ -15,194 +14,211 @@ export const Products: CollectionConfig = {
     update: canWrite,
   },
   admin: {
-    defaultColumns: ["name", "status", "tenant"],
-    useAsTitle: "name",
+    defaultColumns: ["title", "variants", "category"],
+    useAsTitle: "title",
   },
   fields: [
     {
-      name: "name",
+      name: "title",
       required: true,
       type: "text",
     },
-    ...slugField("name"),
     {
-      editor: lexicalEditor({}),
+      label: false,
       name: "description",
       required: false,
       type: "richText",
     },
     {
-      hasMany: true,
-      name: "images",
-      relationTo: "media",
-      required: false,
-      type: "relationship",
-    },
-    {
-      hasMany: false,
-      name: "category",
-      relationTo: "categories",
-      required: false,
-      type: "relationship",
-    },
-    {
-      defaultValue: "draft",
-      name: "status",
-      required: true,
-      type: "select",
-      admin: {
-        position: "sidebar",
-      },
-      options: [
-        { label: "Draft", value: "draft" },
-        { label: "Published", value: "published" },
-      ],
-    },
-    // --- Variant builder ---
-    {
-      label: "Build Variants",
-      type: "collapsible",
-      admin: {
-        initCollapsed: true,
-      },
-      fields: [
-        {
-          name: "variantAxes",
-          required: false,
-          type: "array",
-          admin: {
-            description:
-              "Define variant dimensions (e.g. Color, Size). Leave empty for simple products.",
-          },
-          fields: [
-            {
-              type: "row",
-              fields: [
-                {
-                  admin: { placeholder: "e.g. Color" },
-                  name: "name",
-                  required: true,
-                  type: "text",
-                },
-                {
-                  hasMany: true,
-                  name: "values",
-                  required: true,
-                  type: "text",
-                  admin: {
-                    description:
-                      "Press Enter to add each value (e.g. Red, Blue, Green).",
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: "buildVariantsButton",
-          type: "ui",
-          admin: {
-            components: {
-              Field:
-                "@/payload/collections/products/components/BuildVariantsButton",
-            },
-          },
-        },
-      ],
-    },
-    // --- Variants ---
-    {
-      minRows: 1,
-      name: "variants",
-      required: true,
+      name: "media",
       type: "array",
-      admin: {
-        description:
-          "Use 'Build Variants' above to generate rows from axes. Each row is one purchasable variant.",
-        initCollapsed: true,
-        components: {
-          RowLabel: "@/payload/collections/products/components/VariantRowLabel",
-        },
-      },
       fields: [
         {
-          name: "options",
-          required: false,
-          type: "array",
+          label: false,
+          name: "asset",
+          relationTo: "media",
+          required: true,
+          type: "upload",
+        },
+      ],
+    },
+
+    // ! These fields (price, inventory, shipping) will only be visible only if the product doesn’t have any variants,
+    // * since the data model enforce any product to have atleast 1 variant even if the user
+    // * doesn’t create it explicitly.
+    // ! These fields will also exist in Variants collection, and that will be the sole source of truth.
+    {
+      label: "Price",
+      type: "group",
+      virtual: true, // Not sure if this will be applied to the child fields
+      fields: [
+        {
+          label: false,
+          name: "price",
+          required: true,
+          type: "number",
           admin: {
-            description:
-              "Auto-populated by 'Generate Variants'. Empty for simple products.",
-            initCollapsed: true,
-            components: {
-              RowLabel:
-                "@/payload/collections/products/components/VariantRowLabel",
-            },
+            placeholder: "0.00",
           },
+        },
+        // * For stuff like compare-at price, unit price, etc
+        {
+          fields: [],
+          label: "Additional display prices",
+          type: "collapsible",
+        },
+      ],
+    },
+
+    {
+      label: "Inventory",
+      type: "group",
+      virtual: true,
+      fields: [
+        // TODO: Add some sort of table field (join) for stock stuff??
+
+        {
+          label: "More details",
+          type: "collapsible",
           fields: [
             {
               type: "row",
               fields: [
                 {
-                  admin: { placeholder: "e.g. Color" },
-                  label: "Name",
-                  name: "option",
-                  required: true,
+                  label: "SKU (Stock Keeping Unit)",
+                  name: "sku",
                   type: "text",
                 },
+                // ? Not sure we need this or not
                 {
-                  admin: { placeholder: "e.g. Red" },
-                  name: "value",
-                  required: true,
+                  name: "barcodes",
                   type: "text",
                 },
               ],
             },
+            // ? Not sure we need this or not
+            {
+              defaultValue: false,
+              label: "Continue selling when out of stock",
+              name: "allowBackorder",
+              type: "checkbox",
+            },
           ],
         },
+      ],
+    },
+
+    {
+      label: "Shipping",
+      type: "group",
+      virtual: true,
+      fields: [
         {
           type: "row",
           fields: [
             {
-              min: 0,
-              name: "price",
-              required: true,
-              type: "number",
-              admin: {
-                description: "Price in IDR.",
-              },
+              name: "package",
+              options: ["package1", "package2"],
+              type: "select",
             },
             {
-              min: 0,
-              name: "stock",
-              required: false,
-              type: "number",
-              admin: {
-                description: "Available stock count.",
-              },
-            },
-            {
-              min: 0,
+              defaultValue: 0.0,
               name: "weight",
-              required: true,
               type: "number",
               admin: {
-                description: "Weight in grams. Required for shipping.",
+                placeholder: "0.0",
               },
             },
           ],
         },
+      ],
+    },
+
+    {
+      label: "Variants",
+      type: "group",
+      fields: [
         {
-          name: "sku",
-          required: false,
-          type: "text",
+          hasMany: true,
+          label: false,
+          name: "variantTypes",
+          relationTo: "variantTypes",
+          type: "relationship",
+        },
+        {
+          collection: "variants",
+          label: "Available Variants",
+          maxDepth: 2,
+          name: "variants",
+          on: "product",
+          type: "join",
           admin: {
-            description: "Optional SKU / barcode code.",
+            defaultColumns: ["options", "_status"],
+            disableListColumn: true,
           },
         },
       ],
     },
+
+    // TODO: Add page sections blocks field in here
+
+    // * Need @payload/plugin-seo installed
+    {
+      label: "Search engine listing",
+      type: "collapsible",
+      fields: [
+        {
+          fields: [],
+          label: false,
+          name: "meta",
+          type: "group",
+        },
+      ],
+    },
+
+    // Sidebar
+    slugField(),
+    {
+      hasMany: false,
+      name: "category",
+      relationTo: "categories",
+      type: "relationship",
+      admin: {
+        position: "sidebar",
+        sortOptions: "name",
+      },
+    },
+    {
+      hasMany: true,
+      name: "relatedProducts",
+      relationTo: "products",
+      type: "relationship",
+      admin: {
+        position: "sidebar",
+      },
+      filterOptions: ({ id }) => {
+        if (id) {
+          return {
+            id: {
+              not_in: [id],
+            },
+          };
+        }
+
+        return {
+          id: {
+            exists: true,
+          },
+        };
+      },
+    },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate, regenerateVariants],
+    beforeChange: [enforceTenantOnCreate],
+  },
+  versions: {
+    drafts: {
+      autosave: true,
+    },
   },
 };

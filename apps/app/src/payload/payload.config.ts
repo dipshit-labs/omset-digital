@@ -3,7 +3,15 @@ import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import {
+  BoldFeature,
+  FixedToolbarFeature,
+  ItalicFeature,
+  lexicalEditor,
+  ParagraphFeature,
+  StrikethroughFeature,
+  UnderlineFeature,
+} from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { env } from "@/env";
@@ -11,6 +19,11 @@ import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
 import { Products } from "./collections/products";
+import {
+  VariantOptions,
+  Variants,
+  VariantTypes,
+} from "./collections/products/variants";
 import { Tenants } from "./collections/tenants";
 import { Users } from "./collections/users";
 import { getUserTenantIDs } from "./lib/ids";
@@ -21,13 +34,21 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
-  collections: [Users, Tenants, Categories, Products, Media],
   db: postgresAdapter({
     pool: {
       connectionString: env.DATABASE_URL,
     },
   }),
-  editor: lexicalEditor({}),
+  editor: lexicalEditor({
+    features: [
+      FixedToolbarFeature(),
+      ParagraphFeature(),
+      UnderlineFeature(),
+      BoldFeature(),
+      ItalicFeature(),
+      StrikethroughFeature(),
+    ],
+  }),
   email: resendAdapter({
     apiKey: env.RESEND_API_KEY,
     defaultFromAddress: "noreply@omsetdigital.com",
@@ -40,6 +61,16 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  collections: [
+    Users,
+    Tenants,
+    Categories,
+    Products,
+    Media,
+    Variants,
+    VariantOptions,
+    VariantTypes,
+  ],
   onInit: async (args) => {
     if (env.PAYLOAD_SEED) {
       await seed(args);

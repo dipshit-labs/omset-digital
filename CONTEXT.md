@@ -61,19 +61,19 @@ _Avoid_: Page config, storefront settings
 ### Products
 
 **Product**:
-A sellable item listed on the Storefront. Has one or more SKUs.
+A sellable item listed on the Storefront. Has one or more Variants.
 _Avoid_: Item, listing, goods
 
-**SKU**:
-A specific purchasable variant of a Product, representing the leaf node of the variant tree. Carries its own price, stock, weight, and barcode. Linked to a Product and its selected Variant Options.
-_Avoid_: Variant, option, item
+**Variant**:
+A specific purchasable variation of a Product, representing the leaf node of the variant tree. Carries its own price, stock, weight, and barcode. Linked to a Product and its selected Variant Options. Every Product has at least one Variant (Shopify model).
+_Avoid_: Item, sub-product
 
-**Variant Axis**:
-A named dimension of Product variation (e.g. Color, Size). A Product's SKUs are the Cartesian product of its Variant Axes.
-_Avoid_: Attribute, option group, dimension
+**Variant Type**:
+A named dimension of Product variation (e.g. Color, Size), scoped to a Tenant and reusable across Products.
+_Avoid_: Attribute, option group, dimension, variant axis
 
 **Variant Option**:
-A discrete choice on a Variant Axis (e.g. Red, Blue, Small, Large). Linked to a Variant Axis.
+A discrete choice on a Variant Type (e.g. Red, Blue, Small, Large). Linked to a Variant Type.
 _Avoid_: Value, choice, attribute value
 **Digital Asset**:
 A file attached to a Product of type `digital`, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
