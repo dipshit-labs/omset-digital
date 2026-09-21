@@ -5,6 +5,7 @@ interface InventoryFieldsOverrides {
   barcodeOverrides?: Partial<TextField>;
   skuOverrides?: Partial<TextField>;
   stockOverrides?: Partial<NumberField>;
+  trackedOverrides?: Partial<CheckboxField>;
 }
 
 interface InventoryFieldsParams {
@@ -17,13 +18,27 @@ export const inventoryFields = ({
   overrides = {},
 }: InventoryFieldsParams = {}): Field[] => {
   const {
-    stockOverrides,
-    skuOverrides,
-    barcodeOverrides,
     allowBackorderOverrides,
+    barcodeOverrides,
+    skuOverrides,
+    stockOverrides,
+    trackedOverrides,
   } = overrides;
 
   return [
+    // TODO: Create a custom UI to turn this into a Switch instead of checkbox
+    {
+      defaultValue: true,
+      label: "Inventory tracked",
+      name: "tracked",
+      type: "checkbox",
+      ...trackedOverrides,
+      admin: {
+        readOnly: false,
+        ...trackedOverrides?.admin,
+      },
+      virtual,
+    },
     {
       defaultValue: 0,
       min: 0,
@@ -33,6 +48,8 @@ export const inventoryFields = ({
       admin: {
         description: "Available inventory.",
         readOnly: false,
+        condition: (data, siblingData) =>
+          Boolean(siblingData?.tracked ?? data?.inventory?.tracked),
         ...stockOverrides?.admin,
       },
       virtual,
@@ -79,6 +96,8 @@ export const inventoryFields = ({
           ...allowBackorderOverrides,
           admin: {
             readOnly: false,
+            condition: (data, siblingData) =>
+              Boolean(siblingData?.tracked ?? data?.inventory?.tracked),
             ...allowBackorderOverrides?.admin,
           },
           virtual,

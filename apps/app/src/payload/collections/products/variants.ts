@@ -131,14 +131,17 @@ export const Variants: CollectionConfig = {
         {
           fields: [...pricingFields()],
           label: "Pricing",
+          name: "pricing",
         },
         {
           fields: [...inventoryFields()],
           label: "Inventory",
+          name: "inventory",
         },
         {
           fields: [...shippingFields()],
           label: "Shipping",
+          name: "shipping",
         },
       ],
     },

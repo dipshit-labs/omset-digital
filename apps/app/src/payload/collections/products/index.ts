@@ -6,7 +6,10 @@ import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
 import { shippingFields } from "./fields/shipping";
 import { populateDefaultVariantData } from "./hooks/populateDefaultVariantData";
-import { syncDefaultVariant } from "./hooks/syncDefaultVariant";
+import {
+  syncDefaultVariant,
+  syncDefaultVariantBeforeChange,
+} from "./hooks/syncDefaultVariant";
 
 export const Products: CollectionConfig = {
   slug: "products",
@@ -33,6 +36,7 @@ export const Products: CollectionConfig = {
       required: false,
       type: "richText",
     },
+    // TODO: create custom component for this since the current UX is so bad
     {
       name: "media",
       type: "array",
@@ -49,6 +53,7 @@ export const Products: CollectionConfig = {
 
     {
       label: "Price",
+      name: "pricing",
       type: "group",
       virtual: true,
       admin: {
@@ -66,6 +71,7 @@ export const Products: CollectionConfig = {
     {
       fields: [...inventoryFields({ virtual: true })],
       label: "Inventory",
+      name: "inventory",
       type: "group",
       virtual: true,
       admin: {
@@ -77,6 +83,7 @@ export const Products: CollectionConfig = {
     {
       fields: [...shippingFields({ virtual: true })],
       label: "Shipping",
+      name: "shipping",
       type: "group",
       virtual: true,
       admin: {
@@ -169,7 +176,7 @@ export const Products: CollectionConfig = {
   hooks: {
     afterChange: [syncDefaultVariant],
     afterRead: [populateDefaultVariantData],
-    beforeChange: [enforceTenantOnCreate],
+    beforeChange: [enforceTenantOnCreate, syncDefaultVariantBeforeChange],
   },
   versions: {
     drafts: {

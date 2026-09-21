@@ -1,6 +1,11 @@
 import { FieldError, FieldLabel } from "@payloadcms/ui";
 import type { RelationshipFieldServerProps } from "payload";
-import type { VariantOption } from "@/payload/payload-types";
+import { extractID } from "@/payload/lib/ids";
+import type {
+  Product,
+  VariantOption,
+  VariantType,
+} from "@/payload/payload-types";
 import { OptionsSelect } from "./OptionsSelect";
 import styles from "./VariantOptionsSelector.module.css";
 
@@ -12,8 +17,9 @@ export async function VariantOptionsSelector({
   req,
   user,
 }: RelationshipFieldServerProps) {
-  const productId =
-    typeof data?.product === "object" ? data.product?.id : data?.product;
+  const productId = data?.product
+    ? extractID<Product>(data.product as Product | Product["id"])
+    : undefined;
 
   if (!productId) {
     return (
@@ -40,7 +46,7 @@ export async function VariantOptionsSelector({
 
   const variantTypeIDs = Array.isArray(product.variantTypes)
     ? product.variantTypes.map((type) =>
-        typeof type === "object" ? type.id : type
+        extractID<VariantType>(type as VariantType | VariantType["id"])
       )
     : [];
 
@@ -52,12 +58,52 @@ export async function VariantOptionsSelector({
         depth: 1,
         joins: { options: { sort: "label" } },
         overrideAccess: false,
-        user,
         populate: { variantOptions: { label: true } },
         select: { label: true, name: true, options: true },
+        user,
       })
     )
   ).then((results) => results.filter(Boolean));
+
+  const existingVariants = await req.payload.find({
+    collection: "variants",
+    depth: 0,
+    draft: true,
+    limit: 0,
+    overrideAccess: false,
+    select: {
+      options: true,
+    },
+    user,
+    where: {
+      and: [
+        { product: { equals: productId } },
+        ...(data?.id ? [{ id: { not_equals: data.id } }] : []),
+      ],
+    },
+  });
+
+  const existingCombinations = existingVariants.docs.map((variant) =>
+    Array.isArray(variant.options)
+      ? variant.options.map((opt) =>
+          extractID<VariantOption>(opt as VariantOption | VariantOption["id"])
+        )
+      : []
+  );
+
+  const variantTypesData = variantTypes.map((variantType) => ({
+    id: variantType.id,
+    label: variantType.label || variantType.name,
+    options:
+      variantType.options?.docs
+        ?.filter(
+          (opt): opt is VariantOption => typeof opt === "object" && opt !== null
+        )
+        .map((option) => ({
+          label: option.label,
+          value: option.id,
+        })) ?? [],
+  }));
 
   return (
     <div className={styles.wrapper}>
@@ -67,30 +113,12 @@ export async function VariantOptionsSelector({
 
       <div className={styles.error}>
         <FieldError path={path} />
-        <div className={styles.list}>
-          {variantTypes.map((variantType) => {
-            const options =
-              variantType.options?.docs
-                ?.filter(
-                  (opt): opt is VariantOption =>
-                    typeof opt === "object" && opt !== null
-                )
-                .map((option) => ({
-                  label: option.label,
-                  value: option.id,
-                })) ?? [];
-
-            return (
-              <OptionsSelect
-                key={variantType.id}
-                label={variantType.label}
-                options={options}
-                path={path}
-                required={field.required}
-              />
-            );
-          })}
-        </div>
+        <OptionsSelect
+          existingCombinations={existingCombinations}
+          path={path}
+          required={field.required}
+          variantTypes={variantTypesData}
+        />
       </div>
     </div>
   );

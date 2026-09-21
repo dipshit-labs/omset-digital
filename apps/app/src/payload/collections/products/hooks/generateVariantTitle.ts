@@ -1,5 +1,6 @@
 import type { CollectionBeforeChangeHook } from "payload";
-import type { Variant } from "@/payload/payload-types";
+import { extractID } from "@/payload/lib/ids";
+import type { Product, Variant, VariantOption } from "@/payload/payload-types";
 
 const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
   req,
@@ -12,8 +13,7 @@ const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
     return data;
   }
 
-  const productId =
-    typeof data.product === "object" ? data.product.id : data.product;
+  const productId = extractID<Product>(data.product);
 
   let product: { title?: string | null } | null = null;
   try {
@@ -41,10 +41,7 @@ const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
         return option.label;
       }
 
-      const optionId =
-        typeof option === "object" && option !== null && "id" in option
-          ? option.id
-          : option;
+      const optionId = extractID<VariantOption>(option);
 
       if (typeof optionId !== "string" && typeof optionId !== "number") {
         return null;

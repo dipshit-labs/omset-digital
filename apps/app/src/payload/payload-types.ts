@@ -326,24 +326,31 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
-  price: number;
-  /**
-   * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
-   */
-  compareAtPrice?: number | null;
-  /**
-   * Available inventory.
-   */
-  stock?: number | null;
-  sku?: string | null;
-  barcode?: string | null;
-  allowBackorder?: boolean | null;
-  isPhysicalProduct?: boolean | null;
-  package?: (number | null) | Package;
-  /**
-   * Weight in grams
-   */
-  weight?: number | null;
+  pricing?: {
+    price: number;
+    /**
+     * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
+     */
+    compareAtPrice?: number | null;
+  };
+  inventory?: {
+    tracked?: boolean | null;
+    /**
+     * Available inventory.
+     */
+    stock?: number | null;
+    sku?: string | null;
+    barcode?: string | null;
+    allowBackorder?: boolean | null;
+  };
+  shipping?: {
+    required?: boolean | null;
+    package: number | Package;
+    weight: {
+      value: number;
+      unit: 'g' | 'kg';
+    };
+  };
   variantTypes?: (number | VariantType)[] | null;
   variants?: {
     docs?: (number | Variant)[];
@@ -435,24 +442,31 @@ export interface Variant {
    */
   image?: (number | null) | Media;
   options?: (number | VariantOption)[] | null;
-  price: number;
-  /**
-   * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
-   */
-  compareAtPrice?: number | null;
-  /**
-   * Available inventory.
-   */
-  stock?: number | null;
-  sku?: string | null;
-  barcode?: string | null;
-  allowBackorder?: boolean | null;
-  isPhysicalProduct?: boolean | null;
-  package?: (number | null) | Package;
-  /**
-   * Weight in grams
-   */
-  weight?: number | null;
+  pricing: {
+    price: number;
+    /**
+     * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
+     */
+    compareAtPrice?: number | null;
+  };
+  inventory?: {
+    tracked?: boolean | null;
+    /**
+     * Available inventory.
+     */
+    stock?: number | null;
+    sku?: string | null;
+    barcode?: string | null;
+    allowBackorder?: boolean | null;
+  };
+  shipping: {
+    required?: boolean | null;
+    package: number | Package;
+    weight: {
+      value: number;
+      unit: 'g' | 'kg';
+    };
+  };
   product: number | Product;
   updatedAt: string;
   createdAt: string;
@@ -697,15 +711,33 @@ export interface ProductsSelect<T extends boolean = true> {
         asset?: T;
         id?: T;
       };
-  price?: T;
-  compareAtPrice?: T;
-  stock?: T;
-  sku?: T;
-  barcode?: T;
-  allowBackorder?: T;
-  isPhysicalProduct?: T;
-  package?: T;
-  weight?: T;
+  pricing?:
+    | T
+    | {
+        price?: T;
+        compareAtPrice?: T;
+      };
+  inventory?:
+    | T
+    | {
+        tracked?: T;
+        stock?: T;
+        sku?: T;
+        barcode?: T;
+        allowBackorder?: T;
+      };
+  shipping?:
+    | T
+    | {
+        required?: T;
+        package?: T;
+        weight?:
+          | T
+          | {
+              value?: T;
+              unit?: T;
+            };
+      };
   variantTypes?: T;
   variants?: T;
   meta?: T | {};
@@ -746,15 +778,33 @@ export interface VariantsSelect<T extends boolean = true> {
   title?: T;
   image?: T;
   options?: T;
-  price?: T;
-  compareAtPrice?: T;
-  stock?: T;
-  sku?: T;
-  barcode?: T;
-  allowBackorder?: T;
-  isPhysicalProduct?: T;
-  package?: T;
-  weight?: T;
+  pricing?:
+    | T
+    | {
+        price?: T;
+        compareAtPrice?: T;
+      };
+  inventory?:
+    | T
+    | {
+        tracked?: T;
+        stock?: T;
+        sku?: T;
+        barcode?: T;
+        allowBackorder?: T;
+      };
+  shipping?:
+    | T
+    | {
+        required?: T;
+        package?: T;
+        weight?:
+          | T
+          | {
+              value?: T;
+              unit?: T;
+            };
+      };
   product?: T;
   updatedAt?: T;
   createdAt?: T;

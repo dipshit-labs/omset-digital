@@ -1,4 +1,10 @@
 @layer payload-default {
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.75);
+  }
+
   .options-select {
     display: flex;
     flex-direction: column;

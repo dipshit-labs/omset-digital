@@ -1,16 +1,15 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
-import type {
-  CheckboxField,
-  Field,
-  NumberField,
-  RelationshipField,
-} from "payload";
+import type { CheckboxField, Field, RelationshipField } from "payload";
+import {
+  type MeasurementFieldOverrides,
+  measurementField,
+} from "@/payload/fields/measurement";
 import { getCollectionIDType } from "@/payload/lib/ids";
 
 interface ShippingFieldsOverrides {
-  isPhysicalProductOverrides?: Partial<CheckboxField>;
+  measurementOverrides?: MeasurementFieldOverrides;
   packageOverrides?: Partial<RelationshipField>;
-  weightOverrides?: Partial<NumberField>;
+  requiredOverrides?: Partial<CheckboxField>;
 }
 
 interface ShippingFieldsParams {
@@ -22,19 +21,20 @@ const shippingFields = ({
   virtual = false,
   overrides = {},
 }: ShippingFieldsParams = {}): Field[] => {
-  const { isPhysicalProductOverrides, packageOverrides, weightOverrides } =
-    overrides;
+  const { packageOverrides, requiredOverrides } = overrides;
+  const defaultRequired = requiredOverrides?.defaultValue ?? true;
 
   return [
+    // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
       defaultValue: true,
       label: "This is a physical product",
-      name: "isPhysicalProduct",
+      name: "required",
       type: "checkbox",
-      ...isPhysicalProductOverrides,
+      ...requiredOverrides,
       admin: {
         readOnly: false,
-        ...isPhysicalProductOverrides?.admin,
+        ...requiredOverrides?.admin,
       },
       virtual,
     },
@@ -43,23 +43,26 @@ const shippingFields = ({
       admin: {
         condition: (data, siblingData) =>
           Boolean(
-            siblingData?.isPhysicalProduct ?? data?.isPhysicalProduct ?? true
+            siblingData?.required ?? data?.shipping?.required ?? defaultRequired
           ),
       },
       fields: [
         {
           name: "package",
           relationTo: "packages",
+          required: true,
           type: "relationship",
           ...packageOverrides,
           admin: {
             readOnly: false,
+            width: "60%",
             ...packageOverrides?.admin,
           },
           defaultValue: async ({ req }) => {
             if (!req?.payload) {
               return null;
             }
+
             const tenantId = getTenantFromCookie(
               req.headers,
               getCollectionIDType({
@@ -67,9 +70,11 @@ const shippingFields = ({
                 payload: req.payload,
               })
             );
+
             if (!tenantId) {
               return null;
             }
+
             const defaultPkg = await req.payload.find({
               collection: "packages",
               depth: 0,
@@ -84,78 +89,31 @@ const shippingFields = ({
                 ],
               },
             });
+
             return defaultPkg.docs[0]?.id ?? null;
           },
-          filterOptions: ({ data, siblingData }) => {
-            const dataObj =
-              typeof data === "object" && data !== null ? data : undefined;
-            const siblingObj =
-              typeof siblingData === "object" && siblingData !== null
-                ? siblingData
-                : undefined;
-            const tenant =
-              (dataObj && "tenant" in dataObj ? dataObj.tenant : undefined) ??
-              (siblingObj && "tenant" in siblingObj
-                ? siblingObj.tenant
-                : undefined);
-            const tenantId =
-              typeof tenant === "object" && tenant !== null && "id" in tenant
-                ? tenant.id
-                : tenant;
-            if (!tenantId) {
-              return true;
-            }
-            return {
-              tenant: { equals: tenantId },
-            };
-          },
-          validate: (
-            value: unknown,
-            { siblingData }: { siblingData?: Record<string, unknown> }
-          ) => {
-            const isPhysical =
-              typeof siblingData?.isPhysicalProduct === "boolean"
-                ? siblingData.isPhysicalProduct
-                : true;
-            if (isPhysical && !value) {
-              return "Package is required for physical products";
-            }
-            return true;
-          },
           virtual,
         },
-        {
-          defaultValue: 0,
-          min: 0,
+        measurementField({
+          label: "Product Weight",
           name: "weight",
-          type: "number",
-          admin: {
-            description: "Weight in grams",
-            placeholder: "0",
-            readOnly: false,
-            ...weightOverrides?.admin,
+          required: true,
+          type: "weight",
+          overrides: {
+            unitOverrides: {
+              admin: {
+                readOnly: false,
+              },
+              virtual,
+            },
+            valueOverrides: {
+              admin: {
+                readOnly: false,
+              },
+              virtual,
+            },
           },
-          ...weightOverrides,
-          validate: (
-            value: unknown,
-            { siblingData }: { siblingData?: Record<string, unknown> }
-          ) => {
-            const isPhysical =
-              typeof siblingData?.isPhysicalProduct === "boolean"
-                ? siblingData.isPhysicalProduct
-                : true;
-            if (isPhysical) {
-              if (value === undefined || value === null || value === "") {
-                return "Weight is required for physical products";
-              }
-              if (typeof value === "number" && value < 0) {
-                return "Weight cannot be negative";
-              }
-            }
-            return true;
-          },
-          virtual,
-        },
+        }),
       ],
     },
   ] as Field[];

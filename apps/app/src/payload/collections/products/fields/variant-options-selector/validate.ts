@@ -1,14 +1,13 @@
 import type { Validate } from "payload";
+import { extractID } from "@/payload/lib/ids";
+import type { Product, VariantOption } from "@/payload/payload-types";
 
 const validateVariantOptions: Validate = async (value, { req, data }) => {
   if (!data?.product) {
     return "A product is required.";
   }
 
-  const productId =
-    typeof data.product === "object" && data.product !== null
-      ? data.product.id
-      : data.product;
+  const productId = extractID<Product>(data.product);
 
   if (!productId) {
     return "A product is required.";
@@ -52,12 +51,13 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
   }
 
   const selectedOptionIDs = value.map((option) =>
-    typeof option === "object" ? option.id : option
+    extractID<VariantOption>(option)
   );
 
   const existingVariants = await req.payload.find({
     collection: "variants",
     depth: 0,
+    draft: true,
     limit: 0,
     overrideAccess: true,
     req,
@@ -68,7 +68,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
       and: [
         {
           product: {
-            equals: data.product,
+            equals: productId,
           },
         },
         ...(data.id
@@ -86,9 +86,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
 
   const duplicate = existingVariants.docs.some((variant) => {
     const existingOptionIDs =
-      variant.options?.map((option) =>
-        typeof option === "object" ? option.id : option
-      ) ?? [];
+      variant.options?.map((option) => extractID<VariantOption>(option)) ?? [];
     return (
       existingOptionIDs.length === selectedOptionIDs.length &&
       existingOptionIDs.every((id) => selectedOptionIDs.includes(id))
