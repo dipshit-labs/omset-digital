@@ -18,6 +18,7 @@ import { env } from "@/env";
 import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
+import { Packages } from "./collections/packages";
 import { Products } from "./collections/products";
 import {
   VariantOptions,
@@ -65,6 +66,7 @@ export default buildConfig({
     Users,
     Tenants,
     Categories,
+    Packages,
     Products,
     Media,
     Variants,
@@ -81,6 +83,7 @@ export default buildConfig({
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
+        packages: { isGlobal: false },
         products: { isGlobal: false },
         variantOptions: { isGlobal: false },
         variants: { isGlobal: false },
