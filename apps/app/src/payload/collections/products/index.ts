@@ -2,8 +2,12 @@ import { type CollectionConfig, slugField } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import { readProductAccess } from "./access/read";
+import { inventoryFields } from "./fields/inventory";
+import { pricingFields } from "./fields/pricing";
+import { shippingFields } from "./fields/shipping";
+import { populateDefaultVariantData } from "./hooks/populateDefaultVariantData";
+import { syncDefaultVariant } from "./hooks/syncDefaultVariant";
 
-// TODO: Add variant fields
 export const Products: CollectionConfig = {
   slug: "products",
   trash: true,
@@ -14,7 +18,7 @@ export const Products: CollectionConfig = {
     update: canWrite,
   },
   admin: {
-    defaultColumns: ["title", "variants", "category"],
+    defaultColumns: ["title", "_status", "variants", "category"],
     useAsTitle: "title",
   },
   fields: [
@@ -43,95 +47,42 @@ export const Products: CollectionConfig = {
       ],
     },
 
-    // ! These fields (price, inventory, shipping) will only be visible only if the product doesn’t have any variants,
-    // * since the data model enforce any product to have atleast 1 variant even if the user
-    // * doesn’t create it explicitly.
-    // ! These fields will also exist in Variants collection, and that will be the sole source of truth.
     {
       label: "Price",
       type: "group",
-      virtual: true, // Not sure if this will be applied to the child fields
+      virtual: true,
+      admin: {
+        condition: (data) =>
+          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
+      },
       fields: [
-        {
-          label: false,
-          name: "price",
-          required: true,
-          type: "number",
-          admin: {
-            placeholder: "0.00",
-          },
-        },
-        // * For stuff like compare-at price, unit price, etc
-        {
-          fields: [],
-          label: "Additional display prices",
-          type: "collapsible",
-        },
+        ...pricingFields({
+          overrides: { priceOverrides: { label: false } },
+          virtual: true,
+        }),
       ],
     },
 
     {
+      fields: [...inventoryFields({ virtual: true })],
       label: "Inventory",
       type: "group",
       virtual: true,
-      fields: [
-        // TODO: Add some sort of table field (join) for stock stuff??
-
-        {
-          label: "More details",
-          type: "collapsible",
-          fields: [
-            {
-              type: "row",
-              fields: [
-                {
-                  label: "SKU (Stock Keeping Unit)",
-                  name: "sku",
-                  type: "text",
-                },
-                // ? Not sure we need this or not
-                {
-                  name: "barcodes",
-                  type: "text",
-                },
-              ],
-            },
-            // ? Not sure we need this or not
-            {
-              defaultValue: false,
-              label: "Continue selling when out of stock",
-              name: "allowBackorder",
-              type: "checkbox",
-            },
-          ],
-        },
-      ],
+      admin: {
+        condition: (data) =>
+          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
+      },
     },
 
     {
+      fields: [...shippingFields({ virtual: true })],
       label: "Shipping",
       type: "group",
       virtual: true,
-      fields: [
-        {
-          type: "row",
-          fields: [
-            {
-              name: "package",
-              options: ["package1", "package2"],
-              type: "select",
-            },
-            {
-              defaultValue: 0.0,
-              name: "weight",
-              type: "number",
-              admin: {
-                placeholder: "0.0",
-              },
-            },
-          ],
-        },
-      ],
+      admin: {
+        condition: (data) =>
+          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
+      },
     },
 
     {
@@ -153,8 +104,10 @@ export const Products: CollectionConfig = {
           on: "product",
           type: "join",
           admin: {
-            defaultColumns: ["options", "_status"],
-            disableListColumn: true,
+            defaultColumns: ["options", "price", "stock", "_status"],
+            condition: (data) =>
+              !Array.isArray(data?.variantTypes) ||
+              data.variantTypes.length > 0,
           },
         },
       ],
@@ -214,6 +167,8 @@ export const Products: CollectionConfig = {
     },
   ],
   hooks: {
+    afterChange: [syncDefaultVariant],
+    afterRead: [populateDefaultVariantData],
     beforeChange: [enforceTenantOnCreate],
   },
   versions: {

@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     tenants: Tenant;
     categories: Category;
+    packages: Package;
     products: Product;
     media: Media;
     variants: Variant;
@@ -92,6 +93,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
@@ -273,6 +275,30 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  tareWeight: {
+    value: number;
+    unit: 'g' | 'kg';
+  };
+  /**
+   * Used to calculate rates at checkout and pre-selected when buying labels
+   */
+  isDefault?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -301,10 +327,22 @@ export interface Product {
       }[]
     | null;
   price: number;
+  /**
+   * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
+   */
+  compareAtPrice?: number | null;
+  /**
+   * Available inventory.
+   */
+  stock?: number | null;
   sku?: string | null;
-  barcodes?: string | null;
+  barcode?: string | null;
   allowBackorder?: boolean | null;
-  package?: ('package1' | 'package2') | null;
+  isPhysicalProduct?: boolean | null;
+  package?: (number | null) | Package;
+  /**
+   * Weight in grams
+   */
   weight?: number | null;
   variantTypes?: (number | VariantType)[] | null;
   variants?: {
@@ -392,8 +430,30 @@ export interface Variant {
    * Generated administrative title, such as Small / Red.
    */
   title?: string | null;
+  /**
+   * Featured image for this variant. Automatically synced to product gallery.
+   */
+  image?: (number | null) | Media;
+  options?: (number | VariantOption)[] | null;
+  price: number;
+  /**
+   * Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).
+   */
+  compareAtPrice?: number | null;
+  /**
+   * Available inventory.
+   */
+  stock?: number | null;
+  sku?: string | null;
+  barcode?: string | null;
+  allowBackorder?: boolean | null;
+  isPhysicalProduct?: boolean | null;
+  package?: (number | null) | Package;
+  /**
+   * Weight in grams
+   */
+  weight?: number | null;
   product: number | Product;
-  options: (number | VariantOption)[];
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -434,6 +494,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'packages';
+        value: number | Package;
       } | null)
     | ({
         relationTo: 'products';
@@ -597,6 +661,30 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages_select".
+ */
+export interface PackagesSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  tareWeight?:
+    | T
+    | {
+        value?: T;
+        unit?: T;
+      };
+  isDefault?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -610,9 +698,12 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   price?: T;
+  compareAtPrice?: T;
+  stock?: T;
   sku?: T;
-  barcodes?: T;
+  barcode?: T;
   allowBackorder?: T;
+  isPhysicalProduct?: T;
   package?: T;
   weight?: T;
   variantTypes?: T;
@@ -653,8 +744,18 @@ export interface MediaSelect<T extends boolean = true> {
 export interface VariantsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
-  product?: T;
+  image?: T;
   options?: T;
+  price?: T;
+  compareAtPrice?: T;
+  stock?: T;
+  sku?: T;
+  barcode?: T;
+  allowBackorder?: T;
+  isPhysicalProduct?: T;
+  package?: T;
+  weight?: T;
+  product?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;

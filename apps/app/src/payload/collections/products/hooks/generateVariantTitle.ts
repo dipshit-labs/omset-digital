@@ -15,13 +15,20 @@ const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
   const productId =
     typeof data.product === "object" ? data.product.id : data.product;
 
-  const product = await req.payload.findByID({
-    collection: "products",
-    depth: 0,
-    id: productId,
-    overrideAccess: true,
-    select: { title: true },
-  });
+  let product: { title?: string | null } | null = null;
+  try {
+    product = await req.payload.findByID({
+      collection: "products",
+      depth: 0,
+      draft: true,
+      id: productId,
+      overrideAccess: true,
+      req,
+      select: { title: true },
+    });
+  } catch {
+    product = null;
+  }
 
   const optionLabels = await Promise.all(
     data.options.map(async (option) => {
@@ -48,6 +55,7 @@ const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
         depth: 0,
         id: optionId,
         overrideAccess: true,
+        req,
         select: { label: true },
       });
 

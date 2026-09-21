@@ -2,8 +2,13 @@ import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import { readProductAccess } from "./access/read";
+import { inventoryFields } from "./fields/inventory";
+import { pricingFields } from "./fields/pricing";
+import { shippingFields } from "./fields/shipping";
 import { variantOptionsSelectorField } from "./fields/variant-options-selector";
 import { generateVariantTitle } from "./hooks/generateVariantTitle";
+import { handleVariantShipping } from "./hooks/handleVariantShipping";
+
 export const VariantTypes: CollectionConfig = {
   slug: "variantTypes",
   trash: true,
@@ -84,6 +89,7 @@ export const VariantOptions: CollectionConfig = {
   },
 };
 
+// TODO: Sync image to `products` media
 export const Variants: CollectionConfig = {
   slug: "variants",
   trash: true,
@@ -94,6 +100,7 @@ export const Variants: CollectionConfig = {
     update: canWrite,
   },
   admin: {
+    defaultColumns: ["title", "price", "stock", "weight", "sku", "_status"],
     group: false,
     useAsTitle: "title",
   },
@@ -107,6 +114,36 @@ export const Variants: CollectionConfig = {
       },
     },
     {
+      name: "image",
+      relationTo: "media",
+      type: "upload",
+      admin: {
+        description:
+          "Featured image for this variant. Automatically synced to product gallery.",
+      },
+    },
+
+    variantOptionsSelectorField(),
+
+    {
+      type: "tabs",
+      tabs: [
+        {
+          fields: [...pricingFields()],
+          label: "Pricing",
+        },
+        {
+          fields: [...inventoryFields()],
+          label: "Inventory",
+        },
+        {
+          fields: [...shippingFields()],
+          label: "Shipping",
+        },
+      ],
+    },
+
+    {
       name: "product",
       relationTo: "products",
       required: true,
@@ -116,10 +153,13 @@ export const Variants: CollectionConfig = {
         readOnly: true,
       },
     },
-    variantOptionsSelectorField(),
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate, generateVariantTitle],
+    beforeChange: [
+      enforceTenantOnCreate,
+      generateVariantTitle,
+      handleVariantShipping,
+    ],
   },
   versions: {
     drafts: {

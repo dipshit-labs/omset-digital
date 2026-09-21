@@ -7,7 +7,7 @@ const variantOptionsSelectorField = (): RelationshipField => ({
   label: "Variant Options",
   name: "options",
   relationTo: "variantOptions",
-  required: true,
+  required: false,
   type: "relationship",
   validate: validateVariantOptions,
   admin: {
