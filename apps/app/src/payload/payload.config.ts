@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
+import { seoPlugin } from "@payloadcms/plugin-seo";
 import {
   BoldFeature,
   FixedToolbarFeature,
@@ -106,6 +107,7 @@ export default buildConfig({
       },
       userHasAccessToAllTenants: (user) => isSuperAdmin(user),
     }),
+    seoPlugin({}),
   ],
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),

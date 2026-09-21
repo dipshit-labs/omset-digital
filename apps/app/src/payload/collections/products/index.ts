@@ -1,5 +1,6 @@
 import { type CollectionConfig, slugField } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
+import { seoField } from "@/payload/fields/seo";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
@@ -123,18 +124,7 @@ export const Products: CollectionConfig = {
     // TODO: Add page sections blocks field in here
 
     // * Need @payload/plugin-seo installed
-    {
-      label: "Search engine listing",
-      type: "collapsible",
-      fields: [
-        {
-          fields: [],
-          label: false,
-          name: "meta",
-          type: "group",
-        },
-      ],
-    },
+    seoField(),
 
     // Sidebar
     slugField(),

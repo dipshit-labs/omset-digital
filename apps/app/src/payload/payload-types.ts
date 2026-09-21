@@ -357,7 +357,14 @@ export interface Product {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  meta?: {};
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -740,7 +747,13 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   variantTypes?: T;
   variants?: T;
-  meta?: T | {};
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   generateSlug?: T;
   slug?: T;
   category?: T;
