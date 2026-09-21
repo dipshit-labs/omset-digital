@@ -1,6 +1,7 @@
 import type { Validate } from "payload";
 import { extractID } from "@/payload/lib/ids";
 import type { Product, VariantOption } from "@/payload/payload-types";
+import { checkVariantOptionConstraints } from "./constraints";
 
 const validateVariantOptions: Validate = async (value, { req, data }) => {
   if (!data?.product) {
@@ -22,9 +23,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
       id: productId,
       overrideAccess: true,
       req,
-      select: {
-        variantTypes: true,
-      },
+      select: { variantTypes: true },
     });
   } catch {
     return true;
@@ -35,7 +34,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
   }
 
   const variantTypeIDs = Array.isArray(product.variantTypes)
-    ? product.variantTypes
+    ? (product.variantTypes as (number | string)[])
     : [];
 
   if (variantTypeIDs.length === 0) {
@@ -43,61 +42,41 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
   }
 
   if (!Array.isArray(value) || value.length === 0) {
-    return "At least one variant option is required.";
+    return checkVariantOptionConstraints({
+      existingCombinations: [],
+      selectedIDs: [],
+      variantTypeIDs,
+    });
   }
 
-  if (value.length < variantTypeIDs.length) {
-    return "Select exactly one option for each variant type.";
-  }
+  const selectedIDs = value.map((option) => extractID<VariantOption>(option));
 
-  const selectedOptionIDs = value.map((option) =>
-    extractID<VariantOption>(option)
-  );
-
-  const existingVariants = await req.payload.find({
+  const existing = await req.payload.find({
     collection: "variants",
     depth: 0,
     draft: true,
     limit: 0,
     overrideAccess: true,
     req,
-    select: {
-      options: true,
-    },
+    select: { options: true },
     where: {
       and: [
-        {
-          product: {
-            equals: productId,
-          },
-        },
-        ...(data.id
-          ? [
-              {
-                id: {
-                  not_equals: data.id,
-                },
-              },
-            ]
-          : []),
+        { product: { equals: productId } },
+        ...(data.id ? [{ id: { not_equals: data.id } }] : []),
       ],
     },
   });
 
-  const duplicate = existingVariants.docs.some((variant) => {
-    const existingOptionIDs =
-      variant.options?.map((option) => extractID<VariantOption>(option)) ?? [];
-    return (
-      existingOptionIDs.length === selectedOptionIDs.length &&
-      existingOptionIDs.every((id) => selectedOptionIDs.includes(id))
-    );
+  const existingCombinations = existing.docs.map(
+    (variant) =>
+      variant.options?.map((option) => extractID<VariantOption>(option)) ?? []
+  );
+
+  return checkVariantOptionConstraints({
+    variantTypeIDs,
+    selectedIDs,
+    existingCombinations,
   });
-
-  if (duplicate) {
-    return "This variant combination already exists for this product.";
-  }
-
-  return true;
 };
 
 export { validateVariantOptions };
