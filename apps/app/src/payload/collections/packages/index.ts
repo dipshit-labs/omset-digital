@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
+import { measurementField } from "@/payload/fields/measurement";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import {
   handleDefaultPackageAfterChange,
@@ -34,6 +35,7 @@ export const Packages: CollectionConfig = {
           name: "dimensions",
           type: "group",
           admin: {
+            hideGutter: true,
             width: "60%",
           },
           fields: [
@@ -74,49 +76,12 @@ export const Packages: CollectionConfig = {
             },
           ],
         },
-        {
-          label: false,
+        measurementField({
+          label: "Weight (Empty)",
           name: "tareWeight",
-          type: "group",
-          fields: [
-            {
-              type: "row",
-              fields: [
-                {
-                  defaultValue: 0,
-                  label: "Weight (Empty)",
-                  min: 0,
-                  name: "value",
-                  required: true,
-                  type: "number",
-                  admin: {
-                    placeholder: "0",
-                  },
-                },
-                {
-                  defaultValue: "g",
-                  name: "unit",
-                  required: true,
-                  type: "select",
-                  admin: {
-                    isClearable: false,
-                    width: "20%",
-                  },
-                  options: [
-                    {
-                      label: "Gram (g)",
-                      value: "g",
-                    },
-                    {
-                      label: "Kilogram (kg)",
-                      value: "kg",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
+          required: true,
+          type: "weight",
+        }),
       ],
     },
     {
