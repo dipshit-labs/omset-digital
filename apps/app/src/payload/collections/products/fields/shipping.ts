@@ -1,10 +1,9 @@
-import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import type { CheckboxField, Field, RelationshipField } from "payload";
 import {
   type MeasurementFieldOverrides,
   measurementField,
 } from "@/payload/fields/measurement";
-import { getCollectionIDType } from "@/payload/lib/ids";
+import { resolveDefaultPackage } from "../lib/resolveDefaultPackage";
 
 interface ShippingFieldsOverrides {
   measurementOverrides?: MeasurementFieldOverrides;
@@ -62,35 +61,7 @@ const shippingFields = ({
             if (!req?.payload) {
               return null;
             }
-
-            const tenantId = getTenantFromCookie(
-              req.headers,
-              getCollectionIDType({
-                collectionSlug: "tenants",
-                payload: req.payload,
-              })
-            );
-
-            if (!tenantId) {
-              return null;
-            }
-
-            const defaultPkg = await req.payload.find({
-              collection: "packages",
-              depth: 0,
-              limit: 1,
-              overrideAccess: true,
-              req,
-              select: { isDefault: true },
-              where: {
-                and: [
-                  { tenant: { equals: tenantId } },
-                  { isDefault: { equals: true } },
-                ],
-              },
-            });
-
-            return defaultPkg.docs[0]?.id ?? null;
+            return await resolveDefaultPackage(req);
           },
           virtual,
         },

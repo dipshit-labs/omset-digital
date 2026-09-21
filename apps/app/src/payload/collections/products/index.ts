@@ -5,11 +5,11 @@ import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
 import { shippingFields } from "./fields/shipping";
-import { populateDefaultVariantData } from "./hooks/populateDefaultVariantData";
 import {
-  syncDefaultVariant,
-  syncDefaultVariantBeforeChange,
-} from "./hooks/syncDefaultVariant";
+  defaultVariantAfterChange,
+  defaultVariantAfterRead,
+  defaultVariantBeforeChange,
+} from "./hooks/defaultVariantSync";
 
 export const Products: CollectionConfig = {
   slug: "products",
@@ -174,9 +174,9 @@ export const Products: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [syncDefaultVariant],
-    afterRead: [populateDefaultVariantData],
-    beforeChange: [enforceTenantOnCreate, syncDefaultVariantBeforeChange],
+    afterChange: [defaultVariantAfterChange],
+    afterRead: [defaultVariantAfterRead],
+    beforeChange: [enforceTenantOnCreate, defaultVariantBeforeChange],
   },
   versions: {
     drafts: {
