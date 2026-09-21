@@ -10,7 +10,7 @@
     "generate:types": "payload generate:types",
     "payload": "payload",
     "test": "bun test",
-    "typecheck": "next typegen && tsc --noEmit --emitDeclarationOnly false",
+    "typecheck": "next typegen && bun generate:types && tsc --noEmit",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
