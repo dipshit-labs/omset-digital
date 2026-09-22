@@ -76,6 +76,9 @@ export interface Config {
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
+    storeSettings: StoreSetting;
+    themes: Theme;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +91,9 @@ export interface Config {
     variantTypes: {
       options: 'variantOptions';
     };
+    themes: {
+      pages: 'pages';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -99,6 +105,9 @@ export interface Config {
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
+    storeSettings: StoreSettingsSelect<false> | StoreSettingsSelect<true>;
+    themes: ThemesSelect<false> | ThemesSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -481,6 +490,140 @@ export interface Variant {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Universal store identity, branding assets, and active theme pointer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeSettings".
+ */
+export interface StoreSetting {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  storeName: string;
+  tagline?: string | null;
+  /**
+   * The live theme rendered for buyers visiting your store.
+   */
+  activeTheme?: (number | null) | Theme;
+  publicEmail?: string | null;
+  publicPhone?: string | null;
+  logo?: (number | null) | Media;
+  favicon?: (number | null) | Media;
+  socialLinks?:
+    | {
+        platform: 'instagram' | 'tiktok' | 'whatsapp' | 'facebook' | 'youtube' | 'x';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage your installed storefront themes, customize styling, and edit pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  name: string;
+  templateSlug: 'default' | 'minimal';
+  /**
+   * Merchants can toggle this to make this theme the active buyer-facing design.
+   */
+  isLive?: boolean | null;
+  settings?: {
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    primaryColor?: string | null;
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    secondaryColor?: string | null;
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    backgroundColor?: string | null;
+    headingFont?: ('inter' | 'playfair' | 'jakarta') | null;
+    containerMaxWidth?: ('1140' | '1280' | '1440') | null;
+  };
+  /**
+   * Pages and section trees associated with this theme instance.
+   */
+  pages?: {
+    docs?: (number | Page)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Pages and section layouts assigned to your storefront themes.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  /**
+   * Path relative to your store domain (e.g. 'home', 'about', 'contact')
+   */
+  slug: string;
+  templateType: 'home' | 'product' | 'standard';
+  /**
+   * The theme instance that this page layout belongs to.
+   */
+  theme: number | Theme;
+  /**
+   * Add, reorder, and configure sections for this page.
+   */
+  sections?:
+    | (
+        | {
+            variant?: ('centered' | 'split' | 'banner') | null;
+            heading: string;
+            subheading?: string | null;
+            showBadge?: boolean | null;
+            badgeText?: string | null;
+            primaryCta?: {
+              label?: string | null;
+              url?: string | null;
+              openInNewTab?: boolean | null;
+            };
+            image?: (number | null) | Media;
+            blocks?:
+              | {
+                  title: string;
+                  description?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'default_hero_feature_bullet';
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'default_hero';
+          }
+        | {
+            heading: string;
+            columns?: ('2' | '3' | '4') | null;
+            limit?: number | null;
+            showAddToCart?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'default_featured_products';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -539,6 +682,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'variantTypes';
         value: number | VariantType;
+      } | null)
+    | ({
+        relationTo: 'storeSettings';
+        value: number | StoreSetting;
+      } | null)
+    | ({
+        relationTo: 'themes';
+        value: number | Theme;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -850,6 +1005,109 @@ export interface VariantTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeSettings_select".
+ */
+export interface StoreSettingsSelect<T extends boolean = true> {
+  tenant?: T;
+  storeName?: T;
+  tagline?: T;
+  activeTheme?: T;
+  publicEmail?: T;
+  publicPhone?: T;
+  logo?: T;
+  favicon?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes_select".
+ */
+export interface ThemesSelect<T extends boolean = true> {
+  tenant?: T;
+  name?: T;
+  templateSlug?: T;
+  isLive?: T;
+  settings?:
+    | T
+    | {
+        primaryColor?: T;
+        secondaryColor?: T;
+        backgroundColor?: T;
+        headingFont?: T;
+        containerMaxWidth?: T;
+      };
+  pages?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  slug?: T;
+  templateType?: T;
+  theme?: T;
+  sections?:
+    | T
+    | {
+        default_hero?:
+          | T
+          | {
+              variant?: T;
+              heading?: T;
+              subheading?: T;
+              showBadge?: T;
+              badgeText?: T;
+              primaryCta?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    openInNewTab?: T;
+                  };
+              image?: T;
+              blocks?:
+                | T
+                | {
+                    default_hero_feature_bullet?:
+                      | T
+                      | {
+                          title?: T;
+                          description?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        default_featured_products?:
+          | T
+          | {
+              heading?: T;
+              columns?: T;
+              limit?: T;
+              showAddToCart?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

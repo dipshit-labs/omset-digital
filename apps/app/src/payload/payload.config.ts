@@ -20,13 +20,16 @@ import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
 import { Packages } from "./collections/packages";
+import { Pages } from "./collections/pages";
 import { Products } from "./collections/products";
 import {
   VariantOptions,
   Variants,
   VariantTypes,
 } from "./collections/products/variants";
+import { StoreSettings } from "./collections/store-settings";
 import { Tenants } from "./collections/tenants";
+import { Themes } from "./collections/themes";
 import { Users } from "./collections/users";
 import { getUserTenantIDs } from "./lib/ids";
 import type { Config } from "./payload-types";
@@ -73,6 +76,9 @@ export default buildConfig({
     Variants,
     VariantOptions,
     VariantTypes,
+    StoreSettings,
+    Themes,
+    Pages,
   ],
   onInit: async (args) => {
     if (env.PAYLOAD_SEED) {
@@ -85,7 +91,10 @@ export default buildConfig({
         categories: { isGlobal: false },
         media: { isGlobal: false },
         packages: { isGlobal: false },
+        pages: { isGlobal: false },
         products: { isGlobal: false },
+        storeSettings: { isGlobal: true },
+        themes: { isGlobal: false },
         variantOptions: { isGlobal: false },
         variants: { isGlobal: false },
         variantTypes: { isGlobal: false },
