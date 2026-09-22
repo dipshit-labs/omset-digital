@@ -537,17 +537,17 @@ export interface Theme {
     /**
      * Hex color code (e.g. #0f172a)
      */
+    backgroundColor?: string | null;
+    containerMaxWidth?: ('1140' | '1280' | '1440') | null;
+    headingFont?: ('inter' | 'playfair' | 'jakarta') | null;
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
     primaryColor?: string | null;
     /**
      * Hex color code (e.g. #0f172a)
      */
     secondaryColor?: string | null;
-    /**
-     * Hex color code (e.g. #0f172a)
-     */
-    backgroundColor?: string | null;
-    headingFont?: ('inter' | 'playfair' | 'jakarta') | null;
-    containerMaxWidth?: ('1140' | '1280' | '1440') | null;
   };
   /**
    * Pages and section trees associated with this theme instance.
@@ -585,21 +585,21 @@ export interface Page {
   sections?:
     | (
         | {
-            variant?: ('centered' | 'split' | 'banner') | null;
-            heading: string;
-            subheading?: string | null;
-            showBadge?: boolean | null;
             badgeText?: string | null;
+            heading: string;
+            image?: (number | null) | Media;
             primaryCta?: {
               label?: string | null;
               url?: string | null;
               openInNewTab?: boolean | null;
             };
-            image?: (number | null) | Media;
+            showBadge?: boolean | null;
+            subheading?: string | null;
+            variant?: ('centered' | 'split' | 'banner') | null;
             blocks?:
               | {
-                  title: string;
                   description?: string | null;
+                  title: string;
                   id?: string | null;
                   blockName?: string | null;
                   blockType: 'default_hero_feature_bullet';
@@ -610,8 +610,8 @@ export interface Page {
             blockType: 'default_hero';
           }
         | {
-            heading: string;
             columns?: ('2' | '3' | '4') | null;
+            heading: string;
             limit?: number | null;
             showAddToCart?: boolean | null;
             id?: string | null;
@@ -1041,11 +1041,11 @@ export interface ThemesSelect<T extends boolean = true> {
   settings?:
     | T
     | {
+        backgroundColor?: T;
+        containerMaxWidth?: T;
+        headingFont?: T;
         primaryColor?: T;
         secondaryColor?: T;
-        backgroundColor?: T;
-        headingFont?: T;
-        containerMaxWidth?: T;
       };
   pages?: T;
   updatedAt?: T;
@@ -1067,11 +1067,9 @@ export interface PagesSelect<T extends boolean = true> {
         default_hero?:
           | T
           | {
-              variant?: T;
-              heading?: T;
-              subheading?: T;
-              showBadge?: T;
               badgeText?: T;
+              heading?: T;
+              image?: T;
               primaryCta?:
                 | T
                 | {
@@ -1079,15 +1077,17 @@ export interface PagesSelect<T extends boolean = true> {
                     url?: T;
                     openInNewTab?: T;
                   };
-              image?: T;
+              showBadge?: T;
+              subheading?: T;
+              variant?: T;
               blocks?:
                 | T
                 | {
                     default_hero_feature_bullet?:
                       | T
                       | {
-                          title?: T;
                           description?: T;
+                          title?: T;
                           id?: T;
                           blockName?: T;
                         };
@@ -1098,8 +1098,8 @@ export interface PagesSelect<T extends boolean = true> {
         default_featured_products?:
           | T
           | {
-              heading?: T;
               columns?: T;
+              heading?: T;
               limit?: T;
               showAddToCart?: T;
               id?: T;
