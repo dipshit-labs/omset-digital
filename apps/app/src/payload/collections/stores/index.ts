@@ -2,13 +2,14 @@ import type { Block, CollectionConfig, TextField } from "payload";
 import { validateSlug } from "@/lib/utils";
 import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
 import { encryptedField } from "@/payload/fields/encrypted";
+import { slugField } from "@/payload/fields/slug";
 import { canReadRestrictedField } from "./access/canReadRestrictedField";
 import { updateAndDeleteTenantAccess } from "./access/updateAndDelete";
 
 const restrictedTextField = (name: string): TextField => ({
   name,
   access: { read: canReadRestrictedField },
-  admin: { description: "Restricted to tenant owner and super-admin" },
+  admin: { description: "Restricted to store owner and super-admin" },
   type: "text",
 });
 
@@ -41,8 +42,8 @@ const XenditBlock: Block = {
   ],
 };
 
-export const Tenants: CollectionConfig = {
-  slug: "tenants",
+export const Stores: CollectionConfig = {
+  slug: "stores",
   access: {
     create: isSuperAdminAccess,
     delete: updateAndDeleteTenantAccess,
@@ -50,11 +51,15 @@ export const Tenants: CollectionConfig = {
     read: ({ req }) => Boolean(req.user),
   },
   admin: {
-    defaultColumns: ["name", "slug", "customDomain", "theme"],
+    defaultColumns: ["name", "slug", "customDomain"],
+    description:
+      "Store identity, branding, custom domain, and BYOK credentials.",
+    group: "Settings",
     useAsTitle: "name",
   },
   fields: [
     {
+      label: "Store Name",
       name: "name",
       required: true,
       type: "text",
@@ -62,18 +67,24 @@ export const Tenants: CollectionConfig = {
         description: "Display name of the merchant's store",
       },
     },
+    ...slugField("name", {
+      slugOverrides: {
+        validate: validateSlug,
+        admin: {
+          description: "Subdomain identifier (e.g. {slug}.omsetdigital.com)",
+        },
+      },
+    }),
     {
-      // unique implies an index in Postgres — no need for index: true
-      name: "slug",
-      required: true,
+      label: "Brand Tagline",
+      name: "tagline",
       type: "text",
-      unique: true,
-      validate: validateSlug,
       admin: {
-        description: "Subdomain identifier (e.g. {slug}.omsetdigital.com)",
+        placeholder: "e.g. Handcrafted ceramics from Yogyakarta",
       },
     },
     {
+      label: "Custom Domain",
       name: "customDomain",
       type: "text",
       admin: {
@@ -81,23 +92,86 @@ export const Tenants: CollectionConfig = {
       },
     },
     {
-      defaultValue: "default",
-      name: "theme",
-      required: true,
-      type: "select",
-      admin: {
-        description: "Active storefront theme",
-      },
-      options: [
-        { label: "Default", value: "default" },
-        { label: "Minimal", value: "minimal" },
+      type: "row",
+      fields: [
+        {
+          label: "Store Logo",
+          name: "logo",
+          relationTo: "media",
+          type: "upload",
+          admin: {
+            width: "50%",
+          },
+        },
+        {
+          label: "Store Favicon",
+          name: "favicon",
+          relationTo: "media",
+          type: "upload",
+          admin: {
+            width: "50%",
+          },
+        },
       ],
     },
     {
-      name: "themeConfig",
-      type: "json",
+      type: "row",
+      fields: [
+        {
+          label: "Support Email",
+          name: "publicEmail",
+          type: "text",
+          admin: {
+            width: "50%",
+          },
+        },
+        {
+          label: "Support Phone / WhatsApp",
+          name: "publicPhone",
+          type: "text",
+          admin: {
+            width: "50%",
+          },
+        },
+      ],
+    },
+    {
+      label: "Social Media Profiles",
+      name: "socialLinks",
+      type: "array",
+      fields: [
+        {
+          label: "Platform",
+          name: "platform",
+          required: true,
+          type: "select",
+          options: [
+            { label: "Instagram", value: "instagram" },
+            { label: "TikTok", value: "tiktok" },
+            { label: "WhatsApp", value: "whatsapp" },
+            { label: "Facebook", value: "facebook" },
+            { label: "YouTube", value: "youtube" },
+            { label: "X / Twitter", value: "x" },
+          ],
+        },
+        {
+          label: "Profile URL",
+          name: "url",
+          required: true,
+          type: "text",
+        },
+      ],
+    },
+    // Themes join field
+    {
+      collection: "themes",
+      label: "Installed Themes",
+      name: "themes",
+      on: "tenant",
+      type: "join",
       admin: {
-        description: "Accent colors, fonts, and per-theme overrides",
+        defaultColumns: ["name", "templateSlug", "isLive", "updatedAt"],
+        description: "Storefront themes installed for this store.",
       },
     },
     // Subscription
@@ -219,4 +293,8 @@ export const Tenants: CollectionConfig = {
       ],
     },
   ],
+  labels: {
+    plural: "Stores",
+    singular: "Store",
+  },
 };

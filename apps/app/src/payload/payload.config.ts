@@ -27,8 +27,8 @@ import {
   Variants,
   VariantTypes,
 } from "./collections/products/variants";
-import { StoreSettings } from "./collections/store-settings";
-import { Tenants } from "./collections/tenants";
+import { Stores } from "./collections/stores";
+import { Templates } from "./collections/templates";
 import { Themes } from "./collections/themes";
 import { Users } from "./collections/users";
 import { getUserTenantIDs } from "./lib/ids";
@@ -68,7 +68,7 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Tenants,
+    Stores,
     Categories,
     Packages,
     Products,
@@ -76,8 +76,8 @@ export default buildConfig({
     Variants,
     VariantOptions,
     VariantTypes,
-    StoreSettings,
     Themes,
+    Templates,
     Pages,
   ],
   onInit: async (args) => {
@@ -87,13 +87,14 @@ export default buildConfig({
   },
   plugins: [
     multiTenantPlugin<Config>({
+      tenantsSlug: "stores",
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
         packages: { isGlobal: false },
         pages: { isGlobal: false },
         products: { isGlobal: false },
-        storeSettings: { isGlobal: true },
+        templates: { isGlobal: false },
         themes: { isGlobal: false },
         variantOptions: { isGlobal: false },
         variants: { isGlobal: false },

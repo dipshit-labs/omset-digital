@@ -17,7 +17,7 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
 
   const selectedTenant = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+    getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
   );
 
   if (selectedTenant) {
@@ -45,7 +45,7 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
     // provide a more specific error message
     if (req.user.roles?.includes("super-admin") || tenantIDs.length > 1) {
       const tenant = await req.payload.findByID({
-        collection: "tenants",
+        collection: "stores",
         depth: 0,
         // @ts-expect-error - selectedTenant will match DB ID type
         id: selectedTenant,

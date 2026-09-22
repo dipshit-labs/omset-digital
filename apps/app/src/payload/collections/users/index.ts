@@ -11,7 +11,7 @@ const defaultTenantArrayField = tenantsArrayField({
   tenantFieldAccess: {},
   tenantsArrayFieldName: "tenants",
   tenantsArrayTenantFieldName: "tenant",
-  tenantsCollectionSlug: "tenants",
+  tenantsCollectionSlug: "stores",
   rowFields: [
     {
       defaultValue: ["manager"],

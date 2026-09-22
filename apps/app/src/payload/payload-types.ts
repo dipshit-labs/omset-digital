@@ -68,7 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
-    tenants: Tenant;
+    stores: Store;
     categories: Category;
     packages: Package;
     products: Product;
@@ -76,8 +76,8 @@ export interface Config {
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
-    storeSettings: StoreSetting;
     themes: Theme;
+    templates: Template;
     pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +85,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    stores: {
+      themes: 'themes';
+    };
     products: {
       variants: 'variants';
     };
@@ -92,12 +95,12 @@ export interface Config {
       options: 'variantOptions';
     };
     themes: {
-      pages: 'pages';
+      templates: 'templates';
     };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    stores: StoresSelect<false> | StoresSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -105,8 +108,8 @@ export interface Config {
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
-    storeSettings: StoreSettingsSelect<false> | StoreSettingsSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
+    templates: TemplatesSelect<false> | TemplatesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -158,7 +161,7 @@ export interface User {
   roles?: ('super-admin' | 'user')[] | null;
   tenants?:
     | {
-        tenant: number | Tenant;
+        tenant: number | Store;
         roles: ('owner' | 'manager')[];
         id?: string | null;
       }[]
@@ -183,10 +186,12 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Store identity, branding, custom domain, and BYOK credentials.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
+ * via the `definition` "stores".
  */
-export interface Tenant {
+export interface Store {
   id: number;
   /**
    * Display name of the merchant's store
@@ -195,27 +200,32 @@ export interface Tenant {
   /**
    * Subdomain identifier (e.g. {slug}.omsetdigital.com)
    */
-  slug: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  tagline?: string | null;
   /**
    * Buyer-facing custom domain (e.g. myshop.com)
    */
   customDomain?: string | null;
-  /**
-   * Active storefront theme
-   */
-  theme: 'default' | 'minimal';
-  /**
-   * Accent colors, fonts, and per-theme overrides
-   */
-  themeConfig?:
+  logo?: (number | null) | Media;
+  favicon?: (number | null) | Media;
+  publicEmail?: string | null;
+  publicPhone?: string | null;
+  socialLinks?:
     | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
+        platform: 'instagram' | 'tiktok' | 'whatsapp' | 'facebook' | 'youtube' | 'x';
+        url: string;
+        id?: string | null;
+      }[]
     | null;
+  /**
+   * Storefront themes installed for this store.
+   */
+  themes?: {
+    docs?: (number | Theme)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   subscription: {
     status: 'trial' | 'active' | 'past_due' | 'canceled';
     trialEndsAt?: string | null;
@@ -247,7 +257,7 @@ export interface Tenant {
     shippingProvider?: ('none' | 'rajaongkir') | null;
     rajaongkirConfig?: {
       /**
-       * Restricted to tenant owner and super-admin
+       * Restricted to store owner and super-admin
        */
       apiKey?: string | null;
       accountType?: ('starter' | 'basic' | 'pro') | null;
@@ -270,11 +280,136 @@ export interface Tenant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  tenant?: (number | null) | Store;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Manage installed storefront themes, customize branding colors and fonts, and configure templates.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: number;
+  tenant?: (number | null) | Store;
+  name: string;
+  templateSlug: 'default' | 'minimal';
+  /**
+   * Active theme rendered for buyers. Exactly one theme is live at a time.
+   */
+  isLive?: boolean | null;
+  settings?: {
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    backgroundColor?: string | null;
+    containerMaxWidth?: ('1140' | '1280' | '1440') | null;
+    headingFont?: ('inter' | 'playfair' | 'jakarta') | null;
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    primaryColor?: string | null;
+    /**
+     * Hex color code (e.g. #0f172a)
+     */
+    secondaryColor?: string | null;
+  };
+  /**
+   * Templates defining the sections for Home, Product, Collection, and Custom Pages.
+   */
+  templates?: {
+    docs?: (number | Template)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Layout templates for your storefront pages, product displays, and catalog views.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates".
+ */
+export interface Template {
+  id: number;
+  tenant?: (number | null) | Store;
+  name: string;
+  type: 'home' | 'product' | 'collection' | 'page';
+  /**
+   * System templates are core to the theme layout and cannot be deleted.
+   */
+  isSystem?: boolean | null;
+  /**
+   * The theme instance this template belongs to.
+   */
+  theme: number | Theme;
+  /**
+   * Add, reorder, and configure sections for this template.
+   */
+  sections?:
+    | (
+        | {
+            badgeText?: string | null;
+            heading: string;
+            image?: (number | null) | Media;
+            primaryCta?: {
+              label?: string | null;
+              url?: string | null;
+              openInNewTab?: boolean | null;
+            };
+            showBadge?: boolean | null;
+            subheading?: string | null;
+            variant?: ('centered' | 'split' | 'banner') | null;
+            blocks?:
+              | {
+                  description?: string | null;
+                  title: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'default_hero_feature_bullet';
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'default_hero';
+          }
+        | {
+            columns?: ('2' | '3' | '4') | null;
+            heading: string;
+            limit?: number | null;
+            showAddToCart?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'default_featured_products';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   name: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -288,7 +423,7 @@ export interface Category {
  */
 export interface Package {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   title: string;
   dimensions: {
     length: number;
@@ -312,7 +447,7 @@ export interface Package {
  */
 export interface Product {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   title: string;
   description?: {
     root: {
@@ -388,31 +523,11 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  alt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variantTypes".
  */
 export interface VariantType {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   label: string;
   name: string;
   options?: {
@@ -431,7 +546,7 @@ export interface VariantType {
 export interface VariantOption {
   id: number;
   _variantOptions_options_order?: string | null;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   variantType: number | VariantType;
   label: string;
   /**
@@ -448,7 +563,7 @@ export interface VariantOption {
  */
 export interface Variant {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   /**
    * Generated administrative title, such as Small / Red.
    */
@@ -490,136 +605,39 @@ export interface Variant {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Universal store identity, branding assets, and active theme pointer.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "storeSettings".
- */
-export interface StoreSetting {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  storeName: string;
-  tagline?: string | null;
-  /**
-   * The live theme rendered for buyers visiting your store.
-   */
-  activeTheme?: (number | null) | Theme;
-  publicEmail?: string | null;
-  publicPhone?: string | null;
-  logo?: (number | null) | Media;
-  favicon?: (number | null) | Media;
-  socialLinks?:
-    | {
-        platform: 'instagram' | 'tiktok' | 'whatsapp' | 'facebook' | 'youtube' | 'x';
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage your installed storefront themes, customize styling, and edit pages.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "themes".
- */
-export interface Theme {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  name: string;
-  templateSlug: 'default' | 'minimal';
-  /**
-   * Merchants can toggle this to make this theme the active buyer-facing design.
-   */
-  isLive?: boolean | null;
-  settings?: {
-    /**
-     * Hex color code (e.g. #0f172a)
-     */
-    backgroundColor?: string | null;
-    containerMaxWidth?: ('1140' | '1280' | '1440') | null;
-    headingFont?: ('inter' | 'playfair' | 'jakarta') | null;
-    /**
-     * Hex color code (e.g. #0f172a)
-     */
-    primaryColor?: string | null;
-    /**
-     * Hex color code (e.g. #0f172a)
-     */
-    secondaryColor?: string | null;
-  };
-  /**
-   * Pages and section trees associated with this theme instance.
-   */
-  pages?: {
-    docs?: (number | Page)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Pages and section layouts assigned to your storefront themes.
+ * Store content and marketing pages (About us, FAQ, Contact, Terms) using theme page templates.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
   id: number;
-  tenant?: (number | null) | Tenant;
+  tenant?: (number | null) | Store;
   title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
   /**
-   * Path relative to your store domain (e.g. 'home', 'about', 'contact')
+   * Select the page layout template that controls the layout and sections for this page.
    */
-  slug: string;
-  templateType: 'home' | 'product' | 'standard';
+  template: number | Template;
   /**
-   * The theme instance that this page layout belongs to.
+   * Primary textual content rendered by the selected page template.
    */
-  theme: number | Theme;
-  /**
-   * Add, reorder, and configure sections for this page.
-   */
-  sections?:
-    | (
-        | {
-            badgeText?: string | null;
-            heading: string;
-            image?: (number | null) | Media;
-            primaryCta?: {
-              label?: string | null;
-              url?: string | null;
-              openInNewTab?: boolean | null;
-            };
-            showBadge?: boolean | null;
-            subheading?: string | null;
-            variant?: ('centered' | 'split' | 'banner') | null;
-            blocks?:
-              | {
-                  description?: string | null;
-                  title: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'default_hero_feature_bullet';
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'default_hero';
-          }
-        | {
-            columns?: ('2' | '3' | '4') | null;
-            heading: string;
-            limit?: number | null;
-            showAddToCart?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'default_featured_products';
-          }
-      )[]
-    | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -652,8 +670,8 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'tenants';
-        value: number | Tenant;
+        relationTo: 'stores';
+        value: number | Store;
       } | null)
     | ({
         relationTo: 'categories';
@@ -684,12 +702,12 @@ export interface PayloadLockedDocument {
         value: number | VariantType;
       } | null)
     | ({
-        relationTo: 'storeSettings';
-        value: number | StoreSetting;
-      } | null)
-    | ({
         relationTo: 'themes';
         value: number | Theme;
+      } | null)
+    | ({
+        relationTo: 'templates';
+        value: number | Template;
       } | null)
     | ({
         relationTo: 'pages';
@@ -772,14 +790,26 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_select".
+ * via the `definition` "stores_select".
  */
-export interface TenantsSelect<T extends boolean = true> {
+export interface StoresSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  slugLock?: T;
+  tagline?: T;
   customDomain?: T;
-  theme?: T;
-  themeConfig?: T;
+  logo?: T;
+  favicon?: T;
+  publicEmail?: T;
+  publicPhone?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  themes?: T;
   subscription?:
     | T
     | {
@@ -1008,29 +1038,6 @@ export interface VariantTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "storeSettings_select".
- */
-export interface StoreSettingsSelect<T extends boolean = true> {
-  tenant?: T;
-  storeName?: T;
-  tagline?: T;
-  activeTheme?: T;
-  publicEmail?: T;
-  publicPhone?: T;
-  logo?: T;
-  favicon?: T;
-  socialLinks?:
-    | T
-    | {
-        platform?: T;
-        url?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "themes_select".
  */
 export interface ThemesSelect<T extends boolean = true> {
@@ -1047,19 +1054,19 @@ export interface ThemesSelect<T extends boolean = true> {
         primaryColor?: T;
         secondaryColor?: T;
       };
-  pages?: T;
+  templates?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
+ * via the `definition` "templates_select".
  */
-export interface PagesSelect<T extends boolean = true> {
+export interface TemplatesSelect<T extends boolean = true> {
   tenant?: T;
-  title?: T;
-  slug?: T;
-  templateType?: T;
+  name?: T;
+  type?: T;
+  isSystem?: T;
   theme?: T;
   sections?:
     | T
@@ -1106,6 +1113,20 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  template?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }

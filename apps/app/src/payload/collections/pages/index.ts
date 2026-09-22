@@ -1,16 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
+import { slugField } from "@/payload/fields/slug";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
-import { convertSectionToPayloadBlock } from "@/payload/prototype/converter";
-import {
-  featuredProductsSection,
-  heroSection,
-} from "@/payload/prototype/sample-template";
-
-const defaultSections = [
-  convertSectionToPayloadBlock("default", heroSection),
-  convertSectionToPayloadBlock("default", featuredProductsSection),
-];
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -21,10 +12,10 @@ export const Pages: CollectionConfig = {
     read: ({ req }) => Boolean(req.user),
   },
   admin: {
-    defaultColumns: ["title", "slug", "templateType", "theme", "updatedAt"],
+    defaultColumns: ["title", "slug", "template", "updatedAt"],
     description:
-      "Pages and section layouts assigned to your storefront themes.",
-    group: "Storefront",
+      "Store content and marketing pages (About us, FAQ, Contact, Terms) using theme page templates.",
+    group: "Content",
     useAsTitle: "title",
   },
   fields: [
@@ -33,50 +24,34 @@ export const Pages: CollectionConfig = {
       name: "title",
       required: true,
       type: "text",
-    },
-    {
-      label: "URL Slug",
-      name: "slug",
-      required: true,
-      type: "text",
       admin: {
-        description:
-          "Path relative to your store domain (e.g. 'home', 'about', 'contact')",
+        placeholder: "e.g. About Our Workshop, Frequently Asked Questions",
       },
     },
+    ...slugField("title"),
     {
-      defaultValue: "standard",
-      label: "Template Type",
-      name: "templateType",
-      required: true,
-      type: "select",
-      options: [
-        { label: "Home Page", value: "home" },
-        { label: "Product Page Layout", value: "product" },
-        { label: "Standard Content Page", value: "standard" },
-      ],
-    },
-    {
-      label: "Assigned Theme",
-      name: "theme",
-      relationTo: "themes",
+      label: "Theme Template",
+      name: "template",
+      relationTo: "templates",
       required: true,
       type: "relationship",
       admin: {
-        description: "The theme instance that this page layout belongs to.",
+        description:
+          "Select the page layout template that controls the layout and sections for this page.",
+      },
+      filterOptions: {
+        type: {
+          equals: "page",
+        },
       },
     },
     {
-      blocks: defaultSections,
-      label: "Page Sections",
-      name: "sections",
-      type: "blocks",
+      label: "Page Body Content",
+      name: "content",
+      type: "richText",
       admin: {
-        description: "Add, reorder, and configure sections for this page.",
-      },
-      labels: {
-        plural: "Sections",
-        singular: "Section",
+        description:
+          "Primary textual content rendered by the selected page template.",
       },
     },
   ],
@@ -84,7 +59,7 @@ export const Pages: CollectionConfig = {
     beforeChange: [enforceTenantOnCreate],
   },
   labels: {
-    plural: "Pages",
-    singular: "Page",
+    plural: "Content Pages",
+    singular: "Content Page",
   },
 };

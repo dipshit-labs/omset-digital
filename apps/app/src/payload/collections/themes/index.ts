@@ -3,6 +3,11 @@ import { canWrite } from "@/payload/access/canWrite";
 import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
 import { convertSettingFields } from "@/payload/prototype/converter";
 import { defaultTemplateManifest } from "@/payload/prototype/sample-template";
+import {
+  handleLiveThemeAfterChange,
+  handleLiveThemeBeforeChange,
+} from "./hooks/handleLiveTheme";
+import { seedThemeTemplatesAfterChange } from "./hooks/seedThemeTemplates";
 
 export const Themes: CollectionConfig = {
   slug: "themes",
@@ -15,7 +20,7 @@ export const Themes: CollectionConfig = {
   admin: {
     defaultColumns: ["name", "templateSlug", "isLive", "updatedAt"],
     description:
-      "Manage your installed storefront themes, customize styling, and edit pages.",
+      "Manage installed storefront themes, customize branding colors and fonts, and configure templates.",
     group: "Storefront",
     useAsTitle: "name",
   },
@@ -47,7 +52,7 @@ export const Themes: CollectionConfig = {
       type: "checkbox",
       admin: {
         description:
-          "Merchants can toggle this to make this theme the active buyer-facing design.",
+          "Active theme rendered for buyers. Exactly one theme is live at a time.",
       },
     },
     {
@@ -57,20 +62,21 @@ export const Themes: CollectionConfig = {
       type: "group",
     },
     {
-      collection: "pages",
-      label: "Theme Pages & Layouts",
-      name: "pages",
+      collection: "templates",
+      label: "Theme Templates",
+      name: "templates",
       on: "theme",
       type: "join",
       admin: {
-        defaultColumns: ["title", "slug", "templateType", "updatedAt"],
+        defaultColumns: ["name", "type", "isSystem", "updatedAt"],
         description:
-          "Pages and section trees associated with this theme instance.",
+          "Templates defining the sections for Home, Product, Collection, and Custom Pages.",
       },
     },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate],
+    afterChange: [handleLiveThemeAfterChange, seedThemeTemplatesAfterChange],
+    beforeChange: [enforceTenantOnCreate, handleLiveThemeBeforeChange],
   },
   labels: {
     plural: "Themes",

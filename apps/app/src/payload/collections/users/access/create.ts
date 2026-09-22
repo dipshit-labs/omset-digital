@@ -1,7 +1,7 @@
 import type { Access } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getUserTenantIDs } from "@/payload/lib/ids";
-import type { Tenant, User } from "@/payload/payload-types";
+import type { Store, User } from "@/payload/payload-types";
 
 const createUserAccess: Access<User> = ({ req }) => {
   if (!req.user) {
@@ -18,8 +18,8 @@ const createUserAccess: Access<User> = ({ req }) => {
 
   const adminTenantAccessIDs = getUserTenantIDs(req.user, "owner");
 
-  const requestedTenants: Tenant["id"][] =
-    req.data?.tenants?.map((t: { tenant: Tenant["id"] }) => t.tenant) ?? [];
+  const requestedTenants: Store["id"][] =
+    req.data?.tenants?.map((t: { tenant: Store["id"] }) => t.tenant) ?? [];
 
   const hasAccessToAllRequestedTenants = requestedTenants.every((tenantID) =>
     adminTenantAccessIDs.includes(tenantID)

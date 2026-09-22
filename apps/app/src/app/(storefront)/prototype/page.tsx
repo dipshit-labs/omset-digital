@@ -86,11 +86,11 @@ export default async function PrototypeStorefrontPage() {
       {/* Prototype Banner */}
       <div className="flex items-center justify-between border-amber-600 border-b bg-amber-500 px-4 py-2 font-mono font-semibold text-amber-950 text-xs">
         <span>
-          [PROTOTYPE] Route: /prototype | Theme:{" "}
+          [PROTOTYPE] Route: /prototype | Active Theme:{" "}
           {mockStoreSettings.activeTheme.name} (
           {mockStoreSettings.activeTheme.templateSlug})
         </span>
-        <span>Three-Tier Relationship: StoreSettings → Themes → Pages</span>
+        <span>Store → Themes (isLive) → Templates (System: Home page)</span>
       </div>
 
       {/* Header (Powered by StoreSettings) */}

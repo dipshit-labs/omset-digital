@@ -23,7 +23,7 @@ export const enforceTenantOnCreate: CollectionBeforeChangeHook = ({
 
   const tenantId = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+    getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
   );
 
   if (!tenantId) {

@@ -5,7 +5,7 @@ import type {
   PayloadRequest,
 } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type { Product, Tenant } from "@/payload/payload-types";
+import type { Product, Store } from "@/payload/payload-types";
 import { normalizeShipping } from "../lib/normalizeShipping";
 import type { RawShipping } from "../lib/types";
 
@@ -103,7 +103,7 @@ async function upsertDefaultVariant(
     where: { product: { equals: doc.id } },
   });
 
-  const tenantId = doc.tenant ? extractID<Tenant>(doc.tenant) : null;
+  const tenantId = doc.tenant ? extractID<Store>(doc.tenant) : null;
   const variantData = extractVariantData(doc, req);
   const [existingVariant] = existing.docs;
   const isDraft = doc._status === "draft";

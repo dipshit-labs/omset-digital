@@ -5,15 +5,21 @@ import type { Config } from "payload";
 type SeedParameters = Parameters<NonNullable<Config["onInit"]>>[0];
 
 async function seed(payload: SeedParameters): Promise<void> {
-  const tenant1 = await payload.create({
-    collection: "tenants",
+  const store1 = await payload.create({
+    collection: "stores",
     draft: false,
     data: {
       customDomain: "trial.localhost",
-      name: "Tenant 1",
+      name: "Tenant 1 Store",
+      publicEmail: "support@tenant1.com",
+      publicPhone: "+6281234567890",
       slug: "trial",
       subscription: { status: "trial" },
-      theme: "default",
+      tagline: "High quality goods direct from Indonesian creators",
+      socialLinks: [
+        { platform: "instagram", url: "https://instagram.com/tenant1" },
+        { platform: "whatsapp", url: "https://wa.me/6281234567890" },
+      ],
     },
   });
 
@@ -37,12 +43,15 @@ async function seed(payload: SeedParameters): Promise<void> {
       tenants: [
         {
           roles: ["owner"],
-          tenant: tenant1.id,
+          tenant: store1.id,
         },
       ],
     },
   });
 
+  // Creating a theme triggers:
+  // 1. handleLiveTheme hooks (marks isLive = true)
+  // 2. seedThemeTemplatesAfterChange hook (creates Home, Product, Collection, and Page templates)
   const defaultTheme = await payload.create({
     collection: "themes",
     draft: false,
@@ -50,7 +59,7 @@ async function seed(payload: SeedParameters): Promise<void> {
       isLive: true,
       name: "Modern Clean (Live)",
       templateSlug: "default",
-      tenant: tenant1.id,
+      tenant: store1.id,
       settings: {
         backgroundColor: "#ffffff",
         containerMaxWidth: "1280",
@@ -61,63 +70,32 @@ async function seed(payload: SeedParameters): Promise<void> {
     },
   });
 
-  await payload.create({
-    collection: "pages",
-    draft: false,
-    data: {
-      slug: "home",
-      templateType: "home",
-      tenant: tenant1.id,
-      theme: defaultTheme.id,
-      title: "Home",
-      sections: [
-        {
-          badgeText: "New Collection Available",
-          blockType: "default_hero",
-          heading: "Crafted for Indonesian Creators",
-          showBadge: true,
-          subheading: "Discover high quality goods from independent merchants.",
-          variant: "centered",
-          blocks: [
-            {
-              blockType: "default_hero_feature_bullet",
-              description: "Shipped nationwide with RajaOngkir integration.",
-              title: "Instant Shipping",
-            },
-          ],
-          primaryCta: {
-            label: "Explore Products",
-            openInNewTab: false,
-            url: "/products",
-          },
-        },
-        {
-          blockType: "default_featured_products",
-          columns: "3",
-          heading: "Trending This Week",
-          limit: 6,
-          showAddToCart: true,
-        },
+  // Find the seeded default page template for creating a sample content page
+  const pageTemplates = await payload.find({
+    collection: "templates",
+    depth: 0,
+    select: {
+      name: true,
+    },
+    where: {
+      and: [
+        { theme: { equals: defaultTheme.id } },
+        { type: { equals: "page" } },
       ],
     },
   });
 
-  await payload.create({
-    collection: "storeSettings",
-    draft: false,
-    data: {
-      activeTheme: defaultTheme.id,
-      publicEmail: "support@tenant1.com",
-      publicPhone: "+6281234567890",
-      storeName: "Tenant 1 Store",
-      tagline: "High quality goods direct from Indonesian creators",
-      tenant: tenant1.id,
-      socialLinks: [
-        { platform: "instagram", url: "https://instagram.com/tenant1" },
-        { platform: "whatsapp", url: "https://wa.me/6281234567890" },
-      ],
-    },
-  });
+  if (pageTemplates.docs[0]) {
+    await payload.create({
+      collection: "pages",
+      draft: false,
+      data: {
+        template: pageTemplates.docs[0].id,
+        tenant: store1.id,
+        title: "About Our Workshop",
+      },
+    });
+  }
 }
 
 export { seed };
