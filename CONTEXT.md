@@ -43,36 +43,20 @@ _Avoid_: API key integration, self-service integration
 ### Storefront
 
 **Storefront**:
-The Buyer-facing website for a Tenant, served at the Tenant's subdomain or Custom Domain. Composed of templated Sections.
+The Buyer-facing website for a Tenant, served at the Tenant's subdomain or Custom Domain. Composed of themed Sections.
 _Avoid_: Shop page, front-end, website
 
-**Template**:
-A package of React components and design tokens that renders the Storefront's pages. Declares the default Section ordering, which Section types it supports, and optional per-template layout settings. One Template is active per Tenant at a time. Switching Templates preserves base token overrides; per-template settings reset to the incoming Template's defaults.
-_Avoid_: Theme, skin, design
+**Theme**:
+A package of React components that renders the Storefront's pages. One Theme is active per Tenant at a time. Switching Themes never changes content.
+_Avoid_: Template, skin, design
 
 **Section**:
-A configurable content block within the Storefront (e.g. hero, product-grid, about, testimonials). Ordered, togglable, and content-preserving across Template switches.
+A configurable content block within the Storefront home page (e.g. hero, product-grid, about, testimonials). Ordered, togglable, and content-preserving across Theme switches.
 _Avoid_: Block, widget, component
 
 **StorefrontContent**:
 The single Payload document per Tenant that holds all Section configurations and their content data.
 _Avoid_: Page config, storefront settings
-
-**TemplateToken**:
-A named design variable (color, typography scale, border radius, container width) drawn from the platform's closed base vocabulary. Every Template exposes default values; Merchants override individual tokens to apply their branding. Token overrides persist when the active Template changes.
-_Avoid_: CSS variable, design token, theme variable
-
-**TemplateConfig**:
-A namespaced map on the Tenant document holding per-Template layout and behavior settings (e.g. `heroLayout`, `showTicker`, `columns`). Keyed by Template slug; only the active Template's namespace is read at render time. Settings reset to the incoming Template's defaults on a Template switch; the dormant namespace is preserved but ignored.
-_Avoid_: Theme settings, template options, settings object
-
-**TemplateManifest**:
-The machine-readable descriptor exported by a Template package. Declares the Template's slug, supported Section types, default Section ordering, default TemplateTokens, token schema, and optional settings schema. Read by `payload-plugin-template-registry` at boot time to generate the Payload admin UI.
-_Avoid_: Theme manifest, config file, template descriptor
-
-**Universal Block**:
-A platform-defined Payload block type (RichText, Table, Media) available on any product page regardless of the active Template. React components for Universal Blocks live in `@repo/ui`; their Payload field definitions are registered by `payload-plugin-template-registry`.
-_Avoid_: Shared block, common block, base block
 
 ### Products
 

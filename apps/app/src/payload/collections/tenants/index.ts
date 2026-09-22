@@ -50,7 +50,7 @@ export const Tenants: CollectionConfig = {
     read: ({ req }) => Boolean(req.user),
   },
   admin: {
-    defaultColumns: ["name", "slug", "customDomain", "activeTemplate"],
+    defaultColumns: ["name", "slug", "customDomain", "theme"],
     useAsTitle: "name",
   },
   fields: [
@@ -78,6 +78,26 @@ export const Tenants: CollectionConfig = {
       type: "text",
       admin: {
         description: "Buyer-facing custom domain (e.g. myshop.com)",
+      },
+    },
+    {
+      defaultValue: "default",
+      name: "theme",
+      required: true,
+      type: "select",
+      admin: {
+        description: "Active storefront theme",
+      },
+      options: [
+        { label: "Default", value: "default" },
+        { label: "Minimal", value: "minimal" },
+      ],
+    },
+    {
+      name: "themeConfig",
+      type: "json",
+      admin: {
+        description: "Accent colors, fonts, and per-theme overrides",
       },
     },
     // Subscription

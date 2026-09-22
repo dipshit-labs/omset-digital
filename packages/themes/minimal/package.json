@@ -1,27 +1,23 @@
 {
-  "name": "@repo/template-default",
+  "name": "@repo/theme-minimal",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
     }
   },
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
-    "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/template-contract": "workspace:*",
-    "@repo/ui": "workspace:*",
-    "zod": "4.6.5"
+    "@repo/types": "workspace:*",
+    "@repo/ui": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/bun": "^1.4.2",
     "@types/react": "19.2.18",
     "react": "19.2.8",
     "typescript": "catalog:"

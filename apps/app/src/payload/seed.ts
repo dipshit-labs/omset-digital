@@ -9,11 +9,11 @@ async function seed(payload: SeedParameters): Promise<void> {
     collection: "tenants",
     draft: false,
     data: {
-      activeTemplate: "default",
       customDomain: "trial.localhost",
       name: "Tenant 1",
       slug: "trial",
       subscription: { status: "trial" },
+      theme: "default",
     },
   });
 
