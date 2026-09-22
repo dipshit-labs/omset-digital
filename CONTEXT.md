@@ -46,18 +46,29 @@ _Avoid_: API key integration, self-service integration
 The Buyer-facing website for a Tenant, served at the Tenant's subdomain or Custom Domain. Composed of themed Sections.
 _Avoid_: Shop page, front-end, website
 
+**StoreSettings**:
+The singleton document per Tenant (`isGlobal: true`) that holds universal store identity (store name, public email, phone, logo, favicon, social links) and references the active Theme.
+_Avoid_: Store profile, site settings, global config
+
 **Theme**:
-A package of React components that renders the Storefront's pages. One Theme is active per Tenant at a time. Switching Themes never changes content.
-_Avoid_: Template, skin, design
+An installed theme instance in the `themes` collection. Holds global theme settings (colors, typography presets) and joins to its child Pages. One Theme is active per Tenant.
+_Avoid_: Template, skin, layout
+
+**Page**:
+A document in the `pages` collection belonging to a specific Theme. Defines a route (`slug`, `templateType`) and holds ordered Section blocks.
+_Avoid_: View, screen, document
 
 **Section**:
-A configurable content block within the Storefront home page (e.g. hero, product-grid, about, testimonials). Ordered, togglable, and content-preserving across Theme switches.
-_Avoid_: Block, widget, component
+A configurable content block within a Page (e.g. hero, product-grid, testimonials). Composed of section-level settings and optional child Blocks.
+_Avoid_: Widget, row, container
 
-**StorefrontContent**:
-The single Payload document per Tenant that holds all Section configurations and their content data.
-_Avoid_: Page config, storefront settings
+**Block**:
+An inner child element within a Section (e.g. accordion item, testimonial card, hero slide).
+_Avoid_: Sub-block, component, item
 
+**Template Package**:
+An independent TypeScript package exporting React components, section definitions, settings schemas, page presets, and a `cssVars` function with zero Payload runtime dependencies.
+_Avoid_: Theme bundle, plugin, addon
 ### Products
 
 **Product**:
