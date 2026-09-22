@@ -89,17 +89,20 @@ export const Templates: CollectionConfig = {
       admin: {
         description:
           "System templates are core to the theme layout and cannot be deleted.",
+        position: "sidebar",
         readOnly: true,
       },
     },
     {
-      label: "Assigned Theme",
+      label: "Theme",
       name: "theme",
       relationTo: "themes",
       required: true,
       type: "relationship",
       admin: {
         description: "The theme instance this template belongs to.",
+        position: "sidebar",
+        readOnly: true,
       },
     },
     {
