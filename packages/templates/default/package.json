@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@repo/template-contract": "workspace:*",
-    "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "zod": "4.6.5"
   },

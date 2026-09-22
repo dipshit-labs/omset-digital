@@ -25,7 +25,6 @@
         "@repo/payload-plugin-template-registry": "workspace:*",
         "@repo/template-contract": "workspace:*",
         "@repo/template-default": "workspace:*",
-        "@repo/types": "workspace:*",
         "@repo/ui": "workspace:*",
         "@t3-oss/env-nextjs": "^0.13.11",
         "next": "16.3.3",
@@ -62,7 +61,7 @@
         "typescript": "catalog:",
       },
       "peerDependencies": {
-        "payload": "^3.90.0",
+        "payload": "^3.90.1",
       },
     },
     "packages/template-contract": {
@@ -87,7 +86,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@repo/template-contract": "workspace:*",
-        "@repo/types": "workspace:*",
         "@repo/ui": "workspace:*",
         "zod": "4.6.5",
       },
@@ -100,14 +98,6 @@
       },
       "peerDependencies": {
         "react": "^19.0.0",
-      },
-    },
-    "packages/types": {
-      "name": "@repo/types",
-      "version": "0.0.0",
-      "devDependencies": {
-        "@repo/typescript-config": "workspace:*",
-        "typescript": "catalog:",
       },
     },
     "packages/typescript-config": {
@@ -524,8 +514,6 @@
     "@repo/template-contract": ["@repo/template-contract@workspace:packages/template-contract"],
 
     "@repo/template-default": ["@repo/template-default@workspace:packages/templates/default"],
-
-    "@repo/types": ["@repo/types@workspace:packages/types"],
 
     "@repo/typescript-config": ["@repo/typescript-config@workspace:packages/typescript-config"],
 
