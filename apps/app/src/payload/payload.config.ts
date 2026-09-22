@@ -13,6 +13,8 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
+import { templateRegistryPlugin } from "@repo/payload-plugin-template-registry";
+import { manifest as defaultManifest } from "@repo/template-default";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { env } from "@/env";
@@ -108,6 +110,9 @@ export default buildConfig({
       userHasAccessToAllTenants: (user) => isSuperAdmin(user),
     }),
     seoPlugin({}),
+    templateRegistryPlugin({
+      manifests: [defaultManifest],
+    }),
   ],
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),

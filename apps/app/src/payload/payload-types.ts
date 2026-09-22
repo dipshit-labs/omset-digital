@@ -192,21 +192,45 @@ export interface Tenant {
    */
   customDomain?: string | null;
   /**
-   * Active storefront theme
+   * Active storefront template
    */
-  theme: 'default' | 'minimal';
+  activeTemplate: 'default';
   /**
-   * Accent colors, fonts, and per-theme overrides
+   * Storefront design tokens (brand overrides)
    */
-  themeConfig?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  templateTokens?: {
+    accent?: string | null;
+    accentForeground?: string | null;
+    background?: string | null;
+    border?: string | null;
+    borderRadius?: ('none' | 'sm' | 'md' | 'lg' | 'full') | null;
+    card?: string | null;
+    cardForeground?: string | null;
+    containerWidth?: ('narrow' | 'normal' | 'wide' | 'full') | null;
+    destructive?: string | null;
+    destructiveForeground?: string | null;
+    foreground?: string | null;
+    input?: string | null;
+    muted?: string | null;
+    mutedForeground?: string | null;
+    popover?: string | null;
+    popoverForeground?: string | null;
+    primary?: string | null;
+    primaryForeground?: string | null;
+    ring?: string | null;
+    secondary?: string | null;
+    secondaryForeground?: string | null;
+  };
+  /**
+   * Per-template settings
+   */
+  templateConfig?: {
+    default?: {
+      heroLayout: 'centered' | 'split';
+      productCardStyle: 'bordered' | 'flat' | 'elevated';
+      showTicker: boolean;
+    };
+  };
   subscription: {
     status: 'trial' | 'active' | 'past_due' | 'canceled';
     trialEndsAt?: string | null;
@@ -623,8 +647,43 @@ export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   customDomain?: T;
-  theme?: T;
-  themeConfig?: T;
+  activeTemplate?: T;
+  templateTokens?:
+    | T
+    | {
+        accent?: T;
+        accentForeground?: T;
+        background?: T;
+        border?: T;
+        borderRadius?: T;
+        card?: T;
+        cardForeground?: T;
+        containerWidth?: T;
+        destructive?: T;
+        destructiveForeground?: T;
+        foreground?: T;
+        input?: T;
+        muted?: T;
+        mutedForeground?: T;
+        popover?: T;
+        popoverForeground?: T;
+        primary?: T;
+        primaryForeground?: T;
+        ring?: T;
+        secondary?: T;
+        secondaryForeground?: T;
+      };
+  templateConfig?:
+    | T
+    | {
+        default?:
+          | T
+          | {
+              heroLayout?: T;
+              productCardStyle?: T;
+              showTicker?: T;
+            };
+      };
   subscription?:
     | T
     | {
