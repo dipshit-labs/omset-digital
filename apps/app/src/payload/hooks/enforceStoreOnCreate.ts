@@ -4,7 +4,7 @@ import { APIError } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getCollectionIDType } from "@/payload/lib/ids";
 
-export const enforceTenantOnCreate: CollectionBeforeChangeHook = ({
+export const enforceStoreOnCreate: CollectionBeforeChangeHook = ({
   data,
   operation,
   req,
@@ -17,18 +17,18 @@ export const enforceTenantOnCreate: CollectionBeforeChangeHook = ({
     return data;
   }
 
-  if (!req.user && data.tenant) {
+  if (!req.user && data.store) {
     return data;
   }
 
-  const tenantId = getTenantFromCookie(
+  const storeId = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+    getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
   );
 
-  if (!tenantId) {
-    throw new APIError("No active tenant selected.", 400);
+  if (!storeId) {
+    throw new APIError("No active store selected.", 400);
   }
 
-  return { ...data, tenant: tenantId };
+  return { ...data, store: storeId };
 };

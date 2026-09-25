@@ -1,8 +1,8 @@
 import type { Access } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
-import { getUserTenantIDs } from "@/payload/lib/ids";
+import { getUserStoreIDs } from "@/payload/lib/ids";
 
-const updateAndDeleteTenantAccess: Access = ({ req }) => {
+const updateAndDeleteStoreAccess: Access = ({ req }) => {
   if (!req.user) {
     return false;
   }
@@ -13,9 +13,9 @@ const updateAndDeleteTenantAccess: Access = ({ req }) => {
 
   return {
     id: {
-      in: getUserTenantIDs(req.user, "owner"),
+      in: getUserStoreIDs(req.user, "owner"),
     },
   };
 };
 
-export { updateAndDeleteTenantAccess };
+export { updateAndDeleteStoreAccess };

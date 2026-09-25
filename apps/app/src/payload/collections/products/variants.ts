@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
-import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
@@ -43,7 +43,7 @@ export const VariantTypes: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate],
+    beforeChange: [enforceStoreOnCreate],
   },
 };
 
@@ -85,7 +85,7 @@ export const VariantOptions: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate],
+    beforeChange: [enforceStoreOnCreate],
   },
 };
 
@@ -159,7 +159,7 @@ export const Variants: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      enforceTenantOnCreate,
+      enforceStoreOnCreate,
       generateVariantTitle,
       handleVariantShipping,
     ],

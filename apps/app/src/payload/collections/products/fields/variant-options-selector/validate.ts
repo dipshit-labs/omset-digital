@@ -1,6 +1,6 @@
+import type { Product, VariantOption } from "@repo/types";
 import type { Validate } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type { Product, VariantOption } from "@/payload/payload-types";
 import { checkVariantOptionConstraints } from "./constraints";
 
 const validateVariantOptions: Validate = async (value, { req, data }) => {

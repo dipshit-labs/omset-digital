@@ -73,6 +73,7 @@ _Avoid_: Template package, theme bundle, addon
 **Theme Plugin**:
 The Payload CMS plugin (`@repo/payload-plugin-themes`) that injects the theme engine collections (`themes`, `templates`), DSL contracts, field helpers, live preview integration, and boot-time auto-sync.
 _Avoid_: Theme loader, template engine
+
 ### Products
 
 **Product**:

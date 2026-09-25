@@ -1,24 +1,24 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
+import type { Package, Store } from "@repo/types";
 import type { PayloadRequest } from "payload";
 import { extractID, getCollectionIDType } from "@/payload/lib/ids";
-import type { Package, Tenant } from "@/payload/payload-types";
 
 export async function resolveDefaultPackage(
   req: PayloadRequest,
-  tenantRaw?: unknown
+  storeRaw?: unknown
 ): Promise<Package["id"] | null> {
-  let tenantId: number | string | null = tenantRaw
-    ? extractID<Tenant>(tenantRaw as Tenant | Tenant["id"])
+  let storeId: number | string | null = storeRaw
+    ? extractID<Store>(storeRaw as Store | Store["id"])
     : null;
 
-  if (!tenantId && req?.headers) {
-    tenantId = getTenantFromCookie(
+  if (!storeId && req?.headers) {
+    storeId = getTenantFromCookie(
       req.headers,
-      getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+      getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
     );
   }
 
-  if (!tenantId) {
+  if (!storeId) {
     return null;
   }
 
@@ -30,7 +30,7 @@ export async function resolveDefaultPackage(
     req,
     select: { isDefault: true },
     where: {
-      and: [{ tenant: { equals: tenantId } }, { isDefault: { equals: true } }],
+      and: [{ store: { equals: storeId } }, { isDefault: { equals: true } }],
     },
   });
 

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
-import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -21,7 +21,7 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate],
+    beforeChange: [enforceStoreOnCreate],
   },
   upload: {
     staticDir: "media",

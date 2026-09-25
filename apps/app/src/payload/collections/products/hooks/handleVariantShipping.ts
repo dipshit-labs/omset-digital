@@ -18,8 +18,8 @@ export const handleVariantShipping: CollectionBeforeChangeHook = async ({
   );
 
   if (normalized.required && !normalized.package) {
-    const tenantRaw = data.tenant ?? originalDoc?.tenant;
-    normalized.package = await resolveDefaultPackage(req, tenantRaw);
+    const storeRaw = data.store ?? originalDoc?.store;
+    normalized.package = await resolveDefaultPackage(req, storeRaw);
   }
 
   data.shipping = normalized;

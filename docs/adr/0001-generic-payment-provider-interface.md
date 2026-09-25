@@ -1,6 +1,6 @@
 # Generic PaymentProvider interface for multi-gateway support
 
-The payment integration layer is designed around a `PaymentProvider` interface rather than being coupled to Xendit directly. Each gateway (Xendit, Midtrans, Stripe, etc.) is implemented as an adapter registered in a static provider map. A Tenant has one active provider at a time, selected via a `paymentProvider` select field inside a `paymentConfig` group on the Tenant document. Each provider's credentials live in a named sub-group (`xenditConfig`, etc.) that is conditionally shown in the Payload admin UI via `admin.condition` keyed to the `paymentProvider` value. The webhook route is `/api/webhooks/[provider]/[tenantSlug]` so each adapter's verification logic runs in isolation.
+The payment integration layer is designed around a `PaymentProvider` interface rather than being coupled to Xendit directly. Each gateway (Xendit, Midtrans, Stripe, etc.) is implemented as an adapter registered in a static provider map. A Store has one active provider at a time, selected via a `paymentProvider` select field inside a `paymentConfig` group on the Store document. Each provider's credentials live in a named sub-group (`xenditConfig`, etc.) that is conditionally shown in the Payload admin UI via `admin.condition` keyed to the `paymentProvider` value. The webhook route is `/api/webhooks/[provider]/[storeSlug]` so each adapter's verification logic runs in isolation.
 
 The interface exposes two methods: `createSession(order)` and `parseWebhook(request)`. Status mapping from provider-specific values to the platform's canonical Payment Status (`pending | paid | expired | failed | cancelled`) is a private implementation detail of each adapter — it is not part of the public interface. `parseWebhook` handles signature verification internally and returns a `ParsedWebhookEvent` (platform Order ID, canonical status, provider event ID, optional metadata); it throws on verification failure.
 
@@ -8,7 +8,7 @@ The same pattern applies to shipping: a `shippingProvider` select inside a `ship
 
 ## Considered Options
 
-**Flat provider-specific field groups on Tenant** (`xenditConfig`, `midtransConfig`, …): rejected because it requires schema changes for every new provider and pollutes the Tenant document with fields for providers the merchant isn't using.
+**Flat provider-specific field groups on Store** (`xenditConfig`, `midtransConfig`, …): rejected because it requires schema changes for every new provider and pollutes the Store document with fields for providers the merchant isn't using.
 
 **Generic JSON credential bag**: rejected because field-level access control (hiding secret keys from non-owners) requires named fields, not a JSON blob.
 

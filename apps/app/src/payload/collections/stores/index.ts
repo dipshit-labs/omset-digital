@@ -3,12 +3,12 @@ import { validateSlug } from "@/lib/utils";
 import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
 import { encryptedField } from "@/payload/fields/encrypted";
 import { canReadRestrictedField } from "./access/canReadRestrictedField";
-import { updateAndDeleteTenantAccess } from "./access/updateAndDelete";
+import { updateAndDeleteStoreAccess } from "./access/updateAndDelete";
 
 const restrictedTextField = (name: string): TextField => ({
   name,
   access: { read: canReadRestrictedField },
-  admin: { description: "Restricted to tenant owner and super-admin" },
+  admin: { description: "Restricted to store owner and super-admin" },
   type: "text",
 });
 
@@ -17,36 +17,38 @@ const XenditBlock: Block = {
   slug: "xendit",
   fields: [
     encryptedField("secretKey", {
-      access: { read: canReadRestrictedField },
+      required: true,
       admin: {
-        placeholder: "xnd_production_...",
+        description:
+          "Xendit Secret API Key (starts with xnd_development_ or xnd_production_)",
       },
     }),
     encryptedField("webhookToken", {
-      access: { read: canReadRestrictedField },
+      required: true,
       admin: {
-        description: "Callback token from Xendit Dashboard → Webhooks settings",
+        description:
+          "Verification token set in the Xendit dashboard webhook settings",
       },
     }),
     {
-      defaultValue: "test",
-      name: "mode",
+      defaultValue: false,
+      name: "isProduction",
       required: true,
-      type: "select",
-      options: [
-        { label: "Test", value: "test" },
-        { label: "Live", value: "live" },
-      ],
+      type: "checkbox",
+      admin: {
+        description:
+          "Enable for live transactions. Keep disabled during testing.",
+      },
     },
   ],
 };
 
-export const Tenants: CollectionConfig = {
-  slug: "tenants",
+export const Stores: CollectionConfig = {
+  slug: "stores",
   access: {
     create: isSuperAdminAccess,
-    delete: updateAndDeleteTenantAccess,
-    update: updateAndDeleteTenantAccess,
+    delete: updateAndDeleteStoreAccess,
+    update: updateAndDeleteStoreAccess,
     read: ({ req }) => Boolean(req.user),
   },
   admin: {

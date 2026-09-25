@@ -1,7 +1,9 @@
+import type { Store, User } from "@repo/types";
 import type { Access } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
-import { getUserTenantIDs } from "@/payload/lib/ids";
-import type { Tenant, User } from "@/payload/payload-types";
+import { getUserStoreIDs } from "@/payload/lib/ids";
+
+type UserStoreEntry = NonNullable<User["stores"]>[number];
 
 const createUserAccess: Access<User> = ({ req }) => {
   if (!req.user) {
@@ -16,16 +18,18 @@ const createUserAccess: Access<User> = ({ req }) => {
     return false;
   }
 
-  const adminTenantAccessIDs = getUserTenantIDs(req.user, "owner");
+  const adminStoreAccessIDs = getUserStoreIDs(req.user, "owner");
 
-  const requestedTenants: Tenant["id"][] =
-    req.data?.tenants?.map((t: { tenant: Tenant["id"] }) => t.tenant) ?? [];
-
-  const hasAccessToAllRequestedTenants = requestedTenants.every((tenantID) =>
-    adminTenantAccessIDs.includes(tenantID)
+  const rawStores = req.data?.stores as UserStoreEntry[] | undefined;
+  const requestedStores: Store["id"][] =
+    rawStores?.map((s: UserStoreEntry) =>
+      typeof s.store === "object" ? s.store.id : s.store
+    ) ?? [];
+  const hasAccessToAllRequestedStores = requestedStores.every((storeID) =>
+    adminStoreAccessIDs.includes(storeID)
   );
 
-  if (hasAccessToAllRequestedTenants) {
+  if (hasAccessToAllRequestedStores) {
     return true;
   }
 

@@ -1,11 +1,7 @@
 import { FieldError, FieldLabel } from "@payloadcms/ui";
+import type { Product, VariantOption, VariantType } from "@repo/types";
 import type { RelationshipFieldServerProps } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type {
-  Product,
-  VariantOption,
-  VariantType,
-} from "@/payload/payload-types";
 import { OptionsSelect } from "./OptionsSelect";
 import styles from "./VariantOptionsSelector.module.css";
 

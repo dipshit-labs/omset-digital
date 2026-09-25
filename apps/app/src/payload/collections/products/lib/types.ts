@@ -1,4 +1,4 @@
-import type { Package } from "@/payload/payload-types";
+import type { Package } from "@repo/types";
 
 export interface RawShipping {
   package?: Package | Package["id"] | null;

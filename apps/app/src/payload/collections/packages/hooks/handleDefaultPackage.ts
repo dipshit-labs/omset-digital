@@ -1,8 +1,9 @@
+import type { Package, Store } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
 } from "payload";
-import type { Package } from "@/payload/payload-types";
+import { extractID } from "@/payload/lib/ids";
 
 export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
   async ({ data, operation, originalDoc, req }) => {
@@ -10,13 +11,10 @@ export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
       return data;
     }
 
-    const tenantRaw = data.tenant ?? originalDoc?.tenant;
-    const tenantId =
-      typeof tenantRaw === "object" && tenantRaw !== null
-        ? tenantRaw.id
-        : tenantRaw;
+    const storeRaw = data.store ?? originalDoc?.store;
+    const storeId = storeRaw ? extractID<Store>(storeRaw) : null;
 
-    if (!tenantId) {
+    if (!storeId) {
       return data;
     }
 
@@ -26,8 +24,8 @@ export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
         overrideAccess: true,
         req,
         where: {
-          tenant: {
-            equals: tenantId,
+          store: {
+            equals: storeId,
           },
         },
       });
@@ -44,7 +42,7 @@ export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
         req,
         where: {
           and: [
-            { tenant: { equals: tenantId } },
+            { store: { equals: storeId } },
             { id: { not_equals: originalDoc.id } },
             { isDefault: { equals: true } },
           ],
@@ -70,13 +68,10 @@ export const handleDefaultPackageAfterChange: CollectionAfterChangeHook<
     return doc;
   }
 
-  const tenantRaw = doc.tenant;
-  const tenantId =
-    typeof tenantRaw === "object" && tenantRaw !== null
-      ? tenantRaw.id
-      : tenantRaw;
+  const storeRaw = doc.store;
+  const storeId = storeRaw ? extractID<Store>(storeRaw) : null;
 
-  if (!tenantId) {
+  if (!storeId) {
     return doc;
   }
 
@@ -93,7 +88,7 @@ export const handleDefaultPackageAfterChange: CollectionAfterChangeHook<
     req,
     where: {
       and: [
-        { tenant: { equals: tenantId } },
+        { store: { equals: storeId } },
         { isDefault: { equals: true } },
         { id: { not_equals: doc.id } },
       ],

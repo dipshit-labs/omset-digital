@@ -5,12 +5,12 @@ import type { Config } from "payload";
 type SeedParameters = Parameters<NonNullable<Config["onInit"]>>[0];
 
 async function seed(payload: SeedParameters): Promise<void> {
-  const tenant1 = await payload.create({
-    collection: "tenants",
+  const store1 = await payload.create({
+    collection: "stores",
     draft: false,
     data: {
       customDomain: "trial.localhost",
-      name: "Tenant 1",
+      name: "Store 1",
       slug: "trial",
       subscription: { status: "trial" },
       theme: "default",
@@ -31,13 +31,13 @@ async function seed(payload: SeedParameters): Promise<void> {
     collection: "users",
     draft: false,
     data: {
-      email: "tenant1@omsetdigital.com",
+      email: "store1@omsetdigital.com",
       password: "demo",
       roles: ["user"],
-      tenants: [
+      stores: [
         {
           roles: ["owner"],
-          tenant: tenant1.id,
+          store: store1.id,
         },
       ],
     },

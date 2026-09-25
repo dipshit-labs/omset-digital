@@ -1,8 +1,8 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
+import type { User } from "@repo/types";
 import type { Access, Where } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
-import { getCollectionIDType, getUserTenantIDs } from "@/payload/lib/ids";
-import type { User } from "@/payload/payload-types";
+import { getCollectionIDType, getUserStoreIDs } from "@/payload/lib/ids";
 import { isAccessingSelf } from "./isAccessingSelf";
 
 const readUserAccess: Access<User> = ({ req, id }) => {
@@ -15,22 +15,22 @@ const readUserAccess: Access<User> = ({ req, id }) => {
   }
 
   const superAdmin = isSuperAdmin(req.user);
-  const selectedTenant = getTenantFromCookie(
+  const selectedStore = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+    getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
   );
-  const ownerTenantAccessIDs = getUserTenantIDs(req.user, "owner");
+  const ownerStoreAccessIDs = getUserStoreIDs(req.user, "owner");
 
-  if (selectedTenant) {
-    // If it's a super admin, or they have access to the tenant ID set in cookie
-    const hasTenantAccess = ownerTenantAccessIDs.some(
-      (ownerID) => ownerID === selectedTenant
+  if (selectedStore) {
+    // If it's a super admin, or they have access to the store ID set in cookie
+    const hasStoreAccess = ownerStoreAccessIDs.some(
+      (ownerID) => ownerID === selectedStore
     );
 
-    if (superAdmin || hasTenantAccess) {
+    if (superAdmin || hasStoreAccess) {
       return {
-        "tenants.tenant": {
-          equals: selectedTenant,
+        "stores.store": {
+          equals: selectedStore,
         },
       };
     }
@@ -43,7 +43,7 @@ const readUserAccess: Access<User> = ({ req, id }) => {
   return {
     or: [
       { id: { equals: req.user.id } },
-      { "tenants.tenant": { in: ownerTenantAccessIDs } },
+      { "stores.store": { in: ownerStoreAccessIDs } },
     ],
   } as Where;
 };

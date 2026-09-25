@@ -1,6 +1,6 @@
+import type { Product, Variant } from "@repo/types";
 import type { CollectionBeforeChangeHook } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type { Product, Variant } from "@/payload/payload-types";
 import { buildVariantTitle } from "../lib/buildVariantTitle";
 
 const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({

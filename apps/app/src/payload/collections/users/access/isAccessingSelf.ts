@@ -1,4 +1,4 @@
-import type { User } from "@/payload/payload-types";
+import type { User } from "@repo/types";
 
 interface IsAccessingSelfParams {
   id?: string | number;

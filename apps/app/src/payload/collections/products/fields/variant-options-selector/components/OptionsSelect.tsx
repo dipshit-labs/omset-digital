@@ -6,9 +6,9 @@ import {
   type ReactSelectOption,
   useField,
 } from "@payloadcms/ui";
+import type { VariantOption } from "@repo/types";
 import { useCallback, useEffect, useMemo } from "react";
 import { extractID } from "@/payload/lib/ids";
-import type { VariantOption } from "@/payload/payload-types";
 import styles from "./OptionsSelect.module.css";
 
 export interface VariantTypeConfig {

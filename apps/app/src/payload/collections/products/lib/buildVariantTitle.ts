@@ -1,6 +1,6 @@
+import type { Product, VariantOption } from "@repo/types";
 import type { PayloadRequest } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type { Product, VariantOption } from "@/payload/payload-types";
 
 type OptionInput = VariantOption | VariantOption["id"];
 

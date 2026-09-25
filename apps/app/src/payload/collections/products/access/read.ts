@@ -1,10 +1,10 @@
 import type { Access, Where } from "payload";
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
-import { getUserTenantIDs } from "@/payload/lib/ids";
+import { getUserStoreIDs } from "@/payload/lib/ids";
 
 /**
  * Public reads return only published products.
- * Authenticated users also see all products from their own tenants (for admin).
+ * Authenticated users also see all products from their own stores (for admin).
  * Super-admin sees everything.
  */
 const readProductAccess: Access = ({ req }): Where | boolean => {
@@ -17,8 +17,8 @@ const readProductAccess: Access = ({ req }): Where | boolean => {
   }
 
   const ids = [
-    ...getUserTenantIDs(req.user, "owner"),
-    ...getUserTenantIDs(req.user, "manager"),
+    ...getUserStoreIDs(req.user, "owner"),
+    ...getUserStoreIDs(req.user, "manager"),
   ];
 
   if (ids.length === 0) {
@@ -26,7 +26,7 @@ const readProductAccess: Access = ({ req }): Where | boolean => {
   }
 
   return {
-    or: [{ _status: { equals: "published" } }, { tenant: { in: ids } }],
+    or: [{ _status: { equals: "published" } }, { store: { in: ids } }],
   };
 };
 

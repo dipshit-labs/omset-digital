@@ -8,7 +8,11 @@
   ],
 
   "files": {
-    "includes": ["!!**/.agents", "!!**/docs"]
+    "includes": [
+      "!!**/.agents",
+      "!!**/docs",
+      "!!**/packages/types/src/payload/generated.ts"
+    ]
   },
 
   "assist": {

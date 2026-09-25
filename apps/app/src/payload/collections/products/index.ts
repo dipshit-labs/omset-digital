@@ -1,7 +1,7 @@
 import { type CollectionConfig, slugField } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
 import { seoField } from "@/payload/fields/seo";
-import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
@@ -166,7 +166,7 @@ export const Products: CollectionConfig = {
   hooks: {
     afterChange: [defaultVariantAfterChange],
     afterRead: [defaultVariantAfterRead],
-    beforeChange: [enforceTenantOnCreate, defaultVariantBeforeChange],
+    beforeChange: [enforceStoreOnCreate, defaultVariantBeforeChange],
   },
   versions: {
     drafts: {

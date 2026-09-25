@@ -1,6 +1,6 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import { type FieldHook, ValidationError, type Where } from "payload";
-import { getCollectionIDType, getUserTenantIDs } from "@/payload/lib/ids";
+import { getCollectionIDType, getUserStoreIDs } from "@/payload/lib/ids";
 
 const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
   if (originalDoc.username === value) {
@@ -15,15 +15,15 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
     },
   ];
 
-  const selectedTenant = getTenantFromCookie(
+  const selectedStore = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ collectionSlug: "tenants", payload: req.payload })
+    getCollectionIDType({ collectionSlug: "stores", payload: req.payload })
   );
 
-  if (selectedTenant) {
+  if (selectedStore) {
     constraints.push({
-      "tenants.tenant": {
-        equals: selectedTenant,
+      "stores.store": {
+        equals: selectedStore,
       },
     });
   }
@@ -32,23 +32,23 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
     collection: "users",
     depth: 0,
     overrideAccess: true,
-    select: { tenants: true },
+    select: { stores: true },
     where: {
       and: constraints,
     },
   });
 
   if (findDuplicateUsers.docs.length > 0 && req.user) {
-    const tenantIDs = getUserTenantIDs(req.user);
+    const storeIDs = getUserStoreIDs(req.user);
 
-    // if the user is an admin or has access to more than 1 tenant
+    // if the user is an admin or has access to more than 1 store
     // provide a more specific error message
-    if (req.user.roles?.includes("super-admin") || tenantIDs.length > 1) {
-      const tenant = await req.payload.findByID({
-        collection: "tenants",
+    if (req.user.roles?.includes("super-admin") || storeIDs.length > 1) {
+      const store = await req.payload.findByID({
+        collection: "stores",
         depth: 0,
-        // @ts-expect-error - selectedTenant will match DB ID type
-        id: selectedTenant,
+        // @ts-expect-error - selectedStore will match DB ID type
+        id: selectedStore,
         overrideAccess: true,
         select: { name: true },
       });
@@ -56,7 +56,7 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
       throw new ValidationError({
         errors: [
           {
-            message: `The "${tenant.name}" tenant already has a user with the username "${value}". Usernames must be unique per tenant.`,
+            message: `The "${store.name}" store already has a user with the username "${value}". Usernames must be unique per store.`,
             path: "username",
           },
         ],
@@ -66,7 +66,7 @@ const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {
     throw new ValidationError({
       errors: [
         {
-          message: `A user with the username ${value} already exists. Usernames must be unique per tenant.`,
+          message: `A user with the username ${value} already exists. Usernames must be unique per store.`,
           path: "username",
         },
       ],

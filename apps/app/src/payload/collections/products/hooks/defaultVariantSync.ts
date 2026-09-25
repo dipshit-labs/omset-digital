@@ -1,3 +1,4 @@
+import type { Product, Store } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
@@ -5,7 +6,6 @@ import type {
   PayloadRequest,
 } from "payload";
 import { extractID } from "@/payload/lib/ids";
-import type { Product, Tenant } from "@/payload/payload-types";
 import { normalizeShipping } from "../lib/normalizeShipping";
 import type { RawShipping } from "../lib/types";
 
@@ -103,7 +103,7 @@ async function upsertDefaultVariant(
     where: { product: { equals: doc.id } },
   });
 
-  const tenantId = doc.tenant ? extractID<Tenant>(doc.tenant) : null;
+  const storeId = doc.store ? extractID<Store>(doc.store) : null;
   const variantData = extractVariantData(doc, req);
   const [existingVariant] = existing.docs;
   const isDraft = doc._status === "draft";
@@ -132,7 +132,7 @@ async function upsertDefaultVariant(
         ...variantData,
         options: [],
         product: doc.id,
-        tenant: tenantId,
+        store: storeId,
       } as never,
       draft: true,
       overrideAccess: true,
@@ -147,7 +147,7 @@ async function upsertDefaultVariant(
         options: [],
         pricing: variantData.pricing ?? { compareAtPrice: null, price: 0 },
         product: doc.id,
-        tenant: tenantId,
+        store: storeId,
       } as never,
       draft: false,
       overrideAccess: true,

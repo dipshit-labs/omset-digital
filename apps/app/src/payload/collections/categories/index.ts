@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
 import { slugField } from "@/payload/fields/slug";
-import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 export const Categories: CollectionConfig = {
   slug: "categories",
@@ -12,7 +12,7 @@ export const Categories: CollectionConfig = {
     read: () => true,
   },
   admin: {
-    defaultColumns: ["name", "slug", "tenant"],
+    defaultColumns: ["name", "slug", "store"],
     useAsTitle: "name",
   },
   fields: [
@@ -29,6 +29,6 @@ export const Categories: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [enforceTenantOnCreate],
+    beforeChange: [enforceStoreOnCreate],
   },
 };

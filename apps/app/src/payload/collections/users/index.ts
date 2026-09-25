@@ -6,12 +6,12 @@ import { readUserAccess } from "./access/read";
 import { updateAndDeleteUserAccess } from "./access/updateAndDelete";
 import { ensureUniqueUsername } from "./hooks/ensureUniqueUsername";
 
-const defaultTenantArrayField = tenantsArrayField({
+const defaultStoreArrayField = tenantsArrayField({
   arrayFieldAccess: {},
   tenantFieldAccess: {},
-  tenantsArrayFieldName: "tenants",
-  tenantsArrayTenantFieldName: "tenant",
-  tenantsCollectionSlug: "tenants",
+  tenantsArrayFieldName: "stores",
+  tenantsArrayTenantFieldName: "store",
+  tenantsCollectionSlug: "stores",
   rowFields: [
     {
       defaultValue: ["manager"],
@@ -82,9 +82,9 @@ export const Users: CollectionConfig = {
       },
     },
     {
-      ...defaultTenantArrayField,
+      ...defaultStoreArrayField,
       admin: {
-        ...(defaultTenantArrayField?.admin || {}),
+        ...(defaultStoreArrayField?.admin || {}),
         position: "sidebar",
       },
     },

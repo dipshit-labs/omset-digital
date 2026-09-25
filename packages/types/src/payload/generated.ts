@@ -68,7 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
-    tenants: Tenant;
+    stores: Store;
     categories: Category;
     packages: Package;
     products: Product;
@@ -91,7 +91,7 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    stores: StoresSelect<false> | StoresSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -147,9 +147,9 @@ export interface User {
   username?: string | null;
   password?: string | null;
   roles?: ('super-admin' | 'user')[] | null;
-  tenants?:
+  stores?:
     | {
-        tenant: number | Tenant;
+        store: number | Store;
         roles: ('owner' | 'manager')[];
         id?: string | null;
       }[]
@@ -175,9 +175,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
+ * via the `definition` "stores".
  */
-export interface Tenant {
+export interface Store {
   id: number;
   /**
    * Display name of the merchant's store
@@ -217,12 +217,18 @@ export interface Tenant {
    */
   paymentProviders?:
     | {
-        secretKey?: string | null;
         /**
-         * Callback token from Xendit Dashboard → Webhooks settings
+         * Xendit Secret API Key (starts with xnd_development_ or xnd_production_)
          */
-        webhookToken?: string | null;
-        mode: 'test' | 'live';
+        secretKey: string;
+        /**
+         * Verification token set in the Xendit dashboard webhook settings
+         */
+        webhookToken: string;
+        /**
+         * Enable for live transactions. Keep disabled during testing.
+         */
+        isProduction: boolean;
         id?: string | null;
         blockName?: string | null;
         blockType: 'xendit';
@@ -238,7 +244,7 @@ export interface Tenant {
     shippingProvider?: ('none' | 'rajaongkir') | null;
     rajaongkirConfig?: {
       /**
-       * Restricted to tenant owner and super-admin
+       * Restricted to store owner and super-admin
        */
       apiKey?: string | null;
       accountType?: ('starter' | 'basic' | 'pro') | null;
@@ -265,7 +271,7 @@ export interface Tenant {
  */
 export interface Category {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   name: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -279,7 +285,7 @@ export interface Category {
  */
 export interface Package {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   title: string;
   dimensions: {
     length: number;
@@ -303,7 +309,7 @@ export interface Package {
  */
 export interface Product {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   title: string;
   description?: {
     root: {
@@ -383,7 +389,7 @@ export interface Product {
  */
 export interface Media {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -403,7 +409,7 @@ export interface Media {
  */
 export interface VariantType {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   label: string;
   name: string;
   options?: {
@@ -422,7 +428,7 @@ export interface VariantType {
 export interface VariantOption {
   id: number;
   _variantOptions_options_order?: string | null;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   variantType: number | VariantType;
   label: string;
   /**
@@ -439,7 +445,7 @@ export interface VariantOption {
  */
 export interface Variant {
   id: number;
-  tenant?: (number | null) | Tenant;
+  store?: (number | null) | Store;
   /**
    * Generated administrative title, such as Small / Red.
    */
@@ -509,8 +515,8 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'tenants';
-        value: number | Tenant;
+        relationTo: 'stores';
+        value: number | Store;
       } | null)
     | ({
         relationTo: 'categories';
@@ -590,10 +596,10 @@ export interface UsersSelect<T extends boolean = true> {
   username?: T;
   password?: T;
   roles?: T;
-  tenants?:
+  stores?:
     | T
     | {
-        tenant?: T;
+        store?: T;
         roles?: T;
         id?: T;
       };
@@ -617,9 +623,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_select".
+ * via the `definition` "stores_select".
  */
-export interface TenantsSelect<T extends boolean = true> {
+export interface StoresSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   customDomain?: T;
@@ -640,7 +646,7 @@ export interface TenantsSelect<T extends boolean = true> {
           | {
               secretKey?: T;
               webhookToken?: T;
-              mode?: T;
+              isProduction?: T;
               id?: T;
               blockName?: T;
             };
@@ -672,7 +678,7 @@ export interface TenantsSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   name?: T;
   slug?: T;
   slugLock?: T;
@@ -685,7 +691,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "packages_select".
  */
 export interface PackagesSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   title?: T;
   dimensions?:
     | T
@@ -709,7 +715,7 @@ export interface PackagesSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   title?: T;
   description?: T;
   media?:
@@ -768,7 +774,7 @@ export interface ProductsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   alt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -787,7 +793,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "variants_select".
  */
 export interface VariantsSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   title?: T;
   image?: T;
   options?: T;
@@ -830,7 +836,7 @@ export interface VariantsSelect<T extends boolean = true> {
  */
 export interface VariantOptionsSelect<T extends boolean = true> {
   _variantOptions_options_order?: T;
-  tenant?: T;
+  store?: T;
   variantType?: T;
   label?: T;
   value?: T;
@@ -843,7 +849,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  * via the `definition` "variantTypes_select".
  */
 export interface VariantTypesSelect<T extends boolean = true> {
-  tenant?: T;
+  store?: T;
   label?: T;
   name?: T;
   options?: T;

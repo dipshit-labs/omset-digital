@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { canWrite } from "@/payload/access/canWrite";
 import { measurementField } from "@/payload/fields/measurement";
-import { enforceTenantOnCreate } from "@/payload/hooks/enforceTenantOnCreate";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 import {
   handleDefaultPackageAfterChange,
   handleDefaultPackageBeforeChange,
@@ -97,6 +97,6 @@ export const Packages: CollectionConfig = {
   ],
   hooks: {
     afterChange: [handleDefaultPackageAfterChange],
-    beforeChange: [enforceTenantOnCreate, handleDefaultPackageBeforeChange],
+    beforeChange: [enforceStoreOnCreate, handleDefaultPackageBeforeChange],
   },
 };

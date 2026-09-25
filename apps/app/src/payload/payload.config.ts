@@ -13,6 +13,7 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
+import type { Config } from "@repo/types";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { env } from "@/env";
@@ -26,10 +27,9 @@ import {
   Variants,
   VariantTypes,
 } from "./collections/products/variants";
-import { Tenants } from "./collections/tenants";
+import { Stores } from "./collections/stores";
 import { Users } from "./collections/users";
-import { getUserTenantIDs } from "./lib/ids";
-import type { Config } from "./payload-types";
+import { getUserStoreIDs } from "./lib/ids";
 import { seed } from "./seed";
 
 const filename = fileURLToPath(import.meta.url);
@@ -65,7 +65,7 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Tenants,
+    Stores,
     Categories,
     Packages,
     Products,
@@ -81,6 +81,8 @@ export default buildConfig({
   },
   plugins: [
     multiTenantPlugin<Config>({
+      tenantSelectorLabel: "Store",
+      tenantsSlug: "stores",
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
@@ -91,6 +93,7 @@ export default buildConfig({
         variantTypes: { isGlobal: false },
       },
       tenantField: {
+        name: "store",
         access: {
           read: () => true,
           update: ({ req }) => {
@@ -98,11 +101,13 @@ export default buildConfig({
               return true;
             }
 
-            return getUserTenantIDs(req.user).length > 0;
+            return getUserStoreIDs(req.user).length > 0;
           },
         },
       },
       tenantsArrayField: {
+        arrayFieldName: "stores",
+        arrayTenantFieldName: "store",
         includeDefaultField: false,
       },
       userHasAccessToAllTenants: (user) => isSuperAdmin(user),
@@ -110,7 +115,10 @@ export default buildConfig({
     seoPlugin({}),
   ],
   typescript: {
-    outputFile: path.resolve(dirname, "payload-types.ts"),
+    outputFile: path.resolve(
+      dirname,
+      "../../../../packages/types/src/payload/generated.ts"
+    ),
   },
   sharp,
 });

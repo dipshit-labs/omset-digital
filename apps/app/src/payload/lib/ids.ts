@@ -1,5 +1,5 @@
+import type { Config, Store, User } from "@repo/types";
 import type { CollectionSlug, Payload } from "payload";
-import type { Config, Tenant, User } from "@/payload/payload-types";
 
 export const extractID = <T extends Config["collections"][CollectionSlug]>(
   objectOrID: T | T["id"]
@@ -15,16 +15,16 @@ export const extractID = <T extends Config["collections"][CollectionSlug]>(
   return objectOrID;
 };
 
-export const getUserTenantIDs = (
+export const getUserStoreIDs = (
   user: null | undefined | User,
-  role?: NonNullable<User["tenants"]>[number]["roles"][number]
-): Tenant["id"][] => {
-  if (!(user && Array.isArray(user.tenants))) {
+  role?: NonNullable<User["stores"]>[number]["roles"][number]
+): Store["id"][] => {
+  if (!(user && Array.isArray(user.stores))) {
     return [];
   }
 
-  return user.tenants.reduce<Tenant["id"][]>((acc, item) => {
-    if (!item?.tenant) {
+  return user.stores.reduce<Store["id"][]>((acc, item) => {
+    if (!item?.store) {
       return acc;
     }
 
@@ -34,7 +34,7 @@ export const getUserTenantIDs = (
       return acc;
     }
 
-    acc.push(extractID<Tenant>(item.tenant));
+    acc.push(extractID<Store>(item.store));
     return acc;
   }, []);
 };

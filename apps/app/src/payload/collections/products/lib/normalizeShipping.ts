@@ -1,5 +1,5 @@
+import type { Package } from "@repo/types";
 import { extractID } from "@/payload/lib/ids";
-import type { Package } from "@/payload/payload-types";
 import type { NormalizedShipping, RawShipping } from "./types";
 
 export function normalizeShipping(
