@@ -11,15 +11,17 @@ export default defineConfig({
   jsPlugins: [...(shadcn.jsPlugins ?? []), "eslint-plugin-perfectionist"],
   ignorePatterns: [
     ...(core.ignorePatterns ?? []),
-    "apps/app/src/app/(payload)/**/*",
     "packages/types/src/payload/generated.ts",
   ],
 
   rules: {
     "anti-slop/no-conditional-empty-object-spread": "off",
     "anti-slop/no-module-mocking": "off",
+    "anti-slop/no-runtime-typeof": "off",
     "anti-slop/no-unknown-parameters": "off",
     "anti-slop/no-unknown-returns": "off",
+
+    "no-warning-comments": "off",
 
     "sort-keys": "off",
     "perfectionist/sort-objects": [
@@ -36,6 +38,7 @@ export default defineConfig({
       {
         cases: {
           camelCase: true,
+          pascalCase: true,
         },
       },
     ],

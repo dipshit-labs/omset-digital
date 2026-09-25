@@ -21,7 +21,7 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@shadcn/lint": "^0.1.0",
+    "@shadcn/lint": "^0.2.0",
     "eslint-plugin-perfectionist": "^5.12.1",
     "lefthook": "^2.1.14",
     "oxfmt": "^0.70.0",

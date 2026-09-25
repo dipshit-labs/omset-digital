@@ -5,6 +5,7 @@ import baseConfig from "../../oxlint.config.ts";
 
 export default defineConfig({
   extends: [baseConfig],
+  ignorePatterns: baseConfig.ignorePatterns,
 
   overrides: [
     {
