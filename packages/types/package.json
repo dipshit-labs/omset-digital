@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "payload": "3.90.1",
-    "typescript": "catalog:"
+    "payload": "catalog:payload",
+    "typescript": "catalog:types"
   },
   "peerDependencies": {
     "payload": "^3.90.1"
