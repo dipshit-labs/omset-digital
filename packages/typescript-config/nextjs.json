@@ -6,11 +6,12 @@
     "plugins": [{ "name": "next" }],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "allowJs": true,
     "jsx": "react-jsx",
     "noEmit": true,
+    "allowJs": true,
+    "incremental": true,
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@repo/*": ["../../packages/*"]
     }
   },
