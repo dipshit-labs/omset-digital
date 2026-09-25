@@ -4,11 +4,11 @@ export interface VariantOptionConstraintsInput {
   variantTypeIDs: (number | string)[];
 }
 
-export function checkVariantOptionConstraints({
-  variantTypeIDs,
-  selectedIDs,
+export const checkVariantOptionConstraints = ({
   existingCombinations,
-}: VariantOptionConstraintsInput): string | true {
+  selectedIDs,
+  variantTypeIDs,
+}: VariantOptionConstraintsInput): string | true => {
   if (selectedIDs.length === 0) {
     return "At least one variant option is required.";
   }
@@ -31,4 +31,4 @@ export function checkVariantOptionConstraints({
   }
 
   return true;
-}
+};

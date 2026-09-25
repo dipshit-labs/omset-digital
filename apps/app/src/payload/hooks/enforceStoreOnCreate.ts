@@ -1,8 +1,10 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import type { CollectionBeforeChangeHook } from "payload";
 import { APIError } from "payload";
+
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
-import { getCollectionIDType } from "@/payload/lib/ids";
+
+import { getCollectionIDType } from "../lib/ids";
 
 export const enforceStoreOnCreate: CollectionBeforeChangeHook = ({
   data,

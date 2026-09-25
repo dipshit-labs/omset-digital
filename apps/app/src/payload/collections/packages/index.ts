@@ -1,7 +1,9 @@
 import type { CollectionConfig } from "payload";
+
 import { canWrite } from "@/payload/access/canWrite";
 import { measurementField } from "@/payload/fields/measurement";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
+
 import {
   handleDefaultPackageAfterChange,
   handleDefaultPackageBeforeChange,

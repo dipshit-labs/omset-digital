@@ -1,9 +1,9 @@
-import type { Package, Store } from "@repo/types";
+import type { Package } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
 } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
 
 export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
   async ({ data, operation, originalDoc, req }) => {
@@ -12,7 +12,7 @@ export const handleDefaultPackageBeforeChange: CollectionBeforeChangeHook =
     }
 
     const storeRaw = data.store ?? originalDoc?.store;
-    const storeId = storeRaw ? extractID<Store>(storeRaw) : null;
+    const storeId = storeRaw ? extractID(storeRaw) : null;
 
     if (!storeId) {
       return data;
@@ -69,7 +69,7 @@ export const handleDefaultPackageAfterChange: CollectionAfterChangeHook<
   }
 
   const storeRaw = doc.store;
-  const storeId = storeRaw ? extractID<Store>(storeRaw) : null;
+  const storeId = storeRaw ? extractID(storeRaw) : null;
 
   if (!storeId) {
     return doc;
@@ -78,6 +78,7 @@ export const handleDefaultPackageAfterChange: CollectionAfterChangeHook<
   await req.payload.update({
     collection: "packages",
     overrideAccess: true,
+    req,
     context: {
       ...req.context,
       skipDefaultPackageSync: true,
@@ -85,7 +86,6 @@ export const handleDefaultPackageAfterChange: CollectionAfterChangeHook<
     data: {
       isDefault: false,
     },
-    req,
     where: {
       and: [
         { store: { equals: storeId } },

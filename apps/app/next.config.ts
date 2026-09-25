@@ -1,14 +1,26 @@
+// oxlint-disable unicorn/prefer-import-meta-properties
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import withPayload from "@payloadcms/next/withPayload";
+
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
+
 import "@/env";
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const __filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      ".cjs": [".cts", ".cjs"],
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+    };
+
+    return webpackConfig;
+  },
   images: {
     qualities: [75, 85],
     remotePatterns: [
@@ -22,15 +34,6 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: path.resolve(dirname, "../.."),
-  },
-  webpack: (webpackConfig) => {
-    webpackConfig.resolve.extensionAlias = {
-      ".cjs": [".cts", ".cjs"],
-      ".js": [".ts", ".tsx", ".js", ".jsx"],
-      ".mjs": [".mts", ".mjs"],
-    };
-
-    return webpackConfig;
   },
 };
 

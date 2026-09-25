@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import z from "zod";
+import { z } from "zod";
 
 export const env = createEnv({
   client: {
@@ -11,11 +11,11 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.url(),
     PAYLOAD_SECRET: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1),
     PAYLOAD_SEED: z
       .string()
       .refine((s) => s === "true" || s === "false")
       .transform((s) => s === "true")
       .optional(),
-    RESEND_API_KEY: z.string().min(1),
   },
 });

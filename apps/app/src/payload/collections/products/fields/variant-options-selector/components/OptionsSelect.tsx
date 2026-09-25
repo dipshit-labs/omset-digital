@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  FieldLabel,
-  ReactSelect,
-  type ReactSelectOption,
-  useField,
-} from "@payloadcms/ui";
-import type { VariantOption } from "@repo/types";
+import type { ReactSelectOption } from "@payloadcms/ui";
+import { FieldLabel, ReactSelect, useField } from "@payloadcms/ui";
+import { extractID } from "payload/shared";
 import { useCallback, useEffect, useMemo } from "react";
-import { extractID } from "@/payload/lib/ids";
+
 import styles from "./OptionsSelect.module.css";
 
 export interface VariantTypeConfig {
@@ -37,7 +33,7 @@ interface OptionSelectRowProps {
   typeIndex: number;
 }
 
-function OptionSelectRow({
+const OptionSelectRow = ({
   filteredOptions,
   inputId,
   label,
@@ -45,7 +41,7 @@ function OptionSelectRow({
   required,
   selectedValue,
   typeIndex,
-}: OptionSelectRowProps) {
+}: OptionSelectRowProps) => {
   const handleSelect = useCallback(
     (selected: ReactSelectOption | ReactSelectOption[] | null) => {
       onChange(typeIndex, selected);
@@ -65,20 +61,21 @@ function OptionSelectRow({
       />
     </div>
   );
-}
+};
 
-function canFormValidCombination(
+const canFormValidCombination = (
   optionValue: unknown,
   candidateChoices: unknown[][],
   existingSet: Set<string>,
   choiceIndex = 0,
   currentCombo: unknown[] = []
-): boolean {
+): boolean => {
   if (choiceIndex === candidateChoices.length) {
     const fullCombo = [optionValue, ...currentCombo]
       .map(String)
-      .sort()
+      .toSorted()
       .join(",");
+
     return !existingSet.has(fullCombo);
   }
 
@@ -97,9 +94,9 @@ function canFormValidCombination(
   }
 
   return false;
-}
+};
 
-function getFilteredOptions({
+const getFilteredOptions = ({
   currentTypeIndex,
   existingSet,
   rawValues,
@@ -109,7 +106,7 @@ function getFilteredOptions({
   existingSet: Set<string>;
   rawValues: (number | string)[];
   variantTypes: VariantTypeConfig[];
-}): ReactSelectOption[] {
+}): ReactSelectOption[] => {
   const currentType = variantTypes[currentTypeIndex];
   if (!currentType) {
     return [];
@@ -122,6 +119,7 @@ function getFilteredOptions({
       const selectedForOt = ot.options.find((o) =>
         rawValues.some((sv) => String(sv) === String(o.value))
       );
+
       return selectedForOt
         ? [selectedForOt.value]
         : ot.options.map((o) => o.value);
@@ -129,9 +127,9 @@ function getFilteredOptions({
 
     return canFormValidCombination(option.value, candidateChoices, existingSet);
   });
-}
+};
 
-function computeNextSelections({
+const computeNextSelections = ({
   currentRawValues,
   existingSet,
   selectedOption,
@@ -143,13 +141,13 @@ function computeNextSelections({
   selectedOption: ReactSelectOption | ReactSelectOption[] | null;
   typeIndex: number;
   variantTypes: VariantTypeConfig[];
-}): (number | string)[] {
+}): (number | string)[] => {
   const currentType = variantTypes[typeIndex];
   const typeOptionValues = new Set(
     currentType.options.map((o) => String(o.value))
   );
 
-  let next = currentRawValues.filter(
+  const initialValues = currentRawValues.filter(
     (item) => !typeOptionValues.has(String(item))
   );
 
@@ -159,41 +157,51 @@ function computeNextSelections({
     (typeof selectedOption.value === "string" ||
       typeof selectedOption.value === "number")
   ) {
-    next.push(selectedOption.value);
+    initialValues.push(selectedOption.value);
   }
 
+  const valuesToRemove = new Set<string>();
   for (let i = 0; i < variantTypes.length; i += 1) {
     if (i === typeIndex) {
       continue;
     }
+
     const ot = variantTypes[i];
-    const otSelected = ot.options.find((o) =>
-      next.some((v) => String(v) === String(o.value))
+    const currentActiveValues = initialValues.filter(
+      (v) => !valuesToRemove.has(String(v))
     );
+
+    const otSelected = ot.options.find((o) =>
+      currentActiveValues.some((v) => String(v) === String(o.value))
+    );
+
     if (otSelected) {
       const validOptions = getFilteredOptions({
         currentTypeIndex: i,
         existingSet,
-        rawValues: next,
+        rawValues: currentActiveValues,
         variantTypes,
       });
-      if (
-        !validOptions.some((o) => String(o.value) === String(otSelected.value))
-      ) {
-        next = next.filter((v) => String(v) !== String(otSelected.value));
+
+      const isStillValid = validOptions.some(
+        (o) => String(o.value) === String(otSelected.value)
+      );
+
+      if (!isStillValid) {
+        valuesToRemove.add(String(otSelected.value));
       }
     }
   }
 
-  return next;
-}
+  return initialValues.filter((v) => !valuesToRemove.has(String(v)));
+};
 
-export function OptionsSelect({
+export const OptionsSelect = ({
   existingCombinations,
   path,
   required,
   variantTypes,
-}: OptionsSelectProps) {
+}: OptionsSelectProps) => {
   const { setValue, value } = useField<
     (number | string | { id: number | string })[]
   >({ path });
@@ -203,42 +211,52 @@ export function OptionsSelect({
       return [];
     }
 
-    return value.map((v) =>
-      extractID<VariantOption>(v as VariantOption | VariantOption["id"])
-    );
+    return value.map((v) => extractID(v));
   }, [value]);
 
   const existingSet = useMemo(
     () =>
       new Set(
-        existingCombinations.map((combo) => combo.map(String).sort().join(","))
+        existingCombinations.map((combo) =>
+          combo.map(String).toSorted().join(",")
+        )
       ),
     [existingCombinations]
   );
 
   useEffect(() => {
-    let hasInvalid = false;
-    let current = [...rawValues];
+    const invalidOptionValues = new Set<string>();
+
     for (let i = 0; i < variantTypes.length; i += 1) {
       const vt = variantTypes[i];
-      const selected = vt.options.find((o) =>
-        current.some((v) => String(v) === String(o.value))
+      const activeValues = rawValues.filter(
+        (v) => !invalidOptionValues.has(String(v))
       );
+
+      const selected = vt.options.find((o) =>
+        activeValues.some((v) => String(v) === String(o.value))
+      );
+
       if (selected) {
         const valid = getFilteredOptions({
           currentTypeIndex: i,
           existingSet,
-          rawValues: current,
+          rawValues: activeValues,
           variantTypes,
         });
-        if (!valid.some((o) => String(o.value) === String(selected.value))) {
-          current = current.filter((v) => String(v) !== String(selected.value));
-          hasInvalid = true;
+
+        const isStillValid = valid.some(
+          (o) => String(o.value) === String(selected.value)
+        );
+
+        if (!isStillValid) {
+          invalidOptionValues.add(String(selected.value));
         }
       }
     }
-    if (hasInvalid) {
-      setValue(current);
+
+    if (invalidOptionValues.size > 0) {
+      setValue(rawValues.filter((v) => !invalidOptionValues.has(String(v))));
     }
   }, [existingSet, rawValues, setValue, variantTypes]);
 
@@ -254,6 +272,7 @@ export function OptionsSelect({
         typeIndex,
         variantTypes,
       });
+
       setValue(nextValues);
     },
     [existingSet, rawValues, setValue, variantTypes]
@@ -295,4 +314,4 @@ export function OptionsSelect({
       })}
     </div>
   );
-}
+};

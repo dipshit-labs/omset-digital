@@ -1,15 +1,14 @@
-import type { Product, VariantOption } from "@repo/types";
 import type { Validate } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
+
 import { checkVariantOptionConstraints } from "./constraints";
 
-const validateVariantOptions: Validate = async (value, { req, data }) => {
+const validateVariantOptions: Validate = async (value, { data, req }) => {
   if (!data?.product) {
     return "A product is required.";
   }
 
-  const productId = extractID<Product>(data.product);
-
+  const productId = extractID(data.product);
   if (!productId) {
     return "A product is required.";
   }
@@ -33,6 +32,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
     return true;
   }
 
+  // SAFETY: product.variantTypes with depth:0 is an array of ID values.
   const variantTypeIDs = Array.isArray(product.variantTypes)
     ? (product.variantTypes as (number | string)[])
     : [];
@@ -49,7 +49,7 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
     });
   }
 
-  const selectedIDs = value.map((option) => extractID<VariantOption>(option));
+  const selectedIDs = value.map((option) => extractID(option));
 
   const existing = await req.payload.find({
     collection: "variants",
@@ -68,14 +68,13 @@ const validateVariantOptions: Validate = async (value, { req, data }) => {
   });
 
   const existingCombinations = existing.docs.map(
-    (variant) =>
-      variant.options?.map((option) => extractID<VariantOption>(option)) ?? []
+    (variant) => variant.options?.map((option) => extractID(option)) ?? []
   );
 
   return checkVariantOptionConstraints({
-    variantTypeIDs,
-    selectedIDs,
     existingCombinations,
+    selectedIDs,
+    variantTypeIDs,
   });
 };
 

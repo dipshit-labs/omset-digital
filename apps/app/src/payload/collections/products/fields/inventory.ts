@@ -14,8 +14,8 @@ interface InventoryFieldsParams {
 }
 
 export const inventoryFields = ({
-  virtual = false,
   overrides = {},
+  virtual = false,
 }: InventoryFieldsParams = {}): Field[] => {
   const {
     allowBackorderOverrides,
@@ -25,6 +25,7 @@ export const inventoryFields = ({
     trackedOverrides,
   } = overrides;
 
+  // SAFETY: Field definitions and spread overrides satisfy Payload Field union types.
   return [
     // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
@@ -33,11 +34,11 @@ export const inventoryFields = ({
       name: "tracked",
       type: "checkbox",
       ...trackedOverrides,
+      virtual,
       admin: {
         readOnly: false,
         ...trackedOverrides?.admin,
       },
-      virtual,
     },
     {
       defaultValue: 0,
@@ -45,6 +46,7 @@ export const inventoryFields = ({
       name: "stock",
       type: "number",
       ...stockOverrides,
+      virtual,
       admin: {
         description: "Available inventory.",
         readOnly: false,
@@ -52,7 +54,6 @@ export const inventoryFields = ({
           Boolean(siblingData?.tracked ?? data?.inventory?.tracked),
         ...stockOverrides?.admin,
       },
-      virtual,
     },
     {
       label: "More details",
@@ -69,22 +70,22 @@ export const inventoryFields = ({
               name: "sku",
               type: "text",
               ...skuOverrides,
+              virtual,
               admin: {
                 readOnly: false,
                 ...skuOverrides?.admin,
               },
-              virtual,
             },
             {
               label: "Barcode",
               name: "barcode",
               type: "text",
               ...barcodeOverrides,
+              virtual,
               admin: {
                 readOnly: false,
                 ...barcodeOverrides?.admin,
               },
-              virtual,
             },
           ],
         },
@@ -94,13 +95,13 @@ export const inventoryFields = ({
           name: "allowBackorder",
           type: "checkbox",
           ...allowBackorderOverrides,
+          virtual,
           admin: {
             readOnly: false,
             condition: (data, siblingData) =>
               Boolean(siblingData?.tracked ?? data?.inventory?.tracked),
             ...allowBackorderOverrides?.admin,
           },
-          virtual,
         },
       ],
     },

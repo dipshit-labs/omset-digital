@@ -1,14 +1,17 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import type { Package, Store } from "@repo/types";
 import type { PayloadRequest } from "payload";
-import { extractID, getCollectionIDType } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
 
-export async function resolveDefaultPackage(
+import { getCollectionIDType } from "@/payload/lib/ids";
+
+export const resolveDefaultPackage = async (
   req: PayloadRequest,
   storeRaw?: unknown
-): Promise<Package["id"] | null> {
+): Promise<Package["id"] | null> => {
+  // SAFETY: storeRaw if provided is a populated Store document or Store ID reference.
   let storeId: number | string | null = storeRaw
-    ? extractID<Store>(storeRaw as Store | Store["id"])
+    ? extractID(storeRaw as Store | Store["id"])
     : null;
 
   if (!storeId && req?.headers) {
@@ -35,4 +38,4 @@ export async function resolveDefaultPackage(
   });
 
   return result.docs[0]?.id ?? null;
-}
+};

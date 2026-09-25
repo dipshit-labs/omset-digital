@@ -1,45 +1,35 @@
-import type { Config, Store, User } from "@repo/types";
+import type { Store, User } from "@repo/types";
 import type { CollectionSlug, Payload } from "payload";
+import { extractID } from "payload/shared";
 
-export const extractID = <T extends Config["collections"][CollectionSlug]>(
-  objectOrID: T | T["id"]
-): T["id"] => {
-  if (
-    typeof objectOrID === "object" &&
-    objectOrID !== null &&
-    "id" in objectOrID
-  ) {
-    return objectOrID.id;
-  }
-
-  return objectOrID;
-};
+type UserStoreRole = NonNullable<User["stores"]>[number]["roles"][number];
 
 export const getUserStoreIDs = (
   user: null | undefined | User,
-  role?: NonNullable<User["stores"]>[number]["roles"][number]
+  role?: UserStoreRole
 ): Store["id"][] => {
-  if (!(user && Array.isArray(user.stores))) {
+  if (!user?.stores) {
     return [];
   }
 
-  return user.stores.reduce<Store["id"][]>((acc, item) => {
+  const storeIDs: Store["id"][] = [];
+
+  for (const item of user.stores) {
     if (!item?.store) {
-      return acc;
+      continue;
     }
 
-    const userRoles = item.roles ?? [];
-
-    if (role && !userRoles.includes(role)) {
-      return acc;
+    if (role && !item.roles?.includes(role)) {
+      continue;
     }
 
-    acc.push(extractID<Store>(item.store));
-    return acc;
-  }, []);
+    storeIDs.push(extractID(item.store));
+  }
+
+  return storeIDs;
 };
 
-interface GetCollectionIDTypeParams {
+interface GetCollectionIDTypeArgs {
   collectionSlug: CollectionSlug;
   payload: Payload;
 }
@@ -47,5 +37,5 @@ interface GetCollectionIDTypeParams {
 export const getCollectionIDType = ({
   collectionSlug,
   payload,
-}: GetCollectionIDTypeParams): "number" | "text" =>
+}: GetCollectionIDTypeArgs): "number" | "text" =>
   payload.collections[collectionSlug]?.customIDType ?? payload.db.defaultIDType;

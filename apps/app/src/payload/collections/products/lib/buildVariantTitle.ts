@@ -1,14 +1,14 @@
 import type { Product, VariantOption } from "@repo/types";
 import type { PayloadRequest } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
 
 type OptionInput = VariantOption | VariantOption["id"];
 
-export async function buildVariantTitle(
+export const buildVariantTitle = async (
   productId: Product["id"],
   options: OptionInput[],
   req: PayloadRequest
-): Promise<string> {
+): Promise<string> => {
   let productTitle: string | null = null;
   try {
     const product = await req.payload.findByID({
@@ -20,6 +20,7 @@ export async function buildVariantTitle(
       req,
       select: { title: true },
     });
+
     productTitle = product?.title ?? null;
   } catch {
     // * Non fatal, title falls back to option labels only.
@@ -27,7 +28,8 @@ export async function buildVariantTitle(
 
   const knownLabels: (string | null)[] = [];
   const missingIds: (number | string)[] = [];
-  const orderMap: ("known" | "fetch")[] = []; // Preserve insertion order so the final join matches the options array order.
+  // Preserve insertion order so the final join matches the options array order.
+  const orderMap: ("known" | "fetch")[] = [];
 
   for (const option of options) {
     if (
@@ -39,9 +41,8 @@ export async function buildVariantTitle(
       knownLabels.push(option.label);
       orderMap.push("known");
     } else {
-      const id = extractID<VariantOption>(
-        option as VariantOption | VariantOption["id"]
-      );
+      const id = extractID(option);
+
       if (typeof id === "string" || typeof id === "number") {
         missingIds.push(id);
         orderMap.push("fetch");
@@ -52,7 +53,7 @@ export async function buildVariantTitle(
     }
   }
 
-  const fetchedLabels: Map<number | string, string> = new Map();
+  const fetchedLabels = new Map<number | string, string>();
   if (missingIds.length > 0) {
     const result = await req.payload.find({
       collection: "variantOptions",
@@ -63,6 +64,7 @@ export async function buildVariantTitle(
       select: { label: true },
       where: { id: { in: missingIds } },
     });
+
     for (const doc of result.docs) {
       fetchedLabels.set(doc.id, doc.label);
     }
@@ -76,11 +78,13 @@ export async function buildVariantTitle(
       knownIdx += 1;
       return label;
     }
+
     const id = missingIds[fetchIdx];
     fetchIdx += 1;
+
     return fetchedLabels.get(id) ?? null;
   });
 
   const parts = [productTitle, ...optionLabels].filter(Boolean);
   return parts.join(" — ");
-}
+};

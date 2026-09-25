@@ -1,5 +1,7 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
-import { type FieldHook, ValidationError, type Where } from "payload";
+import { ValidationError } from "payload";
+import type { FieldHook, Where } from "payload";
+
 import { getCollectionIDType, getUserStoreIDs } from "@/payload/lib/ids";
 
 const ensureUniqueUsername: FieldHook = async ({ originalDoc, req, value }) => {

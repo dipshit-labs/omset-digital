@@ -1,6 +1,8 @@
 import type { Access } from "payload";
+
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getUserStoreIDs } from "@/payload/lib/ids";
+
 import { isAccessingSelf } from "./isAccessingSelf";
 
 /**
@@ -11,7 +13,7 @@ import { isAccessingSelf } from "./isAccessingSelf";
  * permission to update or delete other users. This intentional asymmetry matches
  * `createUserAccess`, which also restricts user management to the owner role.
  */
-const updateAndDeleteUserAccess: Access = ({ req, id }) => {
+const updateAndDeleteUserAccess: Access = ({ id, req }) => {
   if (!req.user) {
     return false;
   }

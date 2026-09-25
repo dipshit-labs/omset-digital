@@ -1,11 +1,12 @@
-import type { Product, Store } from "@repo/types";
+import type { Product } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
   CollectionBeforeChangeHook,
   PayloadRequest,
 } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
+
 import { normalizeShipping } from "../lib/normalizeShipping";
 import type { RawShipping } from "../lib/types";
 
@@ -17,7 +18,7 @@ interface VirtualData {
   shipping?: Product["shipping"];
 }
 
-function extractPricing(raw: Product["pricing"]) {
+const extractPricing = (raw: Product["pricing"]) => {
   if (!raw) {
     return;
   }
@@ -25,9 +26,9 @@ function extractPricing(raw: Product["pricing"]) {
     compareAtPrice: raw.compareAtPrice ?? null,
     price: typeof raw.price === "number" ? raw.price : 0,
   };
-}
+};
 
-function extractInventory(raw: Product["inventory"]) {
+const extractInventory = (raw: Product["inventory"]) => {
   if (!raw) {
     return;
   }
@@ -38,31 +39,33 @@ function extractInventory(raw: Product["inventory"]) {
     stock: typeof raw.stock === "number" ? raw.stock : 0,
     tracked: typeof raw.tracked === "boolean" ? raw.tracked : true,
   };
-}
+};
 
-function extractVariantData(doc: Product, req: PayloadRequest) {
+const extractVariantData = (doc: Product, req: PayloadRequest) => {
   // Virtual fields are stripped from `doc` by afterChange time; the beforeChange
   // hook stashes them in req.context under VIRTUAL_DATA_KEY so they survive.
+  // SAFETY: Stashed context data was saved in beforeChange adhering to VirtualData.
   const stashed = req.context?.[VIRTUAL_DATA_KEY] as VirtualData | undefined;
 
   const rawPricing = stashed?.pricing ?? doc.pricing;
   const rawInventory = stashed?.inventory ?? doc.inventory;
   const rawShipping = stashed?.shipping ?? doc.shipping;
 
+  // SAFETY: rawShipping conforms to RawShipping structure for normalization.
   return {
     inventory: extractInventory(rawInventory),
     pricing: extractPricing(rawPricing),
+    title: doc.title || "Default Variant",
     shipping: rawShipping
       ? normalizeShipping(rawShipping as RawShipping)
       : undefined,
-    title: doc.title || "Default Variant",
   };
-}
+};
 
-async function cleanupDefaultVariant(
+const cleanupDefaultVariant = async (
   productId: Product["id"],
   req: PayloadRequest
-): Promise<void> {
+): Promise<void> => {
   const existing = await req.payload.find({
     collection: "variants",
     depth: 0,
@@ -86,12 +89,12 @@ async function cleanupDefaultVariant(
       req,
     });
   }
-}
+};
 
-async function upsertDefaultVariant(
+const upsertDefaultVariant = async (
   doc: Product,
   req: PayloadRequest
-): Promise<void> {
+): Promise<void> => {
   const existing = await req.payload.find({
     collection: "variants",
     depth: 0,
@@ -103,7 +106,7 @@ async function upsertDefaultVariant(
     where: { product: { equals: doc.id } },
   });
 
-  const storeId = doc.store ? extractID<Store>(doc.store) : null;
+  const storeId = doc.store ? extractID(doc.store) : null;
   const variantData = extractVariantData(doc, req);
   const [existingVariant] = existing.docs;
   const isDraft = doc._status === "draft";
@@ -115,6 +118,7 @@ async function upsertDefaultVariant(
   };
 
   if (existingVariant) {
+    // SAFETY: variantData matches the subset of fields accepted by variants collection update.
     await req.payload.update({
       collection: "variants",
       context: syncContext,
@@ -125,23 +129,28 @@ async function upsertDefaultVariant(
       req,
     });
   } else if (isDraft) {
+    // SAFETY: data payload conforms to fields accepted by variants collection creation in draft mode.
     await req.payload.create({
       collection: "variants",
       context: syncContext,
+      draft: true,
+      overrideAccess: true,
+      req,
       data: {
         ...variantData,
         options: [],
         product: doc.id,
         store: storeId,
       } as never,
-      draft: true,
-      overrideAccess: true,
-      req,
     });
   } else {
+    // SAFETY: data payload conforms to fields accepted by variants collection creation in published mode.
     await req.payload.create({
       collection: "variants",
       context: syncContext,
+      draft: false,
+      overrideAccess: true,
+      req,
       data: {
         ...variantData,
         options: [],
@@ -149,17 +158,15 @@ async function upsertDefaultVariant(
         product: doc.id,
         store: storeId,
       } as never,
-      draft: false,
-      overrideAccess: true,
-      req,
     });
   }
 
   // Reflect saved values back onto the product doc for the response.
   doc.pricing = variantData.pricing;
   doc.inventory = variantData.inventory;
+  // SAFETY: Normalized shipping is compatible with the Product shipping group field.
   doc.shipping = variantData.shipping as Product["shipping"];
-}
+};
 
 export const defaultVariantBeforeChange: CollectionBeforeChangeHook = ({
   data,

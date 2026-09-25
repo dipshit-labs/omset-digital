@@ -1,4 +1,5 @@
 import type { TextField } from "payload";
+
 import { decryptField, encryptField } from "./hooks";
 
 type EncryptedFieldOverrides = Partial<Omit<TextField, "type" | "name">>;
@@ -13,12 +14,13 @@ export const encryptedField: EncryptedField = (
   overrides = {}
 ) => {
   const {
+    access: accessOverrides,
     admin: adminOverrides,
     hooks: hooksOverrides,
-    access: accessOverrides,
     ...restOverrides
   } = overrides;
 
+  // SAFETY: Merged overrides conform to the Payload TextField type.
   return {
     name,
     type: "text",

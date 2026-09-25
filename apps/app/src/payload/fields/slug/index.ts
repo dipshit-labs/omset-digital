@@ -1,4 +1,5 @@
 import type { CheckboxField, TextField } from "payload";
+
 import { formatSlugHook } from "./hooks";
 
 interface SlugFieldOverrides {
@@ -25,16 +26,17 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     ...checkboxOverrides,
   };
 
+  // SAFETY: slugOverrides preserves field type and structure satisfies TextField.
   const slugFieldConfig: TextField = {
     index: true,
     label: "Slug",
     name: "slug",
     type: "text",
     unique: true,
-    ...(slugOverrides || {}),
+    ...slugOverrides,
     admin: {
       position: "sidebar",
-      ...(slugOverrides?.admin || {}),
+      ...slugOverrides?.admin,
       components: {
         Field: {
           path: "@/payload/fields/slug/Component#SlugComponent",

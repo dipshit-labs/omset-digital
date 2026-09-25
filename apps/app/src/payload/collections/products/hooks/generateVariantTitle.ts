@@ -1,11 +1,12 @@
-import type { Product, Variant } from "@repo/types";
+import type { Variant } from "@repo/types";
 import type { CollectionBeforeChangeHook } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
+
 import { buildVariantTitle } from "../lib/buildVariantTitle";
 
 const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
-  req,
   data,
+  req,
 }) => {
   if (
     !(data.product && Array.isArray(data.options)) ||
@@ -14,7 +15,7 @@ const generateVariantTitle: CollectionBeforeChangeHook<Variant> = async ({
     return data;
   }
 
-  const productId = extractID<Product>(data.product);
+  const productId = extractID(data.product);
   data.title = await buildVariantTitle(productId, data.options, req);
 
   return data;

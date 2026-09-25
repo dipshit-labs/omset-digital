@@ -1,20 +1,23 @@
 import { FieldError, FieldLabel } from "@payloadcms/ui";
 import type { Product, VariantOption, VariantType } from "@repo/types";
 import type { RelationshipFieldServerProps } from "payload";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
+
 import { OptionsSelect } from "./OptionsSelect";
+
 import styles from "./VariantOptionsSelector.module.css";
 
-export async function VariantOptionsSelector({
+export const VariantOptionsSelector = async ({
   clientField: { label },
   data,
   field,
   path,
   req,
   user,
-}: RelationshipFieldServerProps) {
+}: RelationshipFieldServerProps) => {
+  // SAFETY: data.product is a relationship value representing a Product doc or ID.
   const productId = data?.product
-    ? extractID<Product>(data.product as Product | Product["id"])
+    ? extractID(data.product as Product | Product["id"])
     : undefined;
 
   if (!productId) {
@@ -40,18 +43,19 @@ export async function VariantOptionsSelector({
     user,
   });
 
+  // SAFETY: variantTypes items are relationship references to VariantType docs or IDs.
   const variantTypeIDs = Array.isArray(product.variantTypes)
     ? product.variantTypes.map((type) =>
-        extractID<VariantType>(type as VariantType | VariantType["id"])
+        extractID(type as VariantType | VariantType["id"])
       )
     : [];
 
   const variantTypes = await Promise.all(
     variantTypeIDs.map((id) =>
       req.payload.findByID({
-        id,
         collection: "variantTypes",
         depth: 1,
+        id,
         joins: { options: { sort: "label" } },
         overrideAccess: false,
         populate: { variantOptions: { label: true } },
@@ -67,10 +71,10 @@ export async function VariantOptionsSelector({
     draft: true,
     limit: 0,
     overrideAccess: false,
+    user,
     select: {
       options: true,
     },
-    user,
     where: {
       and: [
         { product: { equals: productId } },
@@ -79,10 +83,11 @@ export async function VariantOptionsSelector({
     },
   });
 
+  // SAFETY: variant.options items are relationship references to VariantOption docs or IDs.
   const existingCombinations = existingVariants.docs.map((variant) =>
     Array.isArray(variant.options)
       ? variant.options.map((opt) =>
-          extractID<VariantOption>(opt as VariantOption | VariantOption["id"])
+          extractID(opt as VariantOption | VariantOption["id"])
         )
       : []
   );
@@ -118,4 +123,4 @@ export async function VariantOptionsSelector({
       </div>
     </div>
   );
-}
+};

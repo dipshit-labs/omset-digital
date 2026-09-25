@@ -1,12 +1,13 @@
 import type { Store } from "@repo/types";
 import type { FieldAccess } from "payload";
+
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getUserStoreIDs } from "@/payload/lib/ids";
 
 /**
  * For use on the Stores collection itself — doc IS the store.
  */
-export const canReadStoreRestrictedField: FieldAccess = ({ req, doc }) => {
+export const canReadStoreRestrictedField: FieldAccess = ({ doc, req }) => {
   if (!req.user) {
     return false;
   }
@@ -15,6 +16,7 @@ export const canReadStoreRestrictedField: FieldAccess = ({ req, doc }) => {
     return true;
   }
 
+  // SAFETY: doc represents the Store collection document whose id is Store["id"].
   const storeId = doc?.id as Store["id"] | undefined;
 
   if (!storeId) {
@@ -27,7 +29,7 @@ export const canReadStoreRestrictedField: FieldAccess = ({ req, doc }) => {
 /**
  * For use on store-scoped collections (Products, Orders, etc.) — doc.store is the ref.
  */
-export const canReadScopedRestrictedField: FieldAccess = ({ req, doc }) => {
+export const canReadScopedRestrictedField: FieldAccess = ({ doc, req }) => {
   if (!req.user) {
     return false;
   }
@@ -36,6 +38,7 @@ export const canReadScopedRestrictedField: FieldAccess = ({ req, doc }) => {
     return true;
   }
 
+  // SAFETY: doc represents a store-scoped document where store is a relationship reference.
   const storeRef = doc?.store as Store | Store["id"] | undefined;
   const storeId =
     typeof storeRef === "object" && storeRef !== null ? storeRef.id : storeRef;

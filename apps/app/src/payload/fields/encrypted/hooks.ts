@@ -1,6 +1,6 @@
 import type { FieldHook } from "payload";
 
-export const encryptField: FieldHook = ({ value, req }) => {
+export const encryptField: FieldHook = ({ req, value }) => {
   if (!value) {
     return value;
   }
@@ -8,7 +8,7 @@ export const encryptField: FieldHook = ({ value, req }) => {
   return req.payload.encrypt(value);
 };
 
-export const decryptField: FieldHook = ({ value, req }) => {
+export const decryptField: FieldHook = ({ req, value }) => {
   if (!value) {
     return value;
   }

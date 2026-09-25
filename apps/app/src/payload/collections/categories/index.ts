@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+
 import { canWrite } from "@/payload/access/canWrite";
 import { slugField } from "@/payload/fields/slug";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";

@@ -1,19 +1,20 @@
 import type { Package } from "@repo/types";
-import { extractID } from "@/payload/lib/ids";
+import { extractID } from "payload/shared";
+
 import type { NormalizedShipping, RawShipping } from "./types";
 
-export function normalizeShipping(
+export const normalizeShipping = (
   raw: RawShipping,
   fallback?: Partial<RawShipping>
-): NormalizedShipping {
+): NormalizedShipping => {
   const required = raw.required ?? fallback?.required ?? true;
   const unit = raw.weight?.unit ?? fallback?.weight?.unit ?? "g";
 
   let packageId: Package["id"] | null = null;
   if (raw.package) {
-    packageId = extractID<Package>(raw.package as Package | Package["id"]);
+    packageId = extractID(raw.package);
   } else if (fallback?.package) {
-    packageId = extractID<Package>(fallback.package as Package | Package["id"]);
+    packageId = extractID(fallback.package);
   }
 
   if (!required) {
@@ -28,7 +29,8 @@ export function normalizeShipping(
   if (typeof raw.weight?.value === "number") {
     ({ value } = raw.weight);
   } else if (typeof fallback?.weight?.value === "number") {
-    ({ value } = fallback.weight as { value: number; unit?: "g" | "kg" });
+    // SAFETY: Guard confirms fallback.weight is defined with a numeric value.
+    ({ value } = fallback.weight as { value: number });
   }
 
   return {
@@ -36,4 +38,4 @@ export function normalizeShipping(
     required: true,
     weight: { unit, value },
   };
-}
+};

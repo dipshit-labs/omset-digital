@@ -1,7 +1,10 @@
-import { type CollectionConfig, slugField } from "payload";
+import { slugField } from "payload";
+import type { CollectionConfig } from "payload";
+
 import { canWrite } from "@/payload/access/canWrite";
 import { seoField } from "@/payload/fields/seo";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
+
 import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
@@ -143,9 +146,6 @@ export const Products: CollectionConfig = {
       name: "relatedProducts",
       relationTo: "products",
       type: "relationship",
-      admin: {
-        position: "sidebar",
-      },
       filterOptions: ({ id }) => {
         if (id) {
           return {
@@ -160,6 +160,9 @@ export const Products: CollectionConfig = {
             exists: true,
           },
         };
+      },
+      admin: {
+        position: "sidebar",
       },
     },
   ],

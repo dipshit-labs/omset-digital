@@ -12,6 +12,7 @@ import type { TextFieldClientProps } from "payload";
 import { slugify } from "payload/shared";
 import type React from "react";
 import { useCallback, useEffect } from "react";
+
 import "./styles.css";
 
 type SlugComponentProps = {
@@ -40,11 +41,13 @@ const SlugComponent: React.FC<SlugComponentProps> = ({
   const { dispatchFields } = useForm();
 
   // The value of the checkbox (slugLock)
+  // SAFETY: checkboxFieldPath points to a checkbox field whose form value is boolean | undefined.
   const checkboxValue = useFormFields(
     ([fields]) => fields[checkboxFieldPath]?.value as boolean | undefined
   );
 
   // The value of the field we're listening to for the slug
+  // SAFETY: targetFieldPath points to a text/title field whose form value is string | undefined.
   const targetFieldValue = useFormFields(
     ([fields]) => fields[targetFieldPath]?.value as string | undefined
   );

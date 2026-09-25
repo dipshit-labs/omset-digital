@@ -11,11 +11,12 @@ interface PricingFieldsParams {
 }
 
 const pricingFields = ({
-  virtual = false,
   overrides = {},
+  virtual = false,
 }: PricingFieldsParams = {}): Field[] => {
   const { compareOverrides, priceOverrides } = overrides;
 
+  // SAFETY: Field definitions and spread overrides satisfy Payload Field union types.
   return [
     {
       min: 0,
@@ -23,12 +24,12 @@ const pricingFields = ({
       required: true,
       type: "number",
       ...priceOverrides,
+      virtual,
       admin: {
         placeholder: "0.00",
         readOnly: false,
         ...priceOverrides?.admin,
       },
-      virtual,
     },
     {
       label: "Additional display prices",
@@ -42,14 +43,14 @@ const pricingFields = ({
           name: "compareAtPrice",
           type: "number",
           ...compareOverrides,
+          virtual,
           admin: {
-            description:
-              "Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).",
             placeholder: "0.00",
             readOnly: false,
+            description:
+              "Enter a value higher than your price. Often shown with a strikethrough (e.g., $25.00).",
             ...compareOverrides?.admin,
           },
-          virtual,
         },
       ],
     },

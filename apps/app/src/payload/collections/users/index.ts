@@ -1,6 +1,8 @@
 import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 import type { CollectionConfig } from "payload";
+
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
+
 import { createUserAccess } from "./access/create";
 import { readUserAccess } from "./access/read";
 import { updateAndDeleteUserAccess } from "./access/updateAndDelete";
@@ -54,7 +56,7 @@ export const Users: CollectionConfig = {
       type: "text",
       access: {
         read: () => false,
-        update: ({ req, id }) => {
+        update: ({ id, req }) => {
           if (!req.user) {
             return false;
           }
@@ -84,7 +86,7 @@ export const Users: CollectionConfig = {
     {
       ...defaultStoreArrayField,
       admin: {
-        ...(defaultStoreArrayField?.admin || {}),
+        ...defaultStoreArrayField?.admin,
         position: "sidebar",
       },
     },

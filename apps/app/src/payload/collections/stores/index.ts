@@ -1,14 +1,15 @@
 import type { Block, CollectionConfig, TextField } from "payload";
-import { validateSlug } from "@/lib/utils";
+
 import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
 import { encryptedField } from "@/payload/fields/encrypted";
+
 import { canReadRestrictedField } from "./access/canReadRestrictedField";
 import { updateAndDeleteStoreAccess } from "./access/updateAndDelete";
 
 const restrictedTextField = (name: string): TextField => ({
-  name,
   access: { read: canReadRestrictedField },
   admin: { description: "Restricted to store owner and super-admin" },
+  name,
   type: "text",
 });
 
@@ -65,12 +66,12 @@ export const Stores: CollectionConfig = {
       },
     },
     {
+      // ! Note: change this in the future
       // unique implies an index in Postgres — no need for index: true
       name: "slug",
       required: true,
       type: "text",
       unique: true,
-      validate: validateSlug,
       admin: {
         description: "Subdomain identifier (e.g. {slug}.omsetdigital.com)",
       },

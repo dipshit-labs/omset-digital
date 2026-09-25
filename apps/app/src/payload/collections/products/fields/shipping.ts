@@ -1,8 +1,8 @@
 import type { CheckboxField, Field, RelationshipField } from "payload";
-import {
-  type MeasurementFieldOverrides,
-  measurementField,
-} from "@/payload/fields/measurement";
+
+import { measurementField } from "@/payload/fields/measurement";
+import type { MeasurementFieldOverrides } from "@/payload/fields/measurement";
+
 import { resolveDefaultPackage } from "../lib/resolveDefaultPackage";
 
 interface ShippingFieldsOverrides {
@@ -17,12 +17,13 @@ interface ShippingFieldsParams {
 }
 
 const shippingFields = ({
-  virtual = false,
   overrides = {},
+  virtual = false,
 }: ShippingFieldsParams = {}): Field[] => {
   const { packageOverrides, requiredOverrides } = overrides;
   const defaultRequired = requiredOverrides?.defaultValue ?? true;
 
+  // SAFETY: Field definitions and spread overrides satisfy Payload Field union types.
   return [
     // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
@@ -31,11 +32,11 @@ const shippingFields = ({
       name: "required",
       type: "checkbox",
       ...requiredOverrides,
+      virtual,
       admin: {
         readOnly: false,
         ...requiredOverrides?.admin,
       },
-      virtual,
     },
     {
       type: "row",
@@ -52,18 +53,18 @@ const shippingFields = ({
           required: true,
           type: "relationship",
           ...packageOverrides,
-          admin: {
-            readOnly: false,
-            width: "60%",
-            ...packageOverrides?.admin,
-          },
+          virtual,
           defaultValue: async ({ req }) => {
             if (!req?.payload) {
               return null;
             }
             return await resolveDefaultPackage(req);
           },
-          virtual,
+          admin: {
+            readOnly: false,
+            width: "60%",
+            ...packageOverrides?.admin,
+          },
         },
         measurementField({
           label: "Product Weight",
@@ -72,16 +73,16 @@ const shippingFields = ({
           type: "weight",
           overrides: {
             unitOverrides: {
+              virtual,
               admin: {
                 readOnly: false,
               },
-              virtual,
             },
             valueOverrides: {
+              virtual,
               admin: {
                 readOnly: false,
               },
-              virtual,
             },
           },
         }),

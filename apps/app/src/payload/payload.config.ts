@@ -1,5 +1,7 @@
+// oxlint-disable unicorn/prefer-import-meta-properties
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
@@ -16,7 +18,9 @@ import {
 import type { Config } from "@repo/types";
 import { buildConfig } from "payload";
 import sharp from "sharp";
+
 import { env } from "@/env";
+
 import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
@@ -32,10 +36,34 @@ import { Users } from "./collections/users";
 import { getUserStoreIDs } from "./lib/ids";
 import { seed } from "./seed";
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const __filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(__filename);
 
 export default buildConfig({
+  secret: env.PAYLOAD_SECRET,
+  sharp,
+  onInit: async (args) => {
+    if (env.PAYLOAD_SEED) {
+      await seed(args);
+    }
+  },
+  admin: {
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  collections: [
+    Users,
+    Stores,
+    Categories,
+    Packages,
+    Products,
+    Media,
+    Variants,
+    VariantOptions,
+    VariantTypes,
+  ],
   db: postgresAdapter({
     pool: {
       connectionString: env.DATABASE_URL,
@@ -56,33 +84,11 @@ export default buildConfig({
     defaultFromAddress: "noreply@omsetdigital.com",
     defaultFromName: "Omset Digital",
   }),
-  secret: env.PAYLOAD_SECRET,
-  admin: {
-    user: Users.slug,
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    Users,
-    Stores,
-    Categories,
-    Packages,
-    Products,
-    Media,
-    Variants,
-    VariantOptions,
-    VariantTypes,
-  ],
-  onInit: async (args) => {
-    if (env.PAYLOAD_SEED) {
-      await seed(args);
-    }
-  },
   plugins: [
     multiTenantPlugin<Config>({
       tenantSelectorLabel: "Store",
       tenantsSlug: "stores",
+      userHasAccessToAllTenants: (user) => isSuperAdmin(user),
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
@@ -110,7 +116,6 @@ export default buildConfig({
         arrayTenantFieldName: "store",
         includeDefaultField: false,
       },
-      userHasAccessToAllTenants: (user) => isSuperAdmin(user),
     }),
     seoPlugin({}),
   ],
@@ -120,5 +125,4 @@ export default buildConfig({
       "../../../../packages/types/src/payload/generated.ts"
     ),
   },
-  sharp,
 });

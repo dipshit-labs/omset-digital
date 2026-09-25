@@ -1,11 +1,13 @@
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import type { User } from "@repo/types";
 import type { Access, Where } from "payload";
+
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getCollectionIDType, getUserStoreIDs } from "@/payload/lib/ids";
+
 import { isAccessingSelf } from "./isAccessingSelf";
 
-const readUserAccess: Access<User> = ({ req, id }) => {
+const readUserAccess: Access<User> = ({ id, req }) => {
   if (!req.user) {
     return false;
   }
@@ -40,6 +42,7 @@ const readUserAccess: Access<User> = ({ req, id }) => {
     return true;
   }
 
+  // SAFETY: Filter object conforms to Payload Where clause query schema.
   return {
     or: [
       { id: { equals: req.user.id } },
