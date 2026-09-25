@@ -7,7 +7,7 @@ A multi-tenant SaaS platform where Indonesian SMEs (Merchants) operate branded s
 ### Platform roles
 
 **Merchant**:
-A business owner who subscribes to Omset Digital to operate a storefront. Owns all configuration, products, and orders within their Tenant.
+A business owner who subscribes to Omset Digital to operate a storefront. Owns all configuration, products, and orders within their Store.
 _Avoid_: Seller, user, admin, vendor
 
 **Buyer**:
@@ -15,17 +15,17 @@ A person who visits a Merchant's storefront and places orders.
 _Avoid_: Customer, user, visitor, shopper
 
 **Platform Admin**:
-An Omset Digital team member with super-admin access across all Tenants.
+An Omset Digital team member with super-admin access across all Stores.
 _Avoid_: Super-user, root, operator
 
-### Tenant
+### Store
 
-**Tenant**:
-The platform record representing one Merchant's store. Holds the store's identity, subscription status, BYOK credentials, and configuration. One Tenant per Merchant.
-_Avoid_: Store, shop, account, workspace
+**Store**:
+The platform record representing one Merchant's business in the `stores` collection. Holds the store's identity, subscription status, BYOK credentials (payments, shipping, WhatsApp), and joins to installed Themes.
+_Avoid_: Tenant, shop, account, workspace
 
 **Slug**:
-The URL-safe identifier for a Tenant used as its subdomain (`{slug}.omsetdigital.com`). Unique across the platform.
+The URL-safe identifier for a Store used as its subdomain (`{slug}.omsetdigital.com`). Unique across the platform.
 _Avoid_: Handle, name, identifier
 
 **Custom Domain**:
@@ -33,7 +33,7 @@ A Buyer-facing domain owned by the Merchant (e.g. `myshop.com`) that resolves to
 _Avoid_: External domain, CNAME domain
 
 **Subscription**:
-The Tenant's billing state with the platform. One of: `trial`, `active`, `past_due`, `canceled`.
+The Store's billing state with the platform. One of: `trial`, `active`, `past_due`, `canceled`.
 _Avoid_: Plan, billing status, account status
 
 **BYOK (Bring Your Own Key)**:
@@ -43,16 +43,12 @@ _Avoid_: API key integration, self-service integration
 ### Storefront
 
 **Storefront**:
-The Buyer-facing website for a Tenant, served at the Tenant's subdomain or Custom Domain. Composed of themed Sections.
+The Buyer-facing website for a Store, served at the Store's subdomain or Custom Domain. Composed of themed Sections.
 _Avoid_: Shop page, front-end, website
 
-**StoreSettings**:
-The singleton document per Tenant (`isGlobal: true`) that holds universal store identity (store name, public email, phone, logo, favicon, social links) and references the active Theme.
-_Avoid_: Store profile, site settings, global config
-
 **Theme**:
-An installed theme instance in the `themes` collection (provided by the Theme Plugin). Holds global theme settings (colors, typography presets) and joins to its child Templates. One Theme is active per Tenant.
-_Avoid_: Skin, style pack
+An installed theme instance in the `themes` collection (provided by the Theme Plugin). Holds global theme settings (colors, typography presets) and joins to its child Templates. Exactly one Theme is live per Store.
+_Avoid_: Skin, style pack, layout
 
 **Template**:
 A layout document in the `templates` collection (provided by the Theme Plugin) belonging to a Theme. Defines the ordered Section blocks for a specific route type (`home`, `product`, `collection`, `page`).
@@ -88,7 +84,7 @@ A specific purchasable variation of a Product, representing the leaf node of the
 _Avoid_: Item, sub-product
 
 **Variant Type**:
-A named dimension of Product variation (e.g. Color, Size), scoped to a Tenant and reusable across Products.
+A named dimension of Product variation (e.g. Color, Size), scoped to a Store and reusable across Products.
 _Avoid_: Attribute, option group, dimension, variant axis
 
 **Variant Option**:

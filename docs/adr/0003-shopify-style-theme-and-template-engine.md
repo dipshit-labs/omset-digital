@@ -1,6 +1,6 @@
 # Shopify-style theme and template engine with relationship hierarchy
 
-The storefront system is modeled after Shopify's architecture using a tiered relationship hierarchy: `StoreSettings` (`isGlobal: true`) references an active `Theme`, which joins to its `Template` documents (`home`, `product`, `collection`, `page`) containing `Section` blocks, while `Pages` reference a layout `Template`. Theme packages are pure TypeScript packages with zero Payload dependencies; they export section definitions, settings schemas, page presets, React components, and a `cssVars` function. A dedicated Payload plugin (`@repo/payload-plugin-themes`) provides the collections, DSL contracts, field helpers, live preview subscriber, and boot-time auto-sync.
+The storefront system is modeled after Shopify's architecture using a tiered relationship hierarchy: a `Store` scopes installed `Theme` instances (with exactly one live Theme), which join to `Template` documents (`home`, `product`, `collection`, `page`) containing `Section` blocks, while `Pages` reference a layout `Template`. Theme packages are pure TypeScript packages with zero Payload dependencies; they export section definitions, settings schemas, page presets, React components, and a `cssVars` function. A dedicated Payload plugin (`@repo/payload-plugin-themes`) provides the collections, DSL contracts, field helpers, live preview subscriber, and boot-time auto-sync.
 
 ## Status
 
@@ -8,11 +8,11 @@ Accepted
 
 ## Context and decision
 
-The previous design attempted to enforce a single platform-wide design token schema (`TemplateTokenSchema`) and dynamic plugin schema injection onto the core `Tenants` collection. This constrained themes to a fixed set of color slots, leaked Payload dependencies into theme packages, and caused cross-template field collisions when switching designs.
+The previous design attempted to enforce a single platform-wide design token schema (`TemplateTokenSchema`) and dynamic plugin schema injection onto the core store record. This constrained themes to a fixed set of color slots, leaked Payload dependencies into theme packages, and caused cross-template field collisions when switching designs.
 
 We chose Shopify's isolated-instance model with a plugin-driven engine:
-1. **`StoreSettings` (`isGlobal: true`)**: A per-tenant singleton collection for universal store identity (store name, public email, phone, logo, favicon, social links) and a relationship to the active `Theme`.
-2. **`Themes` collection**: Injected by the plugin. Represents installed theme instances, stores global theme settings (colors, typography presets), and joins to child `Template` documents.
+1. **`Stores` collection**: Represents the merchant's business entity and universal store identity (store name, public email, phone, logo, favicon, social links), scoping all products, orders, and themes.
+2. **`Themes` collection**: Injected by the plugin. Represents installed theme instances scoped to a `Store`, stores global theme settings (colors, typography presets), and joins to child `Template` documents. Exactly one theme has `isLive: true` per store.
 3. **`Templates` collection**: Injected by the plugin. Belongs to a specific theme (`theme: relationship to 'themes'`). Holds the template type (`home`, `product`, `collection`, `page`) and an ordered `sections` blocks field.
 4. **`Pages` collection**: Retained by the application for merchant-created content (e.g. About, Contact). Uses the plugin's `themeTemplateField` to reference a layout `Template`.
 5. **Namespaced section blocks**: The plugin namespaces section block slugs by theme (`{themeSlug}_{sectionSlug}`) so themes can define distinct section settings without schema collisions.
@@ -26,8 +26,7 @@ We chose Shopify's isolated-instance model with a plugin-driven engine:
 9. **Boot-time auto-sync**: On server startup, the plugin synchronizes registered theme manifests and default presets to existing stores in the database, creating a default store if the database has none.
 ## Considered options
 
-- **Single shared token schema on Tenant (rejected)**: Inflexible. Forced every theme into identical styling constraints and cluttered the infrastructure `Tenants` table.
-- **Section data mapping across themes (rejected)**: Translating arbitrary section fields between different theme layouts is fragile and loses styling intent.
+- **Single shared token schema on Store (rejected)**: Inflexible. Forced every theme into identical styling constraints and cluttered the core store record.
 - **Wiping section data on theme switch (rejected)**: Destroys merchant customization if they want to experiment with another theme and switch back.
 - **Standalone theme devtools without Payload (rejected)**: Reinvented form controls and preview chrome that Payload's native `livePreview` already provides, while disconnecting theme development from real store data.
 - **Monolithic plugin export (rejected)**: Leaks server-side Payload dependencies and Node globals into storefront client components.
