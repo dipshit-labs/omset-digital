@@ -51,24 +51,32 @@ The singleton document per Tenant (`isGlobal: true`) that holds universal store 
 _Avoid_: Store profile, site settings, global config
 
 **Theme**:
-An installed theme instance in the `themes` collection. Holds global theme settings (colors, typography presets) and joins to its child Pages. One Theme is active per Tenant.
-_Avoid_: Template, skin, layout
+An installed theme instance in the `themes` collection (provided by the Theme Plugin). Holds global theme settings (colors, typography presets) and joins to its child Templates. One Theme is active per Tenant.
+_Avoid_: Skin, style pack
+
+**Template**:
+A layout document in the `templates` collection (provided by the Theme Plugin) belonging to a Theme. Defines the ordered Section blocks for a specific route type (`home`, `product`, `collection`, `page`).
+_Avoid_: Layout preset, view definition
 
 **Page**:
-A document in the `pages` collection belonging to a specific Theme. Defines a route (`slug`, `templateType`) and holds ordered Section blocks.
+A document in the `pages` collection representing Merchant-created content (e.g. About, Contact), referencing a layout Template.
 _Avoid_: View, screen, document
 
 **Section**:
-A configurable content block within a Page (e.g. hero, product-grid, testimonials). Composed of section-level settings and optional child Blocks.
+A configurable content block within a Template (e.g. hero, product-grid, testimonials). Composed of section-level settings and optional child Blocks.
 _Avoid_: Widget, row, container
 
 **Block**:
-An inner child element within a Section (e.g. accordion item, testimonial card, hero slide).
+An inner child element within a Section (e.g. feature bullet, testimonial card, accordion item).
 _Avoid_: Sub-block, component, item
 
-**Template Package**:
-An independent TypeScript package exporting React components, section definitions, settings schemas, page presets, and a `cssVars` function with zero Payload runtime dependencies.
-_Avoid_: Theme bundle, plugin, addon
+**Theme Package**:
+An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, settings schemas, page presets, and a `cssVars` function using the DSL from `@repo/payload-plugin-themes/types`.
+_Avoid_: Template package, theme bundle, addon
+
+**Theme Plugin**:
+The Payload CMS plugin (`@repo/payload-plugin-themes`) that injects the theme engine collections (`themes`, `templates`), DSL contracts, field helpers, live preview integration, and boot-time auto-sync.
+_Avoid_: Theme loader, template engine
 ### Products
 
 **Product**:
