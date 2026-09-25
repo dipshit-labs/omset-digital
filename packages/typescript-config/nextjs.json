@@ -11,8 +11,7 @@
     "allowJs": true,
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@repo/*": ["../../packages/*"]
+      "@/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules"]

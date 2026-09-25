@@ -9,7 +9,7 @@
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
     "payload": "payload",
-    "test": "bun test",
+    "test": "vitest",
     "typecheck": "next typegen && bun generate:types && tsc --noEmit",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },
@@ -34,11 +34,14 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:ui",
-    "@types/bun": "catalog:types",
+    "@testing-library/dom": "catalog:test",
+    "@testing-library/react": "catalog:test",
     "@types/node": "catalog:types",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
+    "@vitejs/plugin-react": "catalog:test",
     "babel-plugin-react-compiler": "catalog:react",
+    "jsdom": "catalog:test",
     "tailwindcss": "catalog:ui",
     "typescript": "catalog:types"
   }
