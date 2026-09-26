@@ -2,8 +2,8 @@ import type {
   ThemeManifestDefinition,
   ThemeSyncDoc,
   ThemeSyncPayload,
-} from "../types.js";
-import { extractDefaultSettings } from "./extractDefaultSettings.js";
+} from "../types";
+import { extractDefaultSettings } from "./extractDefaultSettings";
 
 export const syncThemeForStore = async (
   client: ThemeSyncPayload,

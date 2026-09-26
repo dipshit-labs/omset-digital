@@ -6,10 +6,10 @@ import type {
   ThemeSettingsRecord,
 } from "@repo/payload-plugin-themes/types";
 
-import { heroSection } from "./sections/hero.js";
+import { heroSection } from "./sections/hero";
 
-export { Hero, heroSection, heroSettings } from "./sections/hero.js";
-export type { HeroBulletBlock, HeroSettings } from "./sections/hero.js";
+export { Hero, heroSection, heroSettings } from "./sections/hero";
+export type { HeroBulletBlock, HeroSettings } from "./sections/hero";
 
 export const brandingSettings: SettingField[] = [
   {

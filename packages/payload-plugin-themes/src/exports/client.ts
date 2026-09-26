@@ -1,4 +1,4 @@
 export {
   isThemePreviewMessage,
   type ThemePreviewMessage,
-} from "../utilities/isThemePreviewMessage.js";
+} from "../utilities/isThemePreviewMessage";

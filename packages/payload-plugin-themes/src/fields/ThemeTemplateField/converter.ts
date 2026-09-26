@@ -15,9 +15,9 @@ import type {
   ThemeManifestDefinition,
   ToggleSettingField,
   UploadSettingField,
-} from "../../types.js";
+} from "../../types";
 
-export type { ConvertFieldOptions } from "../../types.js";
+export type { ConvertFieldOptions } from "../../types";
 
 const convertTextField = (setting: TextSettingField): Field => ({
   defaultValue: setting.defaultValue,

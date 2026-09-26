@@ -1,8 +1,8 @@
 import type { Block, CollectionConfig, Config, Field } from "payload";
 import { describe, expect, it } from "vitest";
 
-import { themesPlugin } from "./index.js";
-import type { ThemeManifestDefinition } from "./types.js";
+import { themesPlugin } from "./index";
+import type { ThemeManifestDefinition } from "./types";
 
 const sampleManifest: ThemeManifestDefinition = {
   name: "Starter Theme",

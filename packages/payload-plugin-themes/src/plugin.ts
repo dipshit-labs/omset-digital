@@ -1,10 +1,10 @@
 import type { Config, Plugin } from "payload";
 
-import { createTemplatesCollection } from "./collections/createTemplatesCollection.js";
-import { createThemesCollection } from "./collections/createThemesCollection.js";
-import { sanitizePluginConfig } from "./defaults.js";
-import { syncThemes } from "./onInit.js";
-import type { ThemesPluginOptions } from "./types.js";
+import { createTemplatesCollection } from "./collections/createTemplatesCollection";
+import { createThemesCollection } from "./collections/createThemesCollection";
+import { sanitizePluginConfig } from "./defaults";
+import { syncThemes } from "./onInit";
+import type { ThemesPluginOptions } from "./types";
 
 export const themesPlugin =
   (pluginOptions: ThemesPluginOptions): Plugin =>

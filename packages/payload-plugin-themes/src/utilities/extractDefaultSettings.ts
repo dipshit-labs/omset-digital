@@ -1,4 +1,4 @@
-import type { ThemeManifestDefinition, ThemeSettingsRecord } from "../types.js";
+import type { ThemeManifestDefinition, ThemeSettingsRecord } from "../types";
 
 export const extractDefaultSettings = (
   manifest: ThemeManifestDefinition

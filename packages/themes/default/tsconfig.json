@@ -2,8 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "noEmit": true,
-    "types": ["bun"],
     "paths": {
       "@/*": ["./src/*"]
     }

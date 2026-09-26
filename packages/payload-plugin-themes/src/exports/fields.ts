@@ -1,4 +1,4 @@
 export {
   themeTemplateField,
   type ThemeTemplateFieldOptions,
-} from "../fields/ThemeTemplateField/index.js";
+} from "../fields/ThemeTemplateField";

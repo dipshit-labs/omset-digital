@@ -2,8 +2,8 @@ import type {
   ThemeManifestDefinition,
   ThemeSyncDoc,
   ThemeSyncPayload,
-} from "../types.js";
-import { resolveTemplatesList } from "./resolveTemplatesList.js";
+} from "../types";
+import { resolveTemplatesList } from "./resolveTemplatesList";
 
 export const syncTemplatesForTheme = async (
   client: ThemeSyncPayload,

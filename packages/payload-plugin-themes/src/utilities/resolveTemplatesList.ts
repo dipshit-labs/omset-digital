@@ -1,7 +1,7 @@
 import type {
   TemplatePresetDefinition,
   ThemeManifestDefinition,
-} from "../types.js";
+} from "../types";
 
 export const resolveTemplatesList = (
   rawTemplates: ThemeManifestDefinition["templates"]

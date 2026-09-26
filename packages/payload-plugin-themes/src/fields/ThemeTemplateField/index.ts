@@ -1,6 +1,6 @@
 import type { RelationshipField } from "payload";
 
-import type { ThemeTemplateFieldOptions } from "../../types.js";
+import type { ThemeTemplateFieldOptions } from "../../types";
 
 export {
   childBlockToPayloadBlock,
@@ -8,8 +8,8 @@ export {
   sectionToPayloadBlock,
   settingFieldToPayloadField,
   type ConvertFieldOptions,
-} from "./converter.js";
-export type { ThemeTemplateFieldOptions } from "../../types.js";
+} from "./converter";
+export type { ThemeTemplateFieldOptions } from "../../types";
 export const themeTemplateField = (
   overrides?: ThemeTemplateFieldOptions
 ): RelationshipField => {

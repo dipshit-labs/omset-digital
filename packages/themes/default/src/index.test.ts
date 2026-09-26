@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cssVars, defaultTheme, heroSection, homePreset } from "./index.js";
+import { cssVars, defaultTheme, heroSection, homePreset } from "./index";
 
 describe("default-theme package", () => {
   it("declares theme manifest with global branding settings", () => {

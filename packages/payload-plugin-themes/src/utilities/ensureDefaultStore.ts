@@ -2,7 +2,7 @@ import type {
   ThemeSettingValue,
   ThemeSyncDoc,
   ThemeSyncPayload,
-} from "../types.js";
+} from "../types";
 
 export const ensureDefaultStore = (
   client: ThemeSyncPayload,

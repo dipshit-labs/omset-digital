@@ -5,12 +5,12 @@ import type {
   SectionDefinition,
   SettingField,
   ThemeManifestDefinition,
-} from "../../types.js";
+} from "../../types";
 import {
   manifestToPayloadBlocks,
   sectionToPayloadBlock,
   settingFieldToPayloadField,
-} from "./converter.js";
+} from "./converter";
 
 describe(settingFieldToPayloadField, () => {
   it("converts text field correctly", () => {

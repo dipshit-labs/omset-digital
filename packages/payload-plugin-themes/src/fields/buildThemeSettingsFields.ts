@@ -1,7 +1,7 @@
 import type { Condition, Field } from "payload";
 
-import type { ThemeManifestDefinition } from "../types.js";
-import { settingFieldToPayloadField } from "./ThemeTemplateField/converter.js";
+import type { ThemeManifestDefinition } from "../types";
+import { settingFieldToPayloadField } from "./ThemeTemplateField/converter";
 
 export const buildThemeSettingsFields = (
   manifests: ThemeManifestDefinition[],

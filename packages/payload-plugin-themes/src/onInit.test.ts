@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { syncThemes } from "./onInit.js";
-import type { ThemeManifestDefinition, ThemeSettingValue } from "./types.js";
+import { syncThemes } from "./onInit";
+import type { ThemeManifestDefinition, ThemeSettingValue } from "./types";
 
 interface MockDoc {
   id: string;

@@ -1,7 +1,7 @@
 import type {
   SanitizedThemesPluginOptions,
   ThemesPluginOptions,
-} from "./types.js";
+} from "./types";
 
 export const defaultPluginOptions = {
   autoSync: true,

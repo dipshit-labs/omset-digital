@@ -32,4 +32,4 @@ export {
   type ThemesPluginSlugs,
   type ToggleSettingField,
   type UploadSettingField,
-} from "../types.js";
+} from "../types";

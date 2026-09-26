@@ -1,12 +1,12 @@
 import type { Block, CollectionConfig, CollectionSlug, Field } from "payload";
 
-import { manifestToPayloadBlocks } from "../fields/ThemeTemplateField/converter.js";
+import { manifestToPayloadBlocks } from "../fields/ThemeTemplateField/converter";
 import type {
   CreateTemplatesCollectionOptions,
   ThemeManifestDefinition,
-} from "../types.js";
+} from "../types";
 
-export type { CreateTemplatesCollectionOptions } from "../types.js";
+export type { CreateTemplatesCollectionOptions } from "../types";
 
 export const createTemplatesCollection = (
   optionsOrManifests:

@@ -1,14 +1,14 @@
 import type { CollectionConfig, Field } from "payload";
 
-import { buildThemeSettingsFields } from "../fields/buildThemeSettingsFields.js";
-import { enforceSingleLiveTheme } from "../hooks/enforceSingleLiveTheme.js";
+import { buildThemeSettingsFields } from "../fields/buildThemeSettingsFields";
+import { enforceSingleLiveTheme } from "../hooks/enforceSingleLiveTheme";
 import type {
   CreateThemesCollectionOptions,
   ThemeManifestDefinition,
-} from "../types.js";
+} from "../types";
 
-export { enforceSingleLiveTheme as createEnsureSingleLiveThemeHook } from "../hooks/enforceSingleLiveTheme.js";
-export type { CreateThemesCollectionOptions } from "../types.js";
+export { enforceSingleLiveTheme as createEnsureSingleLiveThemeHook } from "../hooks/enforceSingleLiveTheme";
+export type { CreateThemesCollectionOptions } from "../types";
 
 export const createThemesCollection = (
   optionsOrManifests: CreateThemesCollectionOptions | ThemeManifestDefinition[]

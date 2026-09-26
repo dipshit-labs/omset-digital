@@ -4,11 +4,11 @@ import type {
   SyncThemesOptions,
   ThemeSyncDoc,
   ThemeSyncPayload,
-} from "./types.js";
-import { ensureDefaultStore } from "./utilities/ensureDefaultStore.js";
-import { getSyncClient } from "./utilities/getSyncClient.js";
-import { syncTemplatesForTheme } from "./utilities/syncTemplatesForTheme.js";
-import { syncThemeForStore } from "./utilities/syncThemeForStore.js";
+} from "./types";
+import { ensureDefaultStore } from "./utilities/ensureDefaultStore";
+import { getSyncClient } from "./utilities/getSyncClient";
+import { syncTemplatesForTheme } from "./utilities/syncTemplatesForTheme";
+import { syncThemeForStore } from "./utilities/syncThemeForStore";
 
 export const syncThemes = async (
   payload: Payload | ThemeSyncPayload,
