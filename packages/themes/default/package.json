@@ -1,0 +1,35 @@
+{
+  "name": "@repo/theme-default",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/payload-plugin-themes": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@testing-library/dom": "catalog:test",
+    "@testing-library/react": "catalog:test",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@vitejs/plugin-react": "catalog:test",
+    "jsdom": "catalog:test",
+    "react": "catalog:react",
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

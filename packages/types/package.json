@@ -22,7 +22,7 @@
     "typescript": "catalog:types"
   },
   "peerDependencies": {
-    "payload": "^3.90.1"
+    "payload": "^3.90.0"
   },
   "peerDependenciesMeta": {
     "payload": {

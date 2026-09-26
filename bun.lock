@@ -26,6 +26,8 @@
         "@payloadcms/plugin-seo": "catalog:payload",
         "@payloadcms/richtext-lexical": "catalog:payload",
         "@payloadcms/ui": "catalog:payload",
+        "@repo/payload-plugin-themes": "workspace:*",
+        "@repo/theme-default": "workspace:*",
         "@repo/types": "workspace:*",
         "@repo/ui": "workspace:*",
         "@t3-oss/env-nextjs": "catalog:core",
@@ -49,6 +51,43 @@
         "jsdom": "catalog:test",
         "tailwindcss": "catalog:ui",
         "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+    },
+    "packages/payload-plugin-themes": {
+      "name": "@repo/payload-plugin-themes",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/node": "catalog:types",
+        "payload": "catalog:payload",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+      "peerDependencies": {
+        "payload": "^3.90.0",
+      },
+    },
+    "packages/themes/default": {
+      "name": "@repo/theme-default",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/payload-plugin-themes": "workspace:*",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@testing-library/dom": "catalog:test",
+        "@testing-library/react": "catalog:test",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react",
+        "@vitejs/plugin-react": "catalog:test",
+        "jsdom": "catalog:test",
+        "react": "catalog:react",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
       },
     },
     "packages/types": {
@@ -60,7 +99,7 @@
         "typescript": "catalog:types",
       },
       "peerDependencies": {
-        "payload": "^3.90.1",
+        "payload": "^3.90.0",
       },
       "optionalPeers": [
         "payload",
@@ -675,6 +714,10 @@
     "@pinojs/redact": ["@pinojs/redact@0.4.0", "", {}, "sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg=="],
 
     "@preact/signals-core": ["@preact/signals-core@1.14.4", "", {}, "sha512-HNB6HYeYKhQbJ1aKl+YRjrS4+QWHLKX6qKoUsfS/m0vqzsVaEBiZiaKbG/e+NKk2ch5ALQr/ihWaMHxiCuuWHA=="],
+
+    "@repo/payload-plugin-themes": ["@repo/payload-plugin-themes@workspace:packages/payload-plugin-themes"],
+
+    "@repo/theme-default": ["@repo/theme-default@workspace:packages/themes/default"],
 
     "@repo/types": ["@repo/types@workspace:packages/types"],
 

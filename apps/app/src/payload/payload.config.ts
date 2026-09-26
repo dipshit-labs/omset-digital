@@ -15,6 +15,8 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
+import { themesPlugin } from "@repo/payload-plugin-themes";
+import { defaultTheme } from "@repo/theme-default";
 import type { Config } from "@repo/types";
 import { buildConfig } from "payload";
 import sharp from "sharp";
@@ -85,6 +87,9 @@ export default buildConfig({
     defaultFromName: "Omset Digital",
   }),
   plugins: [
+    themesPlugin({
+      manifests: [defaultTheme],
+    }),
     multiTenantPlugin<Config>({
       tenantSelectorLabel: "Store",
       tenantsSlug: "stores",
@@ -94,6 +99,8 @@ export default buildConfig({
         media: { isGlobal: false },
         packages: { isGlobal: false },
         products: { isGlobal: false },
+        templates: { isGlobal: false },
+        themes: { isGlobal: false },
         variantOptions: { isGlobal: false },
         variants: { isGlobal: false },
         variantTypes: { isGlobal: false },

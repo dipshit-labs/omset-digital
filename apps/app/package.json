@@ -21,6 +21,8 @@
     "@payloadcms/plugin-seo": "catalog:payload",
     "@payloadcms/richtext-lexical": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
+    "@repo/payload-plugin-themes": "workspace:*",
+    "@repo/theme-default": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "@t3-oss/env-nextjs": "catalog:core",
@@ -43,6 +45,7 @@
     "babel-plugin-react-compiler": "catalog:react",
     "jsdom": "catalog:test",
     "tailwindcss": "catalog:ui",
-    "typescript": "catalog:types"
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
   }
 }

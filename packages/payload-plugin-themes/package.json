@@ -1,0 +1,39 @@
+{
+  "name": "@repo/payload-plugin-themes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./fields": {
+      "types": "./src/exports/fields.ts",
+      "default": "./src/exports/fields.ts"
+    },
+    "./client": {
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:types",
+    "payload": "catalog:payload",
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "payload": "^3.90.0"
+  }
+}

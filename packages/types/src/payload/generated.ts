@@ -76,6 +76,8 @@ export interface Config {
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
+    themes: Theme;
+    templates: Template;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -99,6 +101,8 @@ export interface Config {
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
+    themes: ThemesSelect<false> | ThemesSelect<true>;
+    templates: TemplatesSelect<false> | TemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -488,6 +492,92 @@ export interface Variant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: number;
+  store?: (number | null) | Store;
+  /**
+   * Display name of the theme
+   */
+  name: string;
+  /**
+   * Unique theme identifier matching the theme package slug
+   */
+  slug: string;
+  /**
+   * Installed theme package version
+   */
+  version?: string | null;
+  /**
+   * Set this theme as active for the store
+   */
+  isLive?: boolean | null;
+  /**
+   * Branding settings, colors, and typography presets
+   */
+  settings?: {
+    primaryColor?: string | null;
+    accentColor?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    fontHeading?: ('plus-jakarta-sans' | 'inter' | 'outfit') | null;
+    fontBody?: ('inter' | 'roboto') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates".
+ */
+export interface Template {
+  id: number;
+  store?: (number | null) | Store;
+  /**
+   * Template display name (e.g. Home, Product Details)
+   */
+  name: string;
+  /**
+   * The route type this layout template applies to
+   */
+  type: 'home' | 'product' | 'collection' | 'page';
+  /**
+   * Installed theme this template belongs to
+   */
+  theme: number | Theme;
+  /**
+   * Ordered sections composing this template layout
+   */
+  sections?:
+    | {
+        heading: string;
+        subheading?: string | null;
+        cta?: {
+          url?: string | null;
+          label?: string | null;
+          newTab?: boolean | null;
+        };
+        alignment?: ('left' | 'center') | null;
+        blocks?:
+          | {
+              text: string;
+              icon?: ('check' | 'star' | 'heart') | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'bullet';
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'default_hero';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -545,6 +635,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'variantTypes';
         value: number | VariantType;
+      } | null)
+    | ({
+        relationTo: 'themes';
+        value: number | Theme;
+      } | null)
+    | ({
+        relationTo: 'templates';
+        value: number | Template;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -856,6 +954,73 @@ export interface VariantTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes_select".
+ */
+export interface ThemesSelect<T extends boolean = true> {
+  store?: T;
+  name?: T;
+  slug?: T;
+  version?: T;
+  isLive?: T;
+  settings?:
+    | T
+    | {
+        primaryColor?: T;
+        accentColor?: T;
+        backgroundColor?: T;
+        textColor?: T;
+        fontHeading?: T;
+        fontBody?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates_select".
+ */
+export interface TemplatesSelect<T extends boolean = true> {
+  store?: T;
+  name?: T;
+  type?: T;
+  theme?: T;
+  sections?:
+    | T
+    | {
+        default_hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              cta?:
+                | T
+                | {
+                    url?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              alignment?: T;
+              blocks?:
+                | T
+                | {
+                    bullet?:
+                      | T
+                      | {
+                          text?: T;
+                          icon?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
