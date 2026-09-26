@@ -1,3 +1,4 @@
+import { THEME_CSS_VARIABLE_KEYS } from "@repo/ui/tokens";
 import { describe, expect, it } from "vitest";
 
 import { cssVars, defaultTheme, heroSection, homePreset } from "./index";
@@ -40,7 +41,7 @@ describe("default-theme package", () => {
     expect(homePreset.sections[0].blocks?.length).toBe(2);
   });
 
-  it("cssVars maps theme settings to CSS variables", () => {
+  it("cssVars maps theme settings to @repo/ui CSS variables", () => {
     const vars = cssVars({
       accentColor: "#445566",
       backgroundColor: "#ffffff",
@@ -50,12 +51,18 @@ describe("default-theme package", () => {
       textColor: "#000000",
     });
     expect(vars).toStrictEqual({
-      "--color-accent": "#445566",
-      "--color-background": "#ffffff",
-      "--color-primary": "#112233",
-      "--color-text": "#000000",
-      "--font-body": "roboto",
-      "--font-heading": "outfit",
+      "--accent": "#445566",
+      "--background": "#ffffff",
+      "--font-template-body": "roboto",
+      "--font-template-heading": "outfit",
+      "--foreground": "#000000",
+      "--primary": "#112233",
     });
+  });
+
+  it("cssVars outputs valid @repo/ui CSS variable properties", () => {
+    const vars = cssVars({});
+    const keys = Object.keys(vars);
+    expect(keys.toSorted()).toStrictEqual(THEME_CSS_VARIABLE_KEYS.toSorted());
   });
 });

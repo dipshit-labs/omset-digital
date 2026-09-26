@@ -5,11 +5,14 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "@repo/payload-plugin-themes/types";
+import { THEME_CSS_VARIABLES } from "@repo/ui/tokens";
+import type { ThemeCssVars } from "@repo/ui/tokens";
 
 import { heroSection } from "./sections/hero";
 
 export { Hero, heroSection, heroSettings } from "./sections/hero";
 export type { HeroBulletBlock, HeroSettings } from "./sections/hero";
+export type { ThemeCssVars } from "@repo/ui/tokens";
 
 export const brandingSettings: SettingField[] = [
   {
@@ -89,37 +92,27 @@ export const homePreset: TemplatePresetDefinition = {
   ],
 };
 
-export type ThemeCssVars = Record<
-  | "--color-accent"
-  | "--color-background"
-  | "--color-primary"
-  | "--color-text"
-  | "--font-body"
-  | "--font-heading",
-  string
->;
-
 export const cssVars = (settings: ThemeSettingsRecord): ThemeCssVars => ({
-  "--color-accent":
+  [THEME_CSS_VARIABLES.accent]:
     typeof settings.accentColor === "string" ? settings.accentColor : "#3b82f6",
-  "--color-background":
+  [THEME_CSS_VARIABLES.background]:
     typeof settings.backgroundColor === "string"
       ? settings.backgroundColor
       : "#ffffff",
-  "--color-primary":
-    typeof settings.primaryColor === "string"
-      ? settings.primaryColor
-      : "#0f172a",
-  "--color-text":
-    typeof settings.textColor === "string" ? settings.textColor : "#0f172a",
-  "--font-body":
+  [THEME_CSS_VARIABLES.fontBody]:
     typeof settings.fontBody === "string"
       ? settings.fontBody
       : "var(--font-inter)",
-  "--font-heading":
+  [THEME_CSS_VARIABLES.fontHeading]:
     typeof settings.fontHeading === "string"
       ? settings.fontHeading
       : "var(--font-plus-jakarta-sans)",
+  [THEME_CSS_VARIABLES.foreground]:
+    typeof settings.textColor === "string" ? settings.textColor : "#0f172a",
+  [THEME_CSS_VARIABLES.primary]:
+    typeof settings.primaryColor === "string"
+      ? settings.primaryColor
+      : "#0f172a",
 });
 
 export const defaultTheme: ThemeManifestDefinition = defineTheme({

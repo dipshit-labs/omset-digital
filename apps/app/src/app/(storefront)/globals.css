@@ -1,1 +1,10 @@
-@import "@repo/ui/styles/globals.css";
+@import "tailwindcss";
+@import "@repo/ui/shared.css";
+
+@source "../../../../../packages/themes/**/*.{ts,tsx}";
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -4,15 +4,27 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+    "./shared.css": "./src/styles/shared.css",
+    "./postcss": "./postcss.config.mjs",
+    "./tokens": {
+      "types": "./src/tokens/index.ts",
+      "default": "./src/tokens/index.ts"
     },
-    "./styles/*": "./src/styles/*",
-    "./components/*": "./src/components/*",
-    "./postcss": "./postcss.config.mjs"
+    "./components/*": {
+      "types": "./src/components/*.tsx",
+      "default": "./src/components/*.tsx"
+    },
+    "./lib/*": {
+      "types": "./src/lib/*.ts",
+      "default": "./src/lib/*.ts"
+    },
+    "./hooks/*": {
+      "types": "./src/hooks/*.ts",
+      "default": "./src/hooks/*.ts"
+    }
   },
   "scripts": {
+    "shadcn": "shadcn",
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "typecheck": "tsc --noEmit"
   },
@@ -28,11 +40,14 @@
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:ui",
     "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "react": "catalog:react",
+    "react-dom": "catalog:react",
     "tailwindcss": "catalog:ui",
     "typescript": "catalog:types"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

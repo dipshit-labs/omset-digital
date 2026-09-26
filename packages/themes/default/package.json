@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/payload-plugin-themes": "workspace:*"
+    "@repo/payload-plugin-themes": "workspace:*",
+    "@repo/ui": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

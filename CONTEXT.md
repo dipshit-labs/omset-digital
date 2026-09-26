@@ -67,8 +67,12 @@ An inner child element within a Section (e.g. feature bullet, testimonial card, 
 _Avoid_: Sub-block, component, item
 
 **Theme Package**:
-An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, settings schemas, page presets, and a `cssVars` function using the DSL from `@repo/payload-plugin-themes/types`.
+An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, settings schemas, page presets, and a `cssVars` function using the DSL from `@repo/payload-plugin-themes/types`. Maps theme settings directly to the `@repo/ui` styling contract.
 _Avoid_: Template package, theme bundle, addon
+
+**Styling Contract**:
+The canonical design tokens and CSS custom properties defined and owned by `@repo/ui` (`@repo/ui/tokens`, `shared.css`). Theme packages map their settings to these variables rather than declaring arbitrary custom property names.
+_Avoid_: Theme variables, custom styling schema
 
 **Theme Plugin**:
 The Payload CMS plugin (`@repo/payload-plugin-themes`) that injects the theme engine collections (`themes`, `templates`), DSL contracts, field helpers, live preview integration, and boot-time auto-sync.
