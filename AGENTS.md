@@ -2,12 +2,39 @@
 
 ### Issue tracker
 
-Issues live in GitHub Issues on `dipshit-labs/omset-digital`. See `docs/agents/issue-tracker.md`.
+Issues and specifications live in GitHub Issues on `dipshit-labs/omset-digital`. Use the `gh` CLI for all operations. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Default five-label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+Five canonical roles: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context layout: one `CONTEXT.md` at root, ADRs under `docs/adr/`. See `docs/agents/domain.md`.
+Single-context layout with `CONTEXT.md` at root and architecture decision records under `docs/adr/`. Consult these before planning domain changes. See `docs/agents/domain.md`.
+
+### Coding standards
+
+`CODING_STANDARDS.md` defines the contracts evaluated during `/code-review`. Read it while writing code, not only during review. Core rules:
+- **Tenant isolation.** Every write to tenant data must pass store scoping through `enforceStoreOnCreate` and `canWrite`.
+- **No any leaks.** Unknown incoming values get `unknown` and type guards. Type assertions require `// SAFETY:` justifications.
+- **Normalized product variants.** Products split across four collections: `products`, `variantTypes`, `variantOptions`, and `variants`. Every variant stores weight in grams for shipping calculations.
+- **Storefront sections.** Section components render as pure React Server Components without client JavaScript.
+
+### Repository layout and boundaries
+
+Turborepo monorepo managed with Bun. Packages export TypeScript source directly through explicit subpaths in `package.json`.
+- `apps/app`. Next.js 15 App Router with embedded Payload CMS 3. Routes isolate public buyer pages in `(storefront)` and admin API endpoints in `(payload)`. Runtime server environment variables must resolve through `@/env` at boot.
+- `packages/payload-plugin-themes`. Payload plugin managing themes and templates. Public entry points export through `./types`, `./fields`, and `./client`.
+- `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts only from `@repo/payload-plugin-themes/types` and design tokens from `@repo/ui`.
+- `packages/ui`. Shared design tokens, CSS variables, and primitives.
+- `packages/types`. Monorepo types and generated Payload schema.
+
+### Testing
+
+Vitest runs all unit and integration tests. Target specific test files during iteration using `bun test path/to/file.test.ts`. Full monorepo suites run in CI. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
+
+### Quality checks
+
+- `bun run check`: Runs `ultracite check` to enforce oxlint, oxfmt, and perfectionist rules. Fails on warnings.
+- `bun run fix`: Automatically formats code and fixes autofixable lint errors.
+- `bun run typecheck`: Runs TypeScript checks across all packages through Turborepo.
