@@ -3,17 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "dev": "next dev -p 3000",
-    "generate:importmap": "payload generate:importmap",
-    "generate:types": "payload generate:types",
+    "build": "next build",
+    "start": "next start",
+    "analyze": "next experimental-analyze",
+    "test": "vitest run",
     "payload": "payload",
-    "test": "vitest",
-    "typecheck": "next typegen && bun generate:types && tsc --noEmit",
-    "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "codegen": "next typegen && payload generate:types && payload generate:importmap",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next/env": "catalog:test",
     "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/email-resend": "catalog:payload",
     "@payloadcms/next": "catalog:payload",

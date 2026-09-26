@@ -1,7 +1,10 @@
 import path from "node:path";
 
+import { loadEnvConfig } from "@next/env";
 import react from "@vitejs/plugin-react";
 import { defineProject } from "vitest/config";
+
+const { combinedEnv } = loadEnvConfig(process.cwd());
 
 export default defineProject({
   plugins: [react()],
@@ -15,6 +18,7 @@ export default defineProject({
     },
   },
   test: {
+    env: combinedEnv,
     environment: "jsdom",
     name: "app",
   },

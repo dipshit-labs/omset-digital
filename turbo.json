@@ -2,25 +2,44 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!vitest.config.*",
+        "!README.md",
+        "!AGENTS.md"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "PAYLOAD_SECRET",
+        "RESEND_API_KEY",
+        "PAYLOAD_SEED",
+        "NEXT_PUBLIC_SERVER_URL"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["transit"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "outputs": []
     },
     "dev": {
       "cache": false,
-      "persistent": true
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
+      "persistent": true,
+      "interruptible": true
     },
     "clean": {
-      "cache": false
-    },
-    "//#clean": {
       "cache": false
     }
   }

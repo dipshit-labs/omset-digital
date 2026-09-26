@@ -23,7 +23,7 @@
   },
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

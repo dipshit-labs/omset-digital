@@ -11,7 +11,7 @@
   },
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "@vitejs/plugin-react": "catalog:test",
     "jsdom": "catalog:test",
     "react": "catalog:react",
+    "react-dom": "catalog:react",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   },
