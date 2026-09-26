@@ -14,7 +14,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@next/env": "catalog:test",
     "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/email-resend": "catalog:payload",
     "@payloadcms/next": "catalog:payload",
