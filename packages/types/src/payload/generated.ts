@@ -521,8 +521,8 @@ export interface Theme {
     accentColor?: string | null;
     backgroundColor?: string | null;
     textColor?: string | null;
-    fontHeading?: ('plus-jakarta-sans' | 'inter' | 'outfit') | null;
-    fontBody?: ('inter' | 'roboto') | null;
+    fontHeading?: ('var(--font-plus-jakarta-sans)' | 'var(--font-inter)' | 'var(--font-outfit)') | null;
+    fontBody?: ('var(--font-inter)' | 'var(--font-roboto)') | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -553,12 +553,12 @@ export interface Template {
     | {
         heading: string;
         subheading?: string | null;
-        cta?: {
-          url?: string | null;
+        alignment?: ('center' | 'left') | null;
+        cta: {
           label?: string | null;
+          url: string;
           newTab?: boolean | null;
         };
-        alignment?: ('left' | 'center') | null;
         blocks?:
           | {
               text: string;
@@ -995,14 +995,14 @@ export interface TemplatesSelect<T extends boolean = true> {
           | {
               heading?: T;
               subheading?: T;
+              alignment?: T;
               cta?:
                 | T
                 | {
-                    url?: T;
                     label?: T;
+                    url?: T;
                     newTab?: T;
                   };
-              alignment?: T;
               blocks?:
                 | T
                 | {
