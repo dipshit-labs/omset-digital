@@ -25,6 +25,7 @@ export {
   type TemplateType,
   type TextSettingField,
   type TextareaSettingField,
+  type ThemeClientManifest,
   type ThemeManifestDefinition,
   type ThemeSettingsRecord,
   type ThemeSettingValue,

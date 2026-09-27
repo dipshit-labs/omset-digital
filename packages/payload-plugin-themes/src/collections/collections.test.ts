@@ -189,4 +189,23 @@ describe("Collection admin.livePreview Hooks", () => {
       "/next/preview?path=%2Ftoko-sepatu%2Fproducts"
     );
   });
+
+  it("includes previewSecret in livePreview URL when previewSecret option is provided", async () => {
+    const config = createThemesCollection({
+      manifests: [testManifest],
+      previewSecret: "test-secret-token",
+    });
+
+    const livePreview = config.admin?.livePreview;
+    // SAFETY: livePreview.url was asserted to be defined.
+    const urlFn = livePreview?.url as LivePreviewURLFunction;
+    const url = await urlFn(
+      createFakeLivePreviewArgs({
+        slug: "test-theme",
+        store: { slug: "toko-kopi" },
+      })
+    );
+
+    expect(url).toContain("previewSecret=test-secret-token");
+  });
 });

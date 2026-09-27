@@ -1,10 +1,26 @@
-import type { Config, Plugin } from "payload";
+import type { CollectionConfig, Config, Plugin } from "payload";
 
 import { createTemplatesCollection } from "./collections/createTemplatesCollection";
 import { createThemesCollection } from "./collections/createThemesCollection";
 import { sanitizePluginConfig } from "./defaults";
 import { syncThemes } from "./onInit";
 import type { ThemesPluginOptions } from "./types";
+
+const mergeCollectionAdmin = (
+  baseAdmin: CollectionConfig["admin"],
+  existingAdmin: CollectionConfig["admin"]
+): CollectionConfig["admin"] => ({
+  ...baseAdmin,
+  ...existingAdmin,
+  ...(baseAdmin?.livePreview || existingAdmin?.livePreview
+    ? {
+        livePreview: {
+          ...baseAdmin?.livePreview,
+          ...existingAdmin?.livePreview,
+        },
+      }
+    : {}),
+});
 
 export const themesPlugin =
   (pluginOptions: ThemesPluginOptions): Plugin =>
@@ -18,6 +34,7 @@ export const themesPlugin =
       defaultMediaSlug: options.defaultMediaSlug,
       manifests: options.manifests,
       overrides: options.overrides.themes,
+      previewSecret: options.previewSecret,
       slug: options.slugs.themes,
       tenantField: options.tenantField,
       tenantsSlug: options.tenantsSlug,
@@ -27,6 +44,7 @@ export const themesPlugin =
       defaultMediaSlug: options.defaultMediaSlug,
       manifests: options.manifests,
       overrides: options.overrides.templates,
+      previewSecret: options.previewSecret,
       slug: options.slugs.templates,
       tenantField: options.tenantField,
       tenantsSlug: options.tenantsSlug,
@@ -45,6 +63,7 @@ export const themesPlugin =
       config.collections[existingThemesIndex] = {
         ...themesCollection,
         ...existing,
+        admin: mergeCollectionAdmin(themesCollection.admin, existing.admin),
         fields: [...themesCollection.fields, ...(existing.fields || [])],
         hooks: {
           ...themesCollection.hooks,
@@ -68,6 +87,7 @@ export const themesPlugin =
       config.collections[existingTemplatesIndex] = {
         ...templatesCollection,
         ...existing,
+        admin: mergeCollectionAdmin(templatesCollection.admin, existing.admin),
         fields: [...templatesCollection.fields, ...(existing.fields || [])],
       };
     }

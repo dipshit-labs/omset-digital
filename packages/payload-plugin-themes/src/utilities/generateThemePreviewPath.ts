@@ -50,11 +50,23 @@ const applyStorePrefix = (
   }
 
   const storePrefix = `/${trimmedSlug}`;
-  if (targetPath === storePrefix || targetPath.startsWith(`${storePrefix}/`)) {
+  if (
+    targetPath === storePrefix ||
+    targetPath.startsWith(`${storePrefix}/`) ||
+    targetPath.startsWith(`${storePrefix}?`)
+  ) {
     return targetPath;
   }
 
-  return targetPath === "/" ? storePrefix : `${storePrefix}${targetPath}`;
+  if (targetPath === "/") {
+    return storePrefix;
+  }
+
+  if (targetPath.startsWith("/?")) {
+    return `${storePrefix}${targetPath.slice(1)}`;
+  }
+
+  return `${storePrefix}${targetPath}`;
 };
 
 export const generateThemePreviewPath = ({

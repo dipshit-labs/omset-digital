@@ -223,4 +223,39 @@ describe(themesPlugin, () => {
     expect(themeRelField).toBeDefined();
     expect(themeRelField?.relationTo).toBe("store_themes");
   });
+
+  it("preserves admin.livePreview on existing or overridden collections", async () => {
+    const plugin = themesPlugin({
+      manifests: [sampleManifest],
+      previewSecret: "plugin-preview-secret",
+    });
+
+    const config = createTestConfig([
+      {
+        fields: [],
+        slug: "themes",
+        admin: {
+          useAsTitle: "name",
+        },
+      },
+      {
+        fields: [],
+        slug: "templates",
+        admin: {
+          useAsTitle: "name",
+        },
+      },
+    ]);
+
+    const modifiedConfig = await plugin(config);
+    const themesCol = (modifiedConfig.collections || []).find(
+      (c: CollectionConfig) => c.slug === "themes"
+    );
+    const templatesCol = (modifiedConfig.collections || []).find(
+      (c: CollectionConfig) => c.slug === "templates"
+    );
+
+    expect(themesCol?.admin?.livePreview?.url).toBeTypeOf("function");
+    expect(templatesCol?.admin?.livePreview?.url).toBeTypeOf("function");
+  });
 });

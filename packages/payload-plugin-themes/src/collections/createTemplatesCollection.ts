@@ -97,6 +97,7 @@ export const createTemplatesCollection = (
           let templatePath = "/";
           const templateType =
             typeof data?.type === "string" ? data.type : "home";
+
           if (templateType === "home") {
             templatePath = "/";
           } else if (templateType === "product") {
@@ -112,6 +113,7 @@ export const createTemplatesCollection = (
           return generateThemePreviewPath({
             collection: options.slug ?? "templates",
             path: templatePath,
+            previewSecret: options.previewSecret,
             req,
             slug: typeof data?.slug === "string" ? data.slug : undefined,
             storeSlug,

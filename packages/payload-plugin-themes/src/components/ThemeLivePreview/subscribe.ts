@@ -1,5 +1,6 @@
 import type {
   TemplateSectionInstance,
+  ThemeClientManifest,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "../../types";
@@ -20,7 +21,7 @@ export interface SubscribeThemeLivePreviewOptions {
   baseTokens?: Record<string, string>;
   initialSections?: TemplateSectionInstance[];
   initialSettings?: ThemeSettingsRecord;
-  manifest?: ThemeManifestDefinition;
+  manifest?: ThemeClientManifest | ThemeManifestDefinition;
   onDocumentEvent?: (event: ThemeDocumentEventMessage) => void;
   onUpdate?: (update: ThemeLivePreviewUpdate) => void;
   refresh?: () => void;
@@ -145,16 +146,19 @@ export const subscribeThemeLivePreview = ({
       const incomingSettings = extractSettings(record);
       if (incomingSettings) {
         currentSettings = incomingSettings;
+
         if (manifest) {
           currentThemeCssVars = evaluateThemeCssVars({
             baseTokens,
             manifest,
             settings: currentSettings,
           });
+
           if (applyToRoot) {
             applyCssVarsToRoot(currentThemeCssVars);
           }
         }
+
         hasUpdate = true;
       }
     }

@@ -224,6 +224,12 @@ export interface ThemeManifestDefinition {
   version: string;
 }
 
+export interface ThemeClientManifest {
+  name?: string;
+  settings?: SettingField[];
+  slug?: string;
+}
+
 export const defineTheme = (
   manifest: ThemeManifestDefinition
 ): ThemeManifestDefinition => manifest;
@@ -253,6 +259,7 @@ export interface ThemesPluginOptions {
   manifests: ThemeManifestDefinition[];
   overrides?: ThemesPluginOverrides;
   slugs?: ThemesPluginSlugs;
+  previewSecret?: string;
   tenantField?: string;
   tenantsSlug?: string;
 }
@@ -268,6 +275,7 @@ export interface SanitizedThemesPluginOptions {
     templates: string;
     themes: string;
   };
+  previewSecret?: string;
   tenantField: string;
   tenantsSlug: string;
 }
@@ -277,6 +285,7 @@ export interface CreateThemesCollectionOptions {
   manifests: ThemeManifestDefinition[];
   overrides?: Partial<CollectionConfig>;
   slug?: string;
+  previewSecret?: string;
   tenantField?: string;
   tenantsSlug?: string;
 }
@@ -286,6 +295,7 @@ export interface CreateTemplatesCollectionOptions {
   manifests: ThemeManifestDefinition[];
   overrides?: Partial<CollectionConfig>;
   slug?: string;
+  previewSecret?: string;
   tenantField?: string;
   tenantsSlug?: string;
   themesSlug?: string;

@@ -94,8 +94,10 @@ export const createThemesCollection = (
             tenantField,
             tenantsSlug: options.tenantsSlug ?? "stores",
           });
+
           return generateThemePreviewPath({
             collection: options.slug ?? "themes",
+            previewSecret: options.previewSecret,
             req,
             slug: typeof data?.slug === "string" ? data.slug : undefined,
             storeSlug,

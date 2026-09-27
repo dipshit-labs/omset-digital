@@ -1,4 +1,6 @@
 import config from "@payload-config";
+import type { TemplateType } from "@repo/payload-plugin-themes/types";
+import { toClientThemeManifest } from "@repo/payload-plugin-themes/utilities";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -12,12 +14,30 @@ export interface HomePageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+const resolveTemplateType = (
+  params: Record<string, string | string[] | undefined>
+): TemplateType => {
+  let raw: string | undefined;
+
+  if (typeof params.templateType === "string") {
+    raw = params.templateType;
+  } else if (typeof params.template === "string") {
+    raw = params.template;
+  }
+  if (raw === "product" || raw === "collection" || raw === "page") {
+    return raw;
+  }
+
+  return "home";
+};
+
 const Home = async ({ searchParams }: HomePageProps): Promise<ReactElement> => {
   const { isEnabled: draft } = await draftMode();
   const headersList = await headers();
   const host = headersList.get("host");
   const params = searchParams ? await searchParams : {};
   const storeSlug = typeof params.store === "string" ? params.store : undefined;
+  const templateType = resolveTemplateType(params);
 
   const payload = await getPayload({ config });
   const context = await resolveStorefront({
@@ -25,7 +45,7 @@ const Home = async ({ searchParams }: HomePageProps): Promise<ReactElement> => {
     host,
     payload,
     storeSlug,
-    templateType: "home",
+    templateType,
   });
 
   if (!context) {
@@ -34,7 +54,11 @@ const Home = async ({ searchParams }: HomePageProps): Promise<ReactElement> => {
 
   return (
     <>
-      {draft ? <LivePreviewListener manifest={context.manifest} /> : null}
+      {draft ? (
+        <LivePreviewListener
+          manifest={toClientThemeManifest(context.manifest)}
+        />
+      ) : null}
       <StorefrontCanvas context={context} />
     </>
   );

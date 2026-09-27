@@ -33,6 +33,7 @@ export const sanitizePluginConfig = (
     enabled: options.enabled ?? defaultPluginOptions.enabled,
     manifests: options.manifests ?? [],
     overrides: options.overrides ?? {},
+    previewSecret: options.previewSecret,
     tenantField,
     tenantsSlug,
     slugs: {

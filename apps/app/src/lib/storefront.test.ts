@@ -132,6 +132,12 @@ const toPaginatedDocs = <T>(docs: T[], limit = 10): PaginatedDocs<T> => ({
 });
 
 const createMockPayload = () => {
+  const findCalls: {
+    collection: string;
+    draft?: boolean;
+    overrideAccess?: boolean;
+  }[] = [];
+
   const stores: Store[] = [];
   const themes: Theme[] = [];
   const templates: Template[] = [];
@@ -139,13 +145,19 @@ const createMockPayload = () => {
   // SAFETY: Mock find method satisfies StorefrontPayloadClient signature.
   const find = (<T>({
     collection,
+    draft,
     limit = 10,
+    overrideAccess,
     where,
   }: {
     collection: string;
+    draft?: boolean;
     limit?: number;
+    overrideAccess?: boolean;
     where?: unknown;
   }): Promise<PaginatedDocs<T>> => {
+    findCalls.push({ collection, draft, overrideAccess });
+
     if (collection === "stores") {
       const filtered = filterStores(stores, where);
       // SAFETY: Filtered stores collection matches requested Store array.
@@ -168,9 +180,9 @@ const createMockPayload = () => {
       toPaginatedDocs(filtered.slice(0, limit) as T[], limit)
     );
   }) as StorefrontPayloadClient["find"];
-  const client = { find };
 
-  return { client, stores, templates, themes };
+  const client = { find };
+  return { client, findCalls, stores, templates, themes };
 };
 
 const createMockStore = (overrides: Partial<Store> = {}): Store => ({
@@ -329,5 +341,105 @@ describe(resolveStorefront, () => {
     expect(context?.sections).toHaveLength(1);
     expect(context?.themeCssVars["--primary"]).toBe("#ff0000");
     expect(context?.themeCssVars["--foreground"]).toBe("#111111");
+  });
+
+  it("passes draft: true and overrideAccess: true to payload.find when draft mode is enabled", async () => {
+    const { client, findCalls, stores, templates, themes } =
+      createMockPayload();
+    stores.push(
+      createMockStore({
+        id: 1,
+        name: "Toko Utama",
+        slug: "utama",
+      })
+    );
+
+    themes.push({
+      createdAt: "",
+      id: 10,
+      isLive: true,
+      name: "Default Theme",
+      slug: "default",
+      store: 1,
+      updatedAt: "",
+    });
+
+    templates.push({
+      createdAt: "",
+      id: 100,
+      name: "Home",
+      sections: [],
+      store: 1,
+      theme: 10,
+      type: "home",
+      updatedAt: "",
+    });
+
+    const context = await resolveStorefront({
+      draft: true,
+      host: "utama.localhost",
+      payload: client,
+    });
+
+    expect(context).not.toBeNull();
+    const themeFind = findCalls.find((call) => call.collection === "themes");
+    const templateFind = findCalls.find(
+      (call) => call.collection === "templates"
+    );
+
+    expect(themeFind?.draft).toBeTruthy();
+    expect(themeFind?.overrideAccess).toBeTruthy();
+    expect(templateFind?.draft).toBeTruthy();
+    expect(templateFind?.overrideAccess).toBeTruthy();
+  });
+
+  it("passes draft: false and overrideAccess: false to payload.find when draft mode is disabled", async () => {
+    const { client, findCalls, stores, templates, themes } =
+      createMockPayload();
+    stores.push(
+      createMockStore({
+        id: 1,
+        name: "Toko Utama",
+        slug: "utama",
+      })
+    );
+
+    themes.push({
+      createdAt: "",
+      id: 10,
+      isLive: true,
+      name: "Default Theme",
+      slug: "default",
+      store: 1,
+      updatedAt: "",
+    });
+
+    templates.push({
+      createdAt: "",
+      id: 100,
+      name: "Home",
+      sections: [],
+      store: 1,
+      theme: 10,
+      type: "home",
+      updatedAt: "",
+    });
+
+    const context = await resolveStorefront({
+      draft: false,
+      host: "utama.localhost",
+      payload: client,
+    });
+
+    expect(context).not.toBeNull();
+    const themeFind = findCalls.find((call) => call.collection === "themes");
+    const templateFind = findCalls.find(
+      (call) => call.collection === "templates"
+    );
+
+    expect(themeFind?.draft).toBeFalsy();
+    expect(themeFind?.overrideAccess).toBeFalsy();
+    expect(templateFind?.draft).toBeFalsy();
+    expect(templateFind?.overrideAccess).toBeFalsy();
   });
 });

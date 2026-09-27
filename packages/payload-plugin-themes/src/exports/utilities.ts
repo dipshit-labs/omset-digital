@@ -23,3 +23,5 @@ export {
   resolveTenantStoreSlug,
   type ResolveTenantStoreSlugOptions,
 } from "../utilities/resolveTenantStoreSlug";
+
+export { toClientThemeManifest } from "../utilities/toClientThemeManifest";

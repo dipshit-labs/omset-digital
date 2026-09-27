@@ -3,7 +3,11 @@
 import { useEffect } from "react";
 import type { ReactElement } from "react";
 
-import type { ThemeManifestDefinition, ThemeSettingsRecord } from "../../types";
+import type {
+  ThemeClientManifest,
+  ThemeManifestDefinition,
+  ThemeSettingsRecord,
+} from "../../types";
 import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import { subscribeThemeLivePreview } from "./subscribe";
 import type { ThemeLivePreviewUpdate } from "./subscribe";
@@ -12,7 +16,7 @@ export interface ThemeLivePreviewListenerProps {
   applyToRoot?: boolean;
   baseTokens?: Record<string, string>;
   initialSettings?: ThemeSettingsRecord;
-  manifest?: ThemeManifestDefinition;
+  manifest?: ThemeClientManifest | ThemeManifestDefinition;
   onDocumentEvent?: (event: ThemeDocumentEventMessage) => void;
   onUpdate?: (update: ThemeLivePreviewUpdate) => void;
   refresh?: () => void;
