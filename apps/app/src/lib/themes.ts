@@ -1,0 +1,10 @@
+import type { ThemeManifestDefinition } from "@repo/payload-plugin-themes/types";
+import { defaultTheme } from "@repo/theme-default";
+
+const THEME_MANIFESTS = {
+  [defaultTheme.slug]: defaultTheme,
+} satisfies Record<string, ThemeManifestDefinition>;
+
+export const getThemeManifest = (
+  slug: string
+): ThemeManifestDefinition | undefined => THEME_MANIFESTS[slug];

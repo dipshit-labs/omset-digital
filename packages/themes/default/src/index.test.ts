@@ -1,7 +1,8 @@
-import { THEME_CSS_VARIABLE_KEYS } from "@repo/ui/tokens";
+import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/types";
+import { THEME_CSS_VARIABLE_KEYS, THEME_CSS_VARIABLES } from "@repo/ui/tokens";
 import { describe, expect, it } from "vitest";
 
-import { cssVars, defaultTheme, heroSection, homePreset } from "./index";
+import { defaultTheme, heroSection, homePreset } from "./index";
 
 describe("default-theme package", () => {
   it("declares theme manifest with global branding settings", () => {
@@ -41,27 +42,43 @@ describe("default-theme package", () => {
     expect(homePreset.sections[0].blocks?.length).toBe(2);
   });
 
-  it("cssVars maps theme settings to @repo/ui CSS variables", () => {
-    const vars = cssVars({
-      accentColor: "#445566",
-      backgroundColor: "#ffffff",
-      fontBody: "roboto",
-      fontHeading: "outfit",
-      primaryColor: "#112233",
-      textColor: "#000000",
+  it("declares declarative cssVar mappings on branding settings", () => {
+    const primaryField = defaultTheme.settings?.find(
+      (s) => s.name === "primaryColor"
+    );
+    expect(primaryField?.cssVar).toBe(THEME_CSS_VARIABLES.primary);
+
+    const fontHeadingField = defaultTheme.settings?.find(
+      (s) => s.name === "fontHeading"
+    );
+    const defaultValue =
+      fontHeadingField && "defaultValue" in fontHeadingField
+        ? fontHeadingField.defaultValue
+        : undefined;
+    expect(defaultValue).toBe("var(--font-plus-jakarta-sans)");
+  });
+
+  it("evaluates default theme CSS variables via plugin evaluator", () => {
+    const vars = evaluateThemeCssVars({
+      manifest: defaultTheme,
+      settings: {
+        accentColor: "#445566",
+        backgroundColor: "#ffffff",
+        fontBody: "var(--font-roboto)",
+        fontHeading: "var(--font-outfit)",
+        primaryColor: "#112233",
+        textColor: "#000000",
+      },
     });
-    expect(vars).toStrictEqual({
+
+    expect(vars).toMatchObject({
       "--accent": "#445566",
       "--background": "#ffffff",
-      "--font-template-body": "roboto",
-      "--font-template-heading": "outfit",
+      "--font-template-body": "var(--font-roboto)",
+      "--font-template-heading": "var(--font-outfit)",
       "--foreground": "#000000",
       "--primary": "#112233",
     });
-  });
-
-  it("cssVars outputs valid @repo/ui CSS variable properties", () => {
-    const vars = cssVars({});
     const keys = Object.keys(vars);
     expect(keys.toSorted()).toStrictEqual(THEME_CSS_VARIABLE_KEYS.toSorted());
   });

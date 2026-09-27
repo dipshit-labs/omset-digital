@@ -29,6 +29,7 @@ export interface BaseSettingField {
   admin?: {
     description?: string;
   };
+  cssVar?: string;
   label: string;
   name: string;
 }
@@ -54,6 +55,7 @@ export type NumberSettingField = BaseSettingField & {
   required?: boolean;
   step?: number;
   type: "number";
+  unit?: "%" | "em" | "ms" | "px" | "rem" | "s" | string;
 };
 
 export type ToggleSettingField = BaseSettingField & {
