@@ -33,9 +33,3 @@ export {
   type ToggleSettingField,
   type UploadSettingField,
 } from "../types";
-
-export {
-  evaluateFieldCssValue,
-  evaluateThemeCssVars,
-  type EvaluateThemeCssVarsOptions,
-} from "../utilities/evaluateThemeCssVars";

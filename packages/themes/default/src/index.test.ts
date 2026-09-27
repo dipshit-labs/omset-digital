@@ -1,4 +1,4 @@
-import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/types";
+import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/utilities";
 import { THEME_CSS_VARIABLE_KEYS, THEME_CSS_VARIABLES } from "@repo/ui/tokens";
 import { describe, expect, it } from "vitest";
 

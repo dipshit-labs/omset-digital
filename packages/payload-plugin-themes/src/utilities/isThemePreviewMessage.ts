@@ -3,7 +3,6 @@ export interface ThemePreviewMessage<T = unknown> {
   type: "payload-live-preview";
 }
 
-// FIXME: This can be moved to ThemeLivePreview when #37 get implemented(?)
 export const isThemePreviewMessage = (
   event: MessageEvent
 ): event is MessageEvent<ThemePreviewMessage> =>

@@ -16,6 +16,10 @@
       "types": "./src/exports/fields.ts",
       "default": "./src/exports/fields.ts"
     },
+    "./utilities": {
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
+    },
     "./client": {
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
@@ -26,14 +30,30 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@repo/ui": "workspace:*"
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@testing-library/dom": "catalog:test",
+    "@testing-library/react": "catalog:test",
     "@types/node": "catalog:types",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "jsdom": "catalog:test",
     "payload": "catalog:payload",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   },
   "peerDependencies": {
-    "payload": "^3.90.0"
+    "payload": "^3.90.0",
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

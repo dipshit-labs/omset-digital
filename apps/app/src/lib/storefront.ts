@@ -1,10 +1,10 @@
-import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/types";
 import type {
   TemplateSectionInstance,
   TemplateType,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "@repo/payload-plugin-themes/types";
+import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/utilities";
 import { defaultTheme } from "@repo/theme-default";
 import type { Store, Template, Theme } from "@repo/types";
 import { DEFAULT_THEME_TOKENS } from "@repo/ui/tokens";

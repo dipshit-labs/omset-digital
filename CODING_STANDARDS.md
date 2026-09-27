@@ -60,7 +60,7 @@ Theme packages under `packages/themes/` are standalone TypeScript packages. They
 
 - **Depend only on the theme plugin DSL.** Theme packages import manifest builders `defineTheme` and `defineSection`, settings field contracts, and type definitions strictly from `@repo/payload-plugin-themes/types`.
 - **Declarative CSS variable bindings.** Setting fields bind directly to canonical CSS custom properties via `cssVar` (such as `cssVar: "--primary"`) and optional `unit` on number fields (such as `unit: "px"`). Themes do not export custom `cssVars` mapping functions.
-- **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/payload-plugin-themes/types`, merging declarative theme bindings over `@repo/ui/tokens` defaults.
+- **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/payload-plugin-themes/utilities`, merging declarative theme bindings over `@repo/ui/tokens` defaults.
 - **Theme package file organization.** Theme packages organize code flatly into `sections/`, `templates/`, and root `branding.ts`, `manifest.ts`, and `index.ts`. Do not use intermediate `config/` or `presets/` directories.
 
 ### Storefront sections are React Server Components
@@ -79,7 +79,7 @@ All storefront layouts, pages, and theme section components run as React Server 
 Workspace packages inside `packages/*` export directly to TypeScript source files in their `package.json`, such as `src/index.ts` and `src/exports/*.ts`.
 
 - **No intermediate build step.** Internal packages do not compile to a `dist/` folder before consumption. Next.js and Turborepo compile package sources directly.
-- **Strict subpath exports.** Packages must define explicit exports in `package.json`. Group consumer-safe entry points under explicit subpaths, such as `./types`, `./fields`, and `./client`. Do not use uncurated barrel files that re-export internal files.
+- **Strict subpath exports.** Packages must define explicit exports in `package.json`. Group consumer-safe entry points under explicit subpaths, such as `./types`, `./fields`, `./utilities`, and `./client`. Do not use uncurated barrel files that re-export internal files.
 - **Pin versions through workspace catalogs.** Workspace packages specify dependencies using `catalog:` references in `package.json`. Do not specify independent hardcoded version strings for packages present in catalogs.
 
 ## Product and inventory model
