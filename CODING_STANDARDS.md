@@ -59,8 +59,9 @@ Each collection in `apps/app/src/payload/collections/` lives in its own director
 Theme packages under `packages/themes/` are standalone TypeScript packages. They must never import `payload`, `@payloadcms/*`, or `@repo/types`.
 
 - **Depend only on the theme plugin DSL.** Theme packages import manifest builders `defineTheme` and `defineSection`, settings field contracts, and type definitions strictly from `@repo/payload-plugin-themes/types`.
-- **Map theme settings to canonical CSS variables.** Every theme package must export a `cssVars(settings)` function that maps theme settings into the CSS custom properties defined by `@repo/ui/tokens`.
-- **Use OKLCH for default color tokens.** Color presets and fallback values in `cssVars` must use `oklch(...)` strings matching `@repo/ui/tokens`, rather than raw hex codes.
+- **Declarative CSS variable bindings.** Setting fields bind directly to canonical CSS custom properties via `cssVar` (such as `cssVar: "--primary"`) and optional `unit` on number fields (such as `unit: "px"`). Themes do not export custom `cssVars` mapping functions.
+- **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/payload-plugin-themes/types`, merging declarative theme bindings over `@repo/ui/tokens` defaults.
+- **Theme package file organization.** Theme packages organize code flatly into `sections/`, `templates/`, and root `branding.ts`, `manifest.ts`, and `index.ts`. Do not use intermediate `config/` or `presets/` directories.
 
 ### Storefront sections are React Server Components
 

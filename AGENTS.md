@@ -19,13 +19,14 @@ Single-context layout with `CONTEXT.md` at root and architecture decision record
 - **No any leaks.** Unknown incoming values get `unknown` and type guards. Type assertions require `// SAFETY:` justifications.
 - **Normalized product variants.** Products split across four collections: `products`, `variantTypes`, `variantOptions`, and `variants`. Every variant stores weight in grams for shipping calculations.
 - **Storefront sections.** Section components render as pure React Server Components without client JavaScript.
+- **Declarative theme tokens.** Theme settings bind directly to CSS variables on field definitions. Evaluated centrally with `evaluateThemeCssVars` rather than per-theme functions.
 
 ### Repository layout and boundaries
 
 Turborepo monorepo managed with Bun. Packages export TypeScript source directly through explicit subpaths in `package.json`.
 - `apps/app`. Next.js 15 App Router with embedded Payload CMS 3. Routes isolate public buyer pages in `(storefront)` and admin API endpoints in `(payload)`. Runtime server environment variables must resolve through `@/env` at boot.
 - `packages/payload-plugin-themes`. Payload plugin managing themes and templates. Public entry points export through `./types`, `./fields`, and `./client`.
-- `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts only from `@repo/payload-plugin-themes/types` and design tokens from `@repo/ui`.
+- `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts only from `@repo/payload-plugin-themes/types` and utilities from `@repo/ui`. Theme layouts structure code into `sections/`, `templates/`, and root `branding.ts`.
 - `packages/ui`. Shared design tokens, CSS variables, and primitives.
 - `packages/types`. Monorepo types and generated Payload schema.
 

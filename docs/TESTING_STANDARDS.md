@@ -71,7 +71,7 @@ Mock at system boundaries only: external network APIs, system time, randomness, 
 
 Never boot a full headless browser in unit and integration test suites. Headless browsers require extra setup, run slowly, and assert on styling details that intentional visual changes alter.
 
-- **Test props schemas and settings mappings.** Validate that section schemas, preset definitions, and `cssVars` mappings produce valid contracts. These are pure data transformations and run instantly.
+- **Test props schemas and settings bindings.** Validate that section schemas, template definitions, and declarative `cssVar` bindings produce valid contracts when evaluated with `evaluateThemeCssVars`. These are pure data transformations and run instantly.
 - **Test component interactivity in jsdom.** Render interactive client components with `@testing-library/react` and assert on accessible roles or user interactions.
 - **Inspect visual styling in the browser.** Visual appearance and live preview belong in manual checks in Next.js and Payload Admin, not automated pixel assertions.
 
