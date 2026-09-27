@@ -93,6 +93,7 @@ next-env.d.ts
 # Logs
 logs
 *.log
+.data/
 lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)

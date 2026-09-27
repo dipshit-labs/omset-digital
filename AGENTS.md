@@ -32,7 +32,15 @@ Turborepo monorepo managed with Bun. Packages export TypeScript source directly 
 
 ### Testing
 
-Vitest runs all unit and integration tests. Target specific test files during iteration using `bun test path/to/file.test.ts`. Full monorepo suites run in CI. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
+Vitest runs all unit and integration tests. Target specific test files during iteration using `bun --filter <package> test path/to/file.test.ts`. Full monorepo suites run in CI. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
+
+### Runtime server logs
+
+`bun run dev` pipes server output through `scripts/run-with-log.ts` into `.data/logs/`. Read `.data/logs/dev-latest.log` when pages throw at runtime, Payload hooks crash, or SSR fails. See `docs/agents/runtime-logs.md`.
+
+### Browser verification
+
+Drive user-facing storefront pages and Payload Admin in browser tabs using the `browser` tool before completing UI changes or resolving layout bugs. See `docs/agents/browser-verification.md` and feature maps under `docs/agents/features/`.
 
 ### Quality checks
 

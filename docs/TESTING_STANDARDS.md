@@ -73,7 +73,7 @@ Never boot a full headless browser in unit and integration test suites. Headless
 
 - **Test props schemas and settings bindings.** Validate that section schemas, template definitions, and declarative `cssVar` bindings produce valid contracts when evaluated with `evaluateThemeCssVars`. These are pure data transformations and run instantly.
 - **Test component interactivity in jsdom.** Render interactive client components with `@testing-library/react` and assert on accessible roles or user interactions.
-- **Inspect visual styling in the browser.** Visual appearance and live preview belong in manual checks in Next.js and Payload Admin, not automated pixel assertions.
+- **Verify user flows with the browser tool.** Visual appearance, responsive layouts, and live preview belong in interactive browser verification runs rather than automated pixel test assertions. See `docs/agents/browser-verification.md`.
 
 ## Vertical slice test-driven development
 

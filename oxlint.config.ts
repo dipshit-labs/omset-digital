@@ -34,6 +34,19 @@ export default defineConfig({
         "react/function-component-definition": "off",
       },
     },
+    {
+      files: ["scripts/**/*.{ts,js,mjs,cjs}"],
+      rules: {
+        "unicorn/filename-case": [
+          "error",
+          {
+            cases: {
+              kebabCase: true,
+            },
+          },
+        ],
+      },
+    },
   ],
 
   rules: {
