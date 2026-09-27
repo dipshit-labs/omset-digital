@@ -35,6 +35,5 @@ Vitest runs all unit and integration tests. Target specific test files during it
 
 ### Quality checks
 
-- `bun run check`: Runs `ultracite check` to enforce oxlint, oxfmt, and perfectionist rules. Fails on warnings.
-- `bun run fix`: Automatically formats code and fixes autofixable lint errors.
-- `bun run typecheck`: Runs TypeScript checks across all packages through Turborepo.
+- While making changes, run `bun run fix` to auto-format and resolve autofixable lint issues.
+- Before finishing, run `bun run check -- --format=agent` and `bun run typecheck` to ensure no lint warnings or TypeScript errors remain.
