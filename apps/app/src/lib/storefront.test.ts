@@ -311,6 +311,10 @@ describe(resolveStorefront, () => {
           blockType: "default_hero",
           heading: "Hero Title",
           id: "hero-1",
+          cta: {
+            label: "Test",
+            url: "/",
+          },
         },
       ],
     });

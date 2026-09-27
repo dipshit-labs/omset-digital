@@ -6,6 +6,7 @@ import type {
   TemplateSectionInstance,
   ThemeManifestDefinition,
 } from "../../types";
+import { isThemePreviewMessage } from "../../utilities/isThemePreviewMessage";
 import { ready } from "./ready";
 import { subscribeThemeLivePreview } from "./subscribe";
 import type { ThemeLivePreviewUpdate } from "./subscribe";
@@ -259,5 +260,83 @@ describe(subscribeThemeLivePreview, () => {
     expect(update?.sections).toStrictEqual(newSections);
 
     unsubscribe();
+  });
+
+  it("invokes refresh and onDocumentEvent callbacks when payload-document-event is received", () => {
+    const onUpdate = vi.fn<() => void>();
+    const onDocumentEvent = vi.fn<() => void>();
+    const refresh = vi.fn<() => void>();
+
+    const unsubscribe = subscribeThemeLivePreview({
+      manifest: mockManifest,
+      onDocumentEvent,
+      onUpdate,
+      refresh,
+      serverURL: "http://localhost:3000",
+    });
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        origin: "http://localhost:3000",
+        data: {
+          event: "save",
+          type: "payload-document-event",
+        },
+      })
+    );
+
+    expect(refresh).toHaveBeenCalledOnce();
+    expect(onDocumentEvent).toHaveBeenCalledOnce();
+    expect(onUpdate).not.toHaveBeenCalled();
+
+    unsubscribe();
+  });
+
+  it("ignores payload-document-event if origin does not match serverURL", () => {
+    const refresh = vi.fn<() => void>();
+    const onDocumentEvent = vi.fn<() => void>();
+
+    const unsubscribe = subscribeThemeLivePreview({
+      manifest: mockManifest,
+      onDocumentEvent,
+      refresh,
+      serverURL: "http://localhost:3000",
+    });
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        origin: "http://malicious-site.com",
+        data: {
+          type: "payload-document-event",
+        },
+      })
+    );
+
+    expect(refresh).not.toHaveBeenCalled();
+    expect(onDocumentEvent).not.toHaveBeenCalled();
+
+    unsubscribe();
+  });
+});
+
+describe(isThemePreviewMessage, () => {
+  it("identifies payload-live-preview and payload-document-event as valid theme preview messages", () => {
+    const livePreviewEvent = new MessageEvent("message", {
+      data: { data: {}, type: "payload-live-preview" },
+    });
+    const docEvent = new MessageEvent("message", {
+      data: { type: "payload-document-event" },
+    });
+    const unknownEvent = new MessageEvent("message", {
+      data: { type: "other-event" },
+    });
+    const nonObjectEvent = new MessageEvent("message", {
+      data: "hello",
+    });
+
+    expect(isThemePreviewMessage(livePreviewEvent)).toBeTruthy();
+    expect(isThemePreviewMessage(docEvent)).toBeTruthy();
+    expect(isThemePreviewMessage(unknownEvent)).toBeFalsy();
+    expect(isThemePreviewMessage(nonObjectEvent)).toBeFalsy();
   });
 });

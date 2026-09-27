@@ -1,7 +1,6 @@
 export { ready } from "./ready";
 export type { ReadyOptions } from "./ready";
 export { subscribeThemeLivePreview } from "./subscribe";
-export { useThemeLivePreview } from "./useThemeLivePreview";
 
 export type {
   SubscribeThemeLivePreviewOptions,
@@ -10,17 +9,11 @@ export type {
 } from "./subscribe";
 
 export {
-  ThemeLivePreview,
-  ThemeLivePreviewClient,
-} from "./ThemeLivePreviewClient";
+  RefreshRouteOnSave,
+  ThemeLivePreviewListener,
+} from "./ThemeLivePreviewListener";
 
 export type {
-  ThemeLivePreviewContext,
-  ThemeLivePreviewProps,
-  ThemeLivePreviewRenderProps,
-} from "./ThemeLivePreviewClient";
-
-export type {
-  UseThemeLivePreviewOptions,
-  UseThemeLivePreviewResult,
-} from "./useThemeLivePreview";
+  RefreshRouteOnSaveProps,
+  ThemeLivePreviewListenerProps,
+} from "./ThemeLivePreviewListener";

@@ -6,6 +6,8 @@ import type {
   CreateThemesCollectionOptions,
   ThemeManifestDefinition,
 } from "../types";
+import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
+import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
 export { enforceSingleLiveTheme as createEnsureSingleLiveThemeHook } from "../hooks/enforceSingleLiveTheme";
 export type { CreateThemesCollectionOptions } from "../types";
@@ -84,17 +86,49 @@ export const createThemesCollection = (
     admin: {
       defaultColumns: ["name", "slug", "version", "isLive"],
       useAsTitle: "name",
+      livePreview: {
+        url: async ({ data, req }) => {
+          const storeSlug = await resolveTenantStoreSlug({
+            data,
+            req,
+            tenantField,
+            tenantsSlug: options.tenantsSlug ?? "stores",
+          });
+          return generateThemePreviewPath({
+            collection: options.slug ?? "themes",
+            req,
+            slug: typeof data?.slug === "string" ? data.slug : undefined,
+            storeSlug,
+          });
+        },
+      },
     },
     hooks: {
       beforeChange: [
         enforceSingleLiveTheme(tenantField, options.slug ?? "themes"),
       ],
     },
+    versions: {
+      maxPerDoc: 50,
+      drafts: {
+        schedulePublish: true,
+        autosave: {
+          interval: 100,
+        },
+      },
+    },
   };
 
   return {
     ...baseConfig,
     ...options.overrides,
+    admin: {
+      ...baseConfig.admin,
+      ...options.overrides?.admin,
+      ...(options.overrides?.admin?.livePreview === undefined
+        ? {}
+        : { livePreview: options.overrides.admin.livePreview }),
+    },
     hooks: {
       ...baseConfig.hooks,
       ...options.overrides?.hooks,

@@ -20,6 +20,7 @@ export const themesPlugin =
       overrides: options.overrides.themes,
       slug: options.slugs.themes,
       tenantField: options.tenantField,
+      tenantsSlug: options.tenantsSlug,
     });
 
     const templatesCollection = createTemplatesCollection({
@@ -27,6 +28,8 @@ export const themesPlugin =
       manifests: options.manifests,
       overrides: options.overrides.templates,
       slug: options.slugs.templates,
+      tenantField: options.tenantField,
+      tenantsSlug: options.tenantsSlug,
       themesSlug: options.slugs.themes,
     });
 

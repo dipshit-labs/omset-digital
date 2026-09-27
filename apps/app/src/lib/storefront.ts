@@ -22,6 +22,7 @@ export interface ResolveStoreOptions {
 }
 
 export interface ResolveStorefrontOptions {
+  draft?: boolean;
   host?: string | null;
   payload: StorefrontPayloadClient;
   storeSlug?: string | null;
@@ -113,6 +114,7 @@ export const resolveStore = async ({
 };
 
 export const resolveStorefront = async ({
+  draft = false,
   host,
   payload,
   storeSlug,
@@ -126,12 +128,13 @@ export const resolveStorefront = async ({
   const liveThemes = await payload.find({
     collection: "themes",
     depth: 0,
+    draft,
     limit: 1,
+    overrideAccess: draft,
     where: {
       and: [{ store: { equals: store.id } }, { isLive: { equals: true } }],
     },
   });
-
   const themeDoc = liveThemes.docs[0] ?? null;
 
   const themeSlug =
@@ -143,7 +146,9 @@ export const resolveStorefront = async ({
     const templates = await payload.find({
       collection: "templates",
       depth: 1,
+      draft,
       limit: 1,
+      overrideAccess: draft,
       where: {
         and: [
           { theme: { equals: themeDoc.id } },

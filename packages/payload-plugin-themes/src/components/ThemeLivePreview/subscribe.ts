@@ -5,6 +5,7 @@ import type {
 } from "../../types";
 import { evaluateThemeCssVars } from "../../utilities/evaluateThemeCssVars";
 import { isThemePreviewMessage } from "../../utilities/isThemePreviewMessage";
+import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import { ready } from "./ready";
 
 export interface ThemeLivePreviewUpdate {
@@ -19,8 +20,10 @@ export interface SubscribeThemeLivePreviewOptions {
   baseTokens?: Record<string, string>;
   initialSections?: TemplateSectionInstance[];
   initialSettings?: ThemeSettingsRecord;
-  manifest: ThemeManifestDefinition;
-  onUpdate: (update: ThemeLivePreviewUpdate) => void;
+  manifest?: ThemeManifestDefinition;
+  onDocumentEvent?: (event: ThemeDocumentEventMessage) => void;
+  onUpdate?: (update: ThemeLivePreviewUpdate) => void;
+  refresh?: () => void;
   serverURL?: string;
 }
 
@@ -79,7 +82,9 @@ export const subscribeThemeLivePreview = ({
   initialSections,
   initialSettings,
   manifest,
+  onDocumentEvent,
   onUpdate,
+  refresh,
   serverURL,
 }: SubscribeThemeLivePreviewOptions): UnsubscribeThemeLivePreview => {
   if (typeof window === "undefined") {
@@ -88,13 +93,15 @@ export const subscribeThemeLivePreview = ({
 
   let currentSettings = initialSettings ?? {};
   let currentSections = initialSections ?? [];
-  let currentThemeCssVars = evaluateThemeCssVars({
-    baseTokens,
-    manifest,
-    settings: currentSettings,
-  });
+  let currentThemeCssVars = manifest
+    ? evaluateThemeCssVars({
+        baseTokens,
+        manifest,
+        settings: currentSettings,
+      })
+    : {};
 
-  if (applyToRoot) {
+  if (applyToRoot && manifest) {
     applyCssVarsToRoot(currentThemeCssVars);
   }
 
@@ -106,6 +113,11 @@ export const subscribeThemeLivePreview = ({
     if (serverURL && event.origin !== serverURL) {
       return;
     }
+    if (event.data.type === "payload-document-event") {
+      onDocumentEvent?.(event.data);
+      refresh?.();
+      return;
+    }
 
     const payloadEvent = event.data;
     const incomingData = payloadEvent.data;
@@ -113,7 +125,6 @@ export const subscribeThemeLivePreview = ({
     if (!incomingData || typeof incomingData !== "object") {
       return;
     }
-
     let hasUpdate = false;
 
     if (Array.isArray(incomingData)) {
@@ -134,20 +145,22 @@ export const subscribeThemeLivePreview = ({
       const incomingSettings = extractSettings(record);
       if (incomingSettings) {
         currentSettings = incomingSettings;
-        currentThemeCssVars = evaluateThemeCssVars({
-          baseTokens,
-          manifest,
-          settings: currentSettings,
-        });
-        if (applyToRoot) {
-          applyCssVarsToRoot(currentThemeCssVars);
+        if (manifest) {
+          currentThemeCssVars = evaluateThemeCssVars({
+            baseTokens,
+            manifest,
+            settings: currentSettings,
+          });
+          if (applyToRoot) {
+            applyCssVarsToRoot(currentThemeCssVars);
+          }
         }
         hasUpdate = true;
       }
     }
 
     if (hasUpdate) {
-      onUpdate({
+      onUpdate?.({
         data: incomingData,
         sections: currentSections,
         settings: currentSettings,

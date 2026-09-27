@@ -278,6 +278,7 @@ export interface CreateThemesCollectionOptions {
   overrides?: Partial<CollectionConfig>;
   slug?: string;
   tenantField?: string;
+  tenantsSlug?: string;
 }
 
 export interface CreateTemplatesCollectionOptions {
@@ -285,6 +286,8 @@ export interface CreateTemplatesCollectionOptions {
   manifests: ThemeManifestDefinition[];
   overrides?: Partial<CollectionConfig>;
   slug?: string;
+  tenantField?: string;
+  tenantsSlug?: string;
   themesSlug?: string;
 }
 
