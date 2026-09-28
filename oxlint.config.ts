@@ -35,6 +35,14 @@ export default defineConfig({
       },
     },
     {
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      rules: {
+        "anti-slop/no-unknown-parameters": "off",
+        "anti-slop/no-unsafe-dictionary-type": "off",
+        "anti-slop/require-safety-comment-for-type-assertion": "off",
+      },
+    },
+    {
       files: ["scripts/**/*.{ts,js,mjs,cjs}"],
       rules: {
         "unicorn/filename-case": [
