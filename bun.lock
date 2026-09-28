@@ -88,7 +88,9 @@
       "name": "@repo/theme-core",
       "version": "0.0.0",
       "dependencies": {
+        "@base-ui/react": "catalog:ui",
         "cn": "catalog:ui",
+        "tw-animate-css": "catalog:ui",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
@@ -98,16 +100,20 @@
         "@types/react": "catalog:react",
         "@types/react-dom": "catalog:react",
         "jsdom": "catalog:test",
+        "next": "catalog:react",
         "react": "catalog:react",
         "react-dom": "catalog:react",
+        "tailwindcss": "catalog:ui",
         "typescript": "catalog:types",
         "vitest": "catalog:test",
       },
       "peerDependencies": {
+        "next": "^15.0.0 || ^16.0.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
       },
       "optionalPeers": [
+        "next",
         "react",
         "react-dom",
       ],

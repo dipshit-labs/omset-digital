@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { ThemeManifestDefinition } from "../types";
 import { toClientThemeManifest } from "./toClientThemeManifest";
-import type { ThemeManifestDefinition } from "./types";
 
 describe(toClientThemeManifest, () => {
   it("extracts public manifest properties for client consumption", () => {

@@ -1,4 +1,4 @@
-import type { ThemeClientManifest, ThemeManifestDefinition } from "./types";
+import type { ThemeClientManifest, ThemeManifestDefinition } from "../types";
 
 export const toClientThemeManifest = (
   manifest?: ThemeManifestDefinition | null

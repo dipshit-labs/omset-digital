@@ -82,6 +82,10 @@ _Avoid_: Theme loader, theme plugin, UI kit
 The canonical design tokens and CSS custom properties prefixed with `--theme-*` defined and owned by `@repo/theme-core`. Organized into Merchant Controlled Tokens (backgrounds, surfaces, muted layers, text, borders, brand, shape, typography) and Fixed Tokens (status feedback and calculated radii). Theme packages map their settings to these variables rather than declaring arbitrary custom property names. Isolated from the platform branding styles in `@repo/ui`.
 _Avoid_: Theme variables, custom styling schema, UI tokens
 
+**Theme Primitive**:
+An unstyled, accessible UI or domain building block exported from `@repo/theme-core/primitives`. Governs structural positioning, viewport clamping, motion, and interaction states while leaving all visual styling to theme authors.
+_Avoid_: UI component, widget, element
+
 **Theme Plugin**:
 The Payload CMS plugin (`@repo/payload-plugin-themes`) that bridges the Theme Engine to Payload, registering the `themes` and `templates` collections, converting theme setting schemas into Payload fields, and wiring admin live preview.
 _Avoid_: Theme loader, template engine

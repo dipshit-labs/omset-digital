@@ -8,7 +8,7 @@ import type {
   TemplateSectionInstance,
   ThemeManifestDefinition,
 } from "../types";
-import { renderThemeSections } from "./index";
+import { renderThemeSections } from "./renderThemeSections";
 
 const MockHeroComponent = ({
   blocks,

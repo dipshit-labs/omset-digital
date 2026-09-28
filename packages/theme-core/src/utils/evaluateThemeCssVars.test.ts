@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  evaluateFieldCssValue,
-  evaluateThemeCssVars,
-} from "./evaluateThemeCssVars";
-import {
   calculateDerivedRadii,
   DEFAULT_MERCHANT_TOKENS,
   FIXED_THEME_TOKENS,
   MERCHANT_THEME_VARIABLES,
-} from "./tokens";
-import type { SettingField, ThemeManifestDefinition } from "./types";
+} from "../tokens";
+import type { SettingField, ThemeManifestDefinition } from "../types";
+import {
+  evaluateFieldCssValue,
+  evaluateThemeCssVars,
+} from "./evaluateThemeCssVars";
 
 describe(evaluateFieldCssValue, () => {
   it("formats number values with attached unit", () => {

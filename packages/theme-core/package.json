@@ -8,9 +8,21 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./types": {
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./primitives": {
+      "types": "./src/exports/primitives.ts",
+      "default": "./src/exports/primitives.ts"
+    },
     "./utils": {
-      "types": "./src/utils/index.ts",
-      "default": "./src/utils/index.ts"
+      "types": "./src/exports/utils.ts",
+      "default": "./src/exports/utils.ts"
+    },
+    "./utilities": {
+      "types": "./src/exports/utils.ts",
+      "default": "./src/exports/utils.ts"
     },
     "./styles": "./src/styles/theme.css"
   },
@@ -20,7 +32,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "cn": "catalog:ui"
+    "@base-ui/react": "catalog:ui",
+    "cn": "catalog:ui",
+    "tw-animate-css": "catalog:ui"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
@@ -30,16 +44,22 @@
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "jsdom": "catalog:test",
+    "next": "catalog:react",
     "react": "catalog:react",
     "react-dom": "catalog:react",
+    "tailwindcss": "catalog:ui",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   },
   "peerDependencies": {
+    "next": "^15.0.0 || ^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
     "react": {
       "optional": true
     },

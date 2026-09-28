@@ -1,10 +1,10 @@
-import { DEFAULT_THEME_TOKENS } from "./tokens";
-import type { ThemeCssVars } from "./tokens";
+import { DEFAULT_THEME_TOKENS } from "../tokens";
+import type { ThemeCssVars } from "../tokens";
 import type {
   SettingField,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
-} from "./types";
+} from "../types";
 
 export interface EvaluateThemeCssVarsOptions {
   baseTokens?: Record<string, string>;

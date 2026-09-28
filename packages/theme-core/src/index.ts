@@ -2,9 +2,9 @@ export {
   evaluateFieldCssValue,
   evaluateThemeCssVars,
   type EvaluateThemeCssVarsOptions,
-} from "./evaluateThemeCssVars";
+} from "./utils/evaluateThemeCssVars";
 
-export { toClientThemeManifest } from "./toClientThemeManifest";
+export { toClientThemeManifest } from "./utils/toClientThemeManifest";
 
 export {
   calculateDerivedRadii,
@@ -24,13 +24,13 @@ export {
 } from "./tokens";
 
 export {
+  defineSection,
+  defineTheme,
   type AnySectionDefinition,
   type ArraySettingField,
   type BaseSettingField,
   type BlocksSettingField,
   type ColorSettingField,
-  defineSection,
-  defineTheme,
   type GroupSettingField,
   type LinkSettingField,
   type LinkSettingValue,
@@ -47,8 +47,8 @@ export {
   type TemplatePresetDefinition,
   type TemplateSectionInstance,
   type TemplateType,
-  type TextareaSettingField,
   type TextSettingField,
+  type TextareaSettingField,
   type ThemeClientManifest,
   type ThemeManifestDefinition,
   type ThemeSettingsRecord,
