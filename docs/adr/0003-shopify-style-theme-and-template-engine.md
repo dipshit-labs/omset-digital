@@ -22,14 +22,16 @@ We chose Shopify's isolated-instance model with a plugin-driven engine:
    - `./types`: Pure TypeScript DSL definitions with zero Payload dependencies.
    - `./client`: Client-side live preview subscriber and styling wrapper for Next.js preview routes.
    - `./fields`: Field helpers (`themeTemplateField`) and block converters.
-8. **Dual-execution live preview**: The storefront preview route (`/preview`) mounts a client subscriber that receives Payload Admin live preview events via `postMessage`. In production, the exact same section components render as React Server Components with no client preview overhead.
+8. **Server-side live preview with draft mode**: Preview requests authenticate and enable Next.js Draft Mode via `/next/preview`, rendering draft document versions through standard React Server Component routes. A lightweight `ThemeLivePreviewListener` triggers `router.refresh()` on `payload-document-event` autosaves while updating declarative theme CSS custom properties instantly in memory.
 9. **Boot-time auto-sync**: On server startup, the plugin synchronizes registered theme manifests and default presets to existing stores in the database, creating a default store if the database has none.
+
 ## Considered options
 
 - **Single shared token schema on Store (rejected)**: Inflexible. Forced every theme into identical styling constraints and cluttered the core store record.
 - **Wiping section data on theme switch (rejected)**: Destroys merchant customization if they want to experiment with another theme and switch back.
 - **Standalone theme devtools without Payload (rejected)**: Reinvented form controls and preview chrome that Payload's native `livePreview` already provides, while disconnecting theme development from real store data.
 - **Monolithic plugin export (rejected)**: Leaks server-side Payload dependencies and Node globals into storefront client components.
+
 ## Consequences
 
 - Theme packages depend strictly on `@repo/payload-plugin-themes/types` and remain isolated from Payload internals.
