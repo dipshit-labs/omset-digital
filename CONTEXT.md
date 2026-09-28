@@ -71,17 +71,20 @@ An inner child element within a Section (e.g. feature bullet, testimonial card, 
 _Avoid_: Sub-block, component, item
 
 **Theme Package**:
-An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, declarative settings schemas with CSS variable bindings, and template presets using the DSL from `@repo/payload-plugin-themes/types`. Maps theme settings directly to the `@repo/ui` styling contract without custom mapping functions.
+An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, declarative settings schemas with CSS variable bindings, and template presets using the DSL from `@repo/theme-core`. Maps theme settings directly to the Theme Styling Contract without custom mapping functions. Depends exclusively on `@repo/theme-core`.
 _Avoid_: Template package, theme bundle, addon
 
-**Styling Contract**:
-The canonical design tokens and CSS custom properties defined and owned by `@repo/ui` (`@repo/ui/tokens`, `shared.css`). Theme packages map their settings to these variables rather than declaring arbitrary custom property names.
-_Avoid_: Theme variables, custom styling schema
+**Theme Engine**:
+The standalone library (`@repo/theme-core`) providing the theme DSL contracts, template and section registries, CSS custom property generators, unstyled layout and e-commerce primitives, and section renderers, with zero Payload dependencies.
+_Avoid_: Theme loader, theme plugin, UI kit
+
+**Theme Styling Contract**:
+The canonical design tokens and CSS custom properties prefixed with `--theme-*` defined and owned by `@repo/theme-core`. Organized into Merchant Controlled Tokens (backgrounds, surfaces, muted layers, text, borders, brand, shape, typography) and Fixed Tokens (status feedback and calculated radii). Theme packages map their settings to these variables rather than declaring arbitrary custom property names. Isolated from the platform branding styles in `@repo/ui`.
+_Avoid_: Theme variables, custom styling schema, UI tokens
 
 **Theme Plugin**:
-The Payload CMS plugin (`@repo/payload-plugin-themes`) that injects the theme engine collections (`themes`, `templates`), DSL contracts, field helpers, live preview integration, and boot-time auto-sync.
+The Payload CMS plugin (`@repo/payload-plugin-themes`) that bridges the Theme Engine to Payload, registering the `themes` and `templates` collections, converting theme setting schemas into Payload fields, and wiring admin live preview.
 _Avoid_: Theme loader, template engine
-
 ### Products
 
 **Product**:
