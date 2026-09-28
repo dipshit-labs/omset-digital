@@ -1,8 +1,10 @@
 import type { ThemeManifestDefinition } from "@repo/payload-plugin-themes/types";
 import { defaultTheme } from "@repo/theme-default";
+import { minimalTheme } from "@repo/theme-minimal";
 
 const THEME_MANIFESTS = {
   [defaultTheme.slug]: defaultTheme,
+  [minimalTheme.slug]: minimalTheme,
 } satisfies Record<string, ThemeManifestDefinition>;
 
 export const getThemeManifest = (

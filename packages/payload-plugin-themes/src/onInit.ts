@@ -63,17 +63,37 @@ export const syncThemes = async (
   }
 
   await Promise.all(
-    stores.flatMap((store) =>
-      manifests.map(async (manifest, index) => {
-        const isFirstManifest = index === 0;
+    stores.map(async (store) => {
+      const existingLiveThemes = await client.find({
+        collection: "themes",
+        depth: 0,
+        limit: 1,
+        where: {
+          and: [
+            { [tenantField]: { equals: store.id } },
+            { isLive: { equals: true } },
+          ],
+        },
+      });
+
+      let hasActiveLiveTheme = existingLiveThemes.docs.length > 0;
+
+      for (const [index, manifest] of manifests.entries()) {
+        const shouldBeLive = !hasActiveLiveTheme && index === 0;
+        // oxlint-disable-next-line eslint/no-await-in-loop
         const themeId = await syncThemeForStore(
           client,
           store,
           manifest,
-          isFirstManifest,
+          shouldBeLive,
           tenantField
         );
 
+        if (shouldBeLive) {
+          hasActiveLiveTheme = true;
+        }
+
+        // oxlint-disable-next-line eslint/no-await-in-loop
         await syncTemplatesForTheme(
           client,
           store,
@@ -81,8 +101,8 @@ export const syncThemes = async (
           manifest,
           tenantField
         );
-      })
-    )
+      }
+    })
   );
 };
 

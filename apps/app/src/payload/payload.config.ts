@@ -17,6 +17,7 @@ import {
 } from "@payloadcms/richtext-lexical";
 import { themesPlugin } from "@repo/payload-plugin-themes";
 import { defaultTheme } from "@repo/theme-default";
+import { minimalTheme } from "@repo/theme-minimal";
 import type { Config } from "@repo/types";
 import { buildConfig } from "payload";
 import sharp from "sharp";
@@ -110,7 +111,7 @@ export default buildConfig({
   }),
   plugins: [
     themesPlugin({
-      manifests: [defaultTheme],
+      manifests: [defaultTheme, minimalTheme],
       previewSecret: env.PREVIEW_SECRET,
     }),
     multiTenantPlugin<Config>({

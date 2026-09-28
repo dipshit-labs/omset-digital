@@ -442,4 +442,285 @@ describe(resolveStorefront, () => {
     expect(templateFind?.draft).toBeFalsy();
     expect(templateFind?.overrideAccess).toBeFalsy();
   });
+
+  it("resolves active minimal theme with isolated templates and declarative css vars", async () => {
+    const { client, stores, templates, themes } = createMockPayload();
+    stores.push(
+      createMockStore({
+        id: 1,
+        name: "Minimal Store",
+        slug: "minimal-store",
+      })
+    );
+
+    themes.push(
+      {
+        createdAt: "",
+        id: 10,
+        isLive: false,
+        name: "Default Theme",
+        slug: "default",
+        store: 1,
+        updatedAt: "",
+        settings: {
+          primaryColor: "#0000ff",
+        },
+      },
+      {
+        createdAt: "",
+        id: 20,
+        isLive: true,
+        name: "Minimal Theme",
+        slug: "minimal",
+        store: 1,
+        updatedAt: "",
+        settings: {
+          accentColor: "#71717a",
+          backgroundColor: "#f5f5f5",
+          fontBody: "var(--font-inter)",
+          fontHeading: "var(--font-inter)",
+          primaryColor: "#18181b",
+          textColor: "#18181b",
+        },
+      }
+    );
+
+    templates.push(
+      {
+        createdAt: "",
+        id: 100,
+        name: "Home",
+        store: 1,
+        theme: 10,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "default_hero",
+            heading: "Default Store Hero",
+            id: "def-1",
+            cta: {
+              label: "Shop",
+              url: "/products",
+            },
+          },
+        ],
+      },
+      {
+        createdAt: "",
+        id: 200,
+        name: "Home",
+        store: 1,
+        theme: 20,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "minimal_hero",
+            heading: "Minimal Store Hero",
+            id: "min-1",
+          },
+        ],
+      }
+    );
+
+    const context = await resolveStorefront({
+      host: "minimal-store.localhost",
+      payload: client,
+    });
+
+    expect(context?.theme?.slug).toBe("minimal");
+    expect(context?.manifest.slug).toBe("minimal");
+    expect(context?.template?.id).toBe(200);
+    expect(context?.sections[0]?.blockType).toBe("minimal_hero");
+    expect(context?.themeCssVars["--primary"]).toBe("#18181b");
+  });
+
+  it("switches active theme from default to minimal dynamically", async () => {
+    const { client, stores, templates, themes } = createMockPayload();
+    stores.push(
+      createMockStore({
+        id: 1,
+        name: "Dual Theme Store",
+        slug: "dual-theme",
+      })
+    );
+
+    const defaultThemeDoc = {
+      createdAt: "",
+      id: 10,
+      isLive: true,
+      name: "Customized Default",
+      slug: "default",
+      store: 1,
+      updatedAt: "",
+      settings: {
+        primaryColor: "#003366",
+      },
+    };
+
+    const minimalThemeDoc = {
+      createdAt: "",
+      id: 20,
+      isLive: false,
+      name: "Customized Minimal",
+      slug: "minimal",
+      store: 1,
+      updatedAt: "",
+      settings: {
+        primaryColor: "#222222",
+      },
+    };
+
+    themes.push(defaultThemeDoc, minimalThemeDoc);
+
+    templates.push(
+      {
+        createdAt: "",
+        id: 100,
+        name: "Default Home",
+        store: 1,
+        theme: 10,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "default_hero",
+            heading: "Preserved Default Content",
+            id: "def-1",
+            cta: {
+              label: "Shop",
+              url: "/products",
+            },
+          },
+        ],
+      },
+      {
+        createdAt: "",
+        id: 200,
+        name: "Minimal Home",
+        store: 1,
+        theme: 20,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "minimal_hero",
+            heading: "Preserved Minimal Content",
+            id: "min-1",
+          },
+        ],
+      }
+    );
+
+    // When default theme is live
+    const defaultContext = await resolveStorefront({
+      host: "dual-theme.localhost",
+      payload: client,
+    });
+    expect(defaultContext?.theme?.slug).toBe("default");
+    expect(defaultContext?.sections[0]?.blockType).toBe("default_hero");
+    expect(defaultContext?.themeCssVars["--primary"]).toBe("#003366");
+
+    // Merchant switches active theme to minimal
+    defaultThemeDoc.isLive = false;
+    minimalThemeDoc.isLive = true;
+
+    const minimalContext = await resolveStorefront({
+      host: "dual-theme.localhost",
+      payload: client,
+    });
+    expect(minimalContext?.theme?.slug).toBe("minimal");
+    expect(minimalContext?.sections[0]?.blockType).toBe("minimal_hero");
+  });
+
+  it("switches back to default theme preserving customizations", async () => {
+    const { client, stores, templates, themes } = createMockPayload();
+    stores.push(
+      createMockStore({
+        id: 1,
+        name: "Dual Theme Store",
+        slug: "dual-theme",
+      })
+    );
+
+    const defaultThemeDoc = {
+      createdAt: "",
+      id: 10,
+      isLive: false,
+      name: "Customized Default",
+      slug: "default",
+      store: 1,
+      updatedAt: "",
+      settings: {
+        primaryColor: "#003366",
+      },
+    };
+
+    const minimalThemeDoc = {
+      createdAt: "",
+      id: 20,
+      isLive: true,
+      name: "Customized Minimal",
+      slug: "minimal",
+      store: 1,
+      updatedAt: "",
+      settings: {
+        primaryColor: "#222222",
+      },
+    };
+
+    themes.push(defaultThemeDoc, minimalThemeDoc);
+
+    templates.push(
+      {
+        createdAt: "",
+        id: 100,
+        name: "Default Home",
+        store: 1,
+        theme: 10,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "default_hero",
+            heading: "Preserved Default Content",
+            id: "def-1",
+            cta: {
+              label: "Shop",
+              url: "/products",
+            },
+          },
+        ],
+      },
+      {
+        createdAt: "",
+        id: 200,
+        name: "Minimal Home",
+        store: 1,
+        theme: 20,
+        type: "home",
+        updatedAt: "",
+        sections: [
+          {
+            blockType: "minimal_hero",
+            heading: "Preserved Minimal Content",
+            id: "min-1",
+          },
+        ],
+      }
+    );
+
+    // Merchant switches back to default theme
+    defaultThemeDoc.isLive = true;
+    minimalThemeDoc.isLive = false;
+
+    const restoredContext = await resolveStorefront({
+      host: "dual-theme.localhost",
+      payload: client,
+    });
+    expect(restoredContext?.theme?.slug).toBe("default");
+    expect(restoredContext?.sections[0]?.blockType).toBe("default_hero");
+    expect(restoredContext?.themeCssVars["--primary"]).toBe("#003366");
+  });
 });

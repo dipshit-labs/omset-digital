@@ -140,6 +140,46 @@ const mockManifest: ThemeManifestDefinition = {
   ],
 };
 
+const mockMinimalManifest: ThemeManifestDefinition = {
+  name: "Minimal Theme",
+  slug: "minimal",
+  version: "1.0.0",
+  sections: [
+    {
+      name: "Hero",
+      slug: "hero",
+      settings: [
+        {
+          defaultValue: "Minimal",
+          label: "Heading",
+          name: "heading",
+          type: "text",
+        },
+      ],
+    },
+  ],
+  settings: [
+    {
+      defaultValue: "#171717",
+      label: "Primary Color",
+      name: "primaryColor",
+      type: "color",
+    },
+  ],
+  templates: [
+    {
+      name: "Home",
+      type: "home",
+      sections: [
+        {
+          blockType: "hero",
+          heading: "Minimal Home",
+        },
+      ],
+    },
+  ],
+};
+
 describe(syncThemes, () => {
   it("provisions fallback trial store if database has no stores", async () => {
     const { collections, payload } = createMockPayload();
@@ -258,5 +298,238 @@ describe(syncThemes, () => {
     // All 150 stores should have a theme provisioned
     expect(collections.themes).toHaveLength(150);
     expect(collections.templates).toHaveLength(150);
+  });
+
+  it("provisions both themes for a store with exactly one live theme", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    expect(collections.themes).toHaveLength(2);
+    const defaultThemeDoc = collections.themes.find(
+      (t) => t.slug === "default"
+    );
+    const minimalThemeDoc = collections.themes.find(
+      (t) => t.slug === "minimal"
+    );
+
+    expect(defaultThemeDoc).toMatchObject({
+      isLive: true,
+      slug: "default",
+      store: "store-123",
+    });
+    expect(minimalThemeDoc).toMatchObject({
+      isLive: false,
+      slug: "minimal",
+      store: "store-123",
+    });
+  });
+
+  it("provisions isolated templates for both themes", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    expect(collections.templates).toHaveLength(2);
+    const defaultTemplate = collections.templates.find(
+      (t) =>
+        // SAFETY: Mock template doc sections array contains section blocks.
+        (t.sections as { blockType: string }[])[0]?.blockType === "default_hero"
+    );
+    const minimalTemplate = collections.templates.find(
+      (t) =>
+        // SAFETY: Mock template doc sections array contains section blocks.
+        (t.sections as { blockType: string }[])[0]?.blockType === "minimal_hero"
+    );
+
+    expect(defaultTemplate?.type).toBe("home");
+    expect(minimalTemplate?.type).toBe("home");
+    expect(defaultTemplate?.theme).not.toBe(minimalTemplate?.theme);
+  });
+
+  it("preserves merchant theme settings and live status when provisioning a new theme", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    collections.themes.push({
+      id: "existing-default-theme",
+      isLive: true,
+      name: "Customized Theme",
+      slug: "default",
+      store: "store-123",
+      settings: {
+        primaryColor: "#ff0000",
+      },
+    });
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    expect(collections.themes).toHaveLength(2);
+    const defaultThemeDoc = collections.themes.find(
+      (t) => t.slug === "default"
+    );
+    const minimalThemeDoc = collections.themes.find(
+      (t) => t.slug === "minimal"
+    );
+
+    expect(defaultThemeDoc).toMatchObject({
+      id: "existing-default-theme",
+      isLive: true,
+      settings: { primaryColor: "#ff0000" },
+    });
+    expect(minimalThemeDoc).toMatchObject({
+      isLive: false,
+      slug: "minimal",
+      store: "store-123",
+    });
+  });
+
+  it("preserves merchant template customizations when provisioning a newly added theme", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    collections.themes.push({
+      id: "existing-default-theme",
+      isLive: true,
+      name: "Customized Theme",
+      slug: "default",
+      store: "store-123",
+    });
+    collections.templates.push({
+      id: "existing-template",
+      name: "Customized Home",
+      store: "store-123",
+      theme: "existing-default-theme",
+      type: "home",
+      sections: [
+        {
+          blockType: "default_hero",
+          heading: "Merchant Customized Heading",
+        },
+      ],
+    });
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    const defaultTemplate = collections.templates.find(
+      (t) => t.theme === "existing-default-theme"
+    );
+    // SAFETY: sections on mock template doc is an array of section blocks.
+    const sections = defaultTemplate?.sections as { heading: string }[];
+    expect(sections[0]?.heading).toBe("Merchant Customized Heading");
+
+    const minimalTemplate = collections.templates.find(
+      (t) => t.theme !== "existing-default-theme"
+    );
+    expect(minimalTemplate).toBeDefined();
+  });
+
+  it("does not overwrite live status when merchant activated minimal theme", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    collections.themes.push(
+      {
+        id: "default-theme-id",
+        isLive: false,
+        name: "Default Theme",
+        slug: "default",
+        store: "store-123",
+      },
+      {
+        id: "minimal-theme-id",
+        isLive: true,
+        name: "Minimal Theme",
+        slug: "minimal",
+        store: "store-123",
+      }
+    );
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    const defaultThemeDoc = collections.themes.find(
+      (t) => t.slug === "default"
+    );
+    const minimalThemeDoc = collections.themes.find(
+      (t) => t.slug === "minimal"
+    );
+
+    expect(defaultThemeDoc?.isLive).toBeFalsy();
+    expect(minimalThemeDoc?.isLive).toBeTruthy();
+  });
+
+  it("does not activate first manifest when store already has another active theme", async () => {
+    const { collections, payload } = createMockPayload();
+    collections.stores.push({
+      id: "store-123",
+      name: "Acme Store",
+      slug: "acme",
+    });
+
+    collections.themes.push({
+      id: "minimal-theme-id",
+      isLive: true,
+      name: "Minimal Theme",
+      slug: "minimal",
+      store: "store-123",
+    });
+
+    await syncThemes(payload, {
+      manifests: [mockManifest, mockMinimalManifest],
+      tenantField: "store",
+      tenantsSlug: "stores",
+    });
+
+    const defaultThemeDoc = collections.themes.find(
+      (t) => t.slug === "default"
+    );
+    const minimalThemeDoc = collections.themes.find(
+      (t) => t.slug === "minimal"
+    );
+
+    expect(defaultThemeDoc?.isLive).toBeFalsy();
+    expect(minimalThemeDoc?.isLive).toBeTruthy();
   });
 });

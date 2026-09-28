@@ -3,6 +3,7 @@ import type {
   ThemeManifestDefinition,
 } from "@repo/payload-plugin-themes/types";
 import { defaultTheme } from "@repo/theme-default";
+import { minimalTheme } from "@repo/theme-minimal";
 import type { Store } from "@repo/types";
 import { THEME_CSS_VARIABLES } from "@repo/ui/tokens";
 import { cleanup, render, screen } from "@testing-library/react";
@@ -179,5 +180,33 @@ describe(StorefrontCanvas, () => {
     expect(
       container.querySelectorAll('[data-testid="custom-section"]')
     ).toHaveLength(0);
+  });
+
+  it("renders minimal theme sections when minimal theme is active", () => {
+    const context: StorefrontContext = {
+      manifest: minimalTheme,
+      store: mockStore,
+      template: null,
+      theme: null,
+      sections: [
+        {
+          blocks: [{ blockType: "tag", label: "Handcrafted" }],
+          blockType: "minimal_hero",
+          eyebrow: "Limited Edition",
+          heading: "Minimal Collection",
+          id: "sec-min-1",
+          subheading: "Minimalist design philosophy",
+        },
+      ],
+      themeCssVars: {
+        "--primary": "#18181b",
+      },
+    };
+
+    render(<StorefrontCanvas context={context} />);
+
+    expect(screen.getByText("Limited Edition")).toBeTruthy();
+    expect(screen.getByText("Minimal Collection")).toBeTruthy();
+    expect(screen.getByText("Handcrafted")).toBeTruthy();
   });
 });

@@ -23,6 +23,7 @@
     "@payloadcms/ui": "catalog:payload",
     "@repo/payload-plugin-themes": "workspace:*",
     "@repo/theme-default": "workspace:*",
+    "@repo/theme-minimal": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "@t3-oss/env-nextjs": "catalog:core",

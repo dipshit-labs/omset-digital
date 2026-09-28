@@ -559,28 +559,51 @@ export interface Template {
    * Ordered sections composing this template layout
    */
   sections?:
-    | {
-        heading: string;
-        subheading?: string | null;
-        alignment?: ('center' | 'left') | null;
-        cta: {
-          label?: string | null;
-          url: string;
-          newTab?: boolean | null;
-        };
-        blocks?:
-          | {
-              text: string;
-              icon?: ('check' | 'star' | 'heart') | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'bullet';
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'default_hero';
-      }[]
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            alignment?: ('center' | 'left') | null;
+            cta: {
+              label?: string | null;
+              url: string;
+              newTab?: boolean | null;
+            };
+            blocks?:
+              | {
+                  text: string;
+                  icon?: ('check' | 'star' | 'heart') | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'bullet';
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'default_hero';
+          }
+        | {
+            eyebrow?: string | null;
+            heading: string;
+            subheading?: string | null;
+            cta?: {
+              label?: string | null;
+              url?: string | null;
+              newTab?: boolean | null;
+            };
+            blocks?:
+              | {
+                  label: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'tag';
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'minimal_hero';
+          }
+      )[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1114,6 +1137,33 @@ export interface TemplatesSelect<T extends boolean = true> {
                       | {
                           text?: T;
                           icon?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        minimal_hero?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              subheading?: T;
+              cta?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    newTab?: T;
+                  };
+              blocks?:
+                | T
+                | {
+                    tag?:
+                      | T
+                      | {
+                          label?: T;
                           id?: T;
                           blockName?: T;
                         };

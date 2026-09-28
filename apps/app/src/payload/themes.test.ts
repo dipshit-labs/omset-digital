@@ -109,4 +109,39 @@ describe("Theme Plugin Integration", () => {
 
     expect(childBlockSlugs).toContain("bullet");
   });
+
+  it("registers minimal_hero section block on templates", async () => {
+    const config = await payloadConfig;
+    const templates = config.collections?.find(
+      (c: CollectionConfig) => c.slug === "templates"
+    );
+    // SAFETY: Sections field is defined as BlocksField with blocks array
+    const sectionsField = templates?.fields.find(
+      (f: Field) => "name" in f && f.name === "sections"
+    ) as { blocks: Block[] };
+    const blockSlugs = sectionsField.blocks.map((b: Block) => b.slug);
+
+    expect(blockSlugs).toContain("minimal_hero");
+  });
+
+  it("registers tag child block inside minimal_hero block", async () => {
+    const config = await payloadConfig;
+    const templates = config.collections?.find(
+      (c: CollectionConfig) => c.slug === "templates"
+    );
+    // SAFETY: Sections field is defined as BlocksField with blocks array
+    const sectionsField = templates?.fields.find(
+      (f: Field) => "name" in f && f.name === "sections"
+    ) as { blocks: Block[] };
+    const heroBlock = sectionsField.blocks.find(
+      (b: Block) => b.slug === "minimal_hero"
+    );
+    // SAFETY: Hero block contains blocks field for child block definitions
+    const childBlocksField = heroBlock?.fields.find(
+      (f: Field) => "name" in f && f.name === "blocks"
+    ) as { blocks: Block[] };
+    const childBlockSlugs = childBlocksField.blocks.map((b: Block) => b.slug);
+
+    expect(childBlockSlugs).toContain("tag");
+  });
 });

@@ -29,6 +29,7 @@
         "@payloadcms/ui": "catalog:payload",
         "@repo/payload-plugin-themes": "workspace:*",
         "@repo/theme-default": "workspace:*",
+        "@repo/theme-minimal": "workspace:*",
         "@repo/types": "workspace:*",
         "@repo/ui": "workspace:*",
         "@t3-oss/env-nextjs": "catalog:core",
@@ -85,6 +86,30 @@
     },
     "packages/themes/default": {
       "name": "@repo/theme-default",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/payload-plugin-themes": "workspace:*",
+        "@repo/ui": "workspace:*",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@testing-library/dom": "catalog:test",
+        "@testing-library/react": "catalog:test",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react",
+        "@vitejs/plugin-react": "catalog:test",
+        "jsdom": "catalog:test",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+      },
+    },
+    "packages/themes/minimal": {
+      "name": "@repo/theme-minimal",
       "version": "0.0.0",
       "dependencies": {
         "@repo/payload-plugin-themes": "workspace:*",
@@ -739,6 +764,8 @@
     "@repo/payload-plugin-themes": ["@repo/payload-plugin-themes@workspace:packages/payload-plugin-themes"],
 
     "@repo/theme-default": ["@repo/theme-default@workspace:packages/themes/default"],
+
+    "@repo/theme-minimal": ["@repo/theme-minimal@workspace:packages/themes/minimal"],
 
     "@repo/types": ["@repo/types@workspace:packages/types"],
 
