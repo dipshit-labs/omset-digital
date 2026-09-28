@@ -84,6 +84,34 @@
         "react",
       ],
     },
+    "packages/theme-core": {
+      "name": "@repo/theme-core",
+      "version": "0.0.0",
+      "dependencies": {
+        "cn": "catalog:ui",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@testing-library/dom": "catalog:test",
+        "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react",
+        "jsdom": "catalog:test",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "optionalPeers": [
+        "react",
+        "react-dom",
+      ],
+    },
     "packages/themes/default": {
       "name": "@repo/theme-default",
       "version": "0.0.0",
@@ -762,6 +790,8 @@
     "@preact/signals-core": ["@preact/signals-core@1.14.4", "", {}, "sha512-HNB6HYeYKhQbJ1aKl+YRjrS4+QWHLKX6qKoUsfS/m0vqzsVaEBiZiaKbG/e+NKk2ch5ALQr/ihWaMHxiCuuWHA=="],
 
     "@repo/payload-plugin-themes": ["@repo/payload-plugin-themes@workspace:packages/payload-plugin-themes"],
+
+    "@repo/theme-core": ["@repo/theme-core@workspace:packages/theme-core"],
 
     "@repo/theme-default": ["@repo/theme-default@workspace:packages/themes/default"],
 

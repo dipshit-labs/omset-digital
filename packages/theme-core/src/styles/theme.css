@@ -1,0 +1,68 @@
+:root {
+  /* Merchant Controlled Tokens - Backgrounds (Layer 1) */
+  --theme-background: #ffffff;
+  --theme-surface: #ffffff;
+  --theme-muted: #f1f5f9;
+
+  /* Merchant Controlled Tokens - Text (Layer 1) */
+  --theme-foreground: #0f172a;
+  --theme-muted-foreground: #64748b;
+
+  /* Merchant Controlled Tokens - Border (Layer 1) */
+  --theme-border: #e2e8f0;
+
+  /* Merchant Controlled Tokens - Brand (Layer 2) */
+  --theme-brand: #0f172a;
+  --theme-brand-foreground: #ffffff;
+
+  /* Merchant Controlled Tokens - Shape (Layer 3) */
+  --theme-radius: 0.5rem;
+
+  /* Merchant Controlled Tokens - Typography (Layer 3) */
+  --theme-font-heading: sans-serif;
+  --theme-font-body: sans-serif;
+
+  /* Fixed Tokens - Semantic feedback states */
+  --theme-success: oklch(0.623 0.188 145.2);
+  --theme-success-foreground: #ffffff;
+  --theme-error: oklch(0.636 0.207 25.3);
+  --theme-error-foreground: #ffffff;
+  --theme-warning: oklch(0.769 0.188 70.1);
+  --theme-warning-foreground: #0f172a;
+
+  /* Fixed Tokens - Derived radii */
+  --theme-radius-sm: calc(var(--theme-radius) * 0.75);
+  --theme-radius-md: var(--theme-radius);
+  --theme-radius-lg: calc(var(--theme-radius) * 1.5);
+  --theme-radius-full: 9999px;
+}
+
+@theme inline {
+  --color-background: var(--theme-background);
+  --color-surface: var(--theme-surface);
+  --color-muted: var(--theme-muted);
+  --color-muted-foreground: var(--theme-muted-foreground);
+  --color-foreground: var(--theme-foreground);
+  --color-border: var(--theme-border);
+
+  --color-brand: var(--theme-brand);
+  --color-brand-foreground: var(--theme-brand-foreground);
+  --color-primary: var(--theme-brand);
+  --color-primary-foreground: var(--theme-brand-foreground);
+
+  --color-success: var(--theme-success);
+  --color-success-foreground: var(--theme-success-foreground);
+  --color-error: var(--theme-error);
+  --color-error-foreground: var(--theme-error-foreground);
+  --color-warning: var(--theme-warning);
+  --color-warning-foreground: var(--theme-warning-foreground);
+
+  --radius-sm: var(--theme-radius-sm);
+  --radius-md: var(--theme-radius-md);
+  --radius: var(--theme-radius);
+  --radius-lg: var(--theme-radius-lg);
+  --radius-full: var(--theme-radius-full);
+
+  --font-heading: var(--theme-font-heading), sans-serif;
+  --font-body: var(--theme-font-body), sans-serif;
+}
