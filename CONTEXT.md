@@ -7,8 +7,12 @@ A multi-tenant SaaS platform where Indonesian SMEs (Merchants) operate branded s
 ### Platform roles
 
 **Merchant**:
-A business owner who subscribes to Omset Digital to operate a storefront. Owns all configuration, products, and orders within their Store.
-_Avoid_: Seller, user, admin, vendor
+A business owner who subscribes to Omset Digital and holds the owner role for their Store. Owns all configuration, products, orders, and BYOK credentials.
+_Avoid_: Seller, user, admin, vendor, shop owner
+
+**Manager**:
+A staff member assigned to a Store with operational access to catalog items and packages, but restricted from modifying store settings, managing users, or viewing sensitive BYOK credentials.
+_Avoid_: Staff, employee, operator, assistant
 
 **Buyer**:
 A person who visits a Merchant's storefront and places orders.
@@ -21,7 +25,7 @@ _Avoid_: Super-user, root, operator
 ### Store
 
 **Store**:
-The platform record representing one Merchant's business in the `stores` collection. Holds the store's identity, subscription status, BYOK credentials (payments, shipping, WhatsApp), and joins to installed Themes.
+The platform entity representing one Merchant's business. Holds the store's identity, subscription status, BYOK credentials (payments, shipping, WhatsApp), and links to installed Themes.
 _Avoid_: Tenant, shop, account, workspace
 
 **Slug**:
@@ -95,8 +99,13 @@ _Avoid_: Attribute, option group, dimension, variant axis
 **Variant Option**:
 A discrete choice on a Variant Type (e.g. Red, Blue, Small, Large). Linked to a Variant Type.
 _Avoid_: Value, choice, attribute value
+
+**Category**:
+A taxonomy classification used to organize and group Products within a Store.
+_Avoid_: Tag, collection, department, genre
+
 **Digital Asset**:
-A file attached to a Product of type `digital`, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
+A downloadable file associated with a non-physical Product, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
 _Avoid_: Download, file, attachment
 
 ### Orders and payments
@@ -134,3 +143,7 @@ _Avoid_: Shipping integration, ongkir API
 **Courier Option**:
 A specific shipping service offered by a courier (name, service level, cost in IDR, estimated days). Returned by `ShippingProvider.getCosts()`.
 _Avoid_: Shipping rate, delivery option
+
+**Package**:
+A physical container or shipping box with defined dimensions and tare weight, scoped to a Store and used to calculate total shipment weight and volumetric costs.
+_Avoid_: Box, parcel, container, carton
