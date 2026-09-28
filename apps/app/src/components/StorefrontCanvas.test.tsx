@@ -209,4 +209,34 @@ describe(StorefrontCanvas, () => {
     expect(screen.getByText("Minimal Collection")).toBeTruthy();
     expect(screen.getByText("Handcrafted")).toBeTruthy();
   });
+
+  it("renders children alongside template sections", () => {
+    const context: StorefrontContext = {
+      manifest: defaultTheme,
+      store: mockStore,
+      template: null,
+      theme: null,
+      sections: [
+        {
+          blockType: "default_hero",
+          cta: { url: "/explore" },
+          heading: "Canvas Hero",
+          id: "sec-hero",
+        },
+      ],
+      themeCssVars: {
+        "--primary": "#003366",
+      },
+    };
+
+    render(
+      <StorefrontCanvas context={context}>
+        <div data-testid="page-body">Custom Page Content</div>
+      </StorefrontCanvas>
+    );
+
+    expect(screen.getByText("Canvas Hero")).toBeTruthy();
+    expect(screen.getByTestId("page-body")).toBeTruthy();
+    expect(screen.getByText("Custom Page Content")).toBeTruthy();
+  });
 });

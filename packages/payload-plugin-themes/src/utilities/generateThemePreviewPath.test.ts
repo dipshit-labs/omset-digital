@@ -66,6 +66,29 @@ describe(generateThemePreviewPath, () => {
     expect(url).toBe("/next/preview?path=%2Fwarung-kopi&previewSecret=secret");
   });
 
+  it("resolves dynamic custom page route when collection is pages", () => {
+    const url = generateThemePreviewPath({
+      collection: "pages",
+      previewSecret: "secret",
+      slug: "about-us",
+      storeSlug: "warung-kopi",
+    });
+
+    expect(url).toBe(
+      "/next/preview?path=%2Fwarung-kopi%2Fabout-us&previewSecret=secret"
+    );
+  });
+
+  it("resolves dynamic custom page route without store slug when collection is pages", () => {
+    const url = generateThemePreviewPath({
+      collection: "pages",
+      previewSecret: "secret",
+      slug: "faq",
+    });
+
+    expect(url).toBe("/next/preview?path=%2Ffaq&previewSecret=secret");
+  });
+
   it("supports custom previewEndpoint", () => {
     const url = generateThemePreviewPath({
       path: "/test",

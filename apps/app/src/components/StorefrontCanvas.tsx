@@ -1,14 +1,16 @@
 // oxlint-disable shadcn/no-inline-styles
 import { renderThemeSections } from "@repo/payload-plugin-themes/utilities";
-import type { CSSProperties, ReactElement } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 
 import type { StorefrontContext } from "@/lib/storefront";
 
 export interface StorefrontCanvasProps {
+  children?: ReactNode;
   context: StorefrontContext;
 }
 
 export const StorefrontCanvas = ({
+  children,
   context,
 }: StorefrontCanvasProps): ReactElement => {
   const { manifest, sections, themeCssVars } = context;
@@ -18,7 +20,10 @@ export const StorefrontCanvas = ({
 
   return (
     <div className="bg-background text-foreground min-h-screen" style={style}>
-      <div className="flex w-full flex-col">{renderedSections}</div>
+      <div className="flex w-full flex-col">
+        {renderedSections}
+        {children}
+      </div>
     </div>
   );
 };

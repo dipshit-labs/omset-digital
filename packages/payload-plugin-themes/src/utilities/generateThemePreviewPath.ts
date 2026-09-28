@@ -27,6 +27,10 @@ const resolveCollectionPath = (collection?: string, slug?: string): string => {
     return !slug || slug === "home" ? "/" : `/${encodeURIComponent(slug)}`;
   }
 
+  if (collection === "pages") {
+    return slug ? `/${encodeURIComponent(slug)}` : "/";
+  }
+
   if (collection) {
     return slug
       ? `/${collection}/${encodeURIComponent(slug)}`

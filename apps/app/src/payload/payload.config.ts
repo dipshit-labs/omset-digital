@@ -28,6 +28,7 @@ import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
 import { Packages } from "./collections/packages";
+import { Pages } from "./collections/pages";
 import { Products } from "./collections/products";
 import {
   VariantOptions,
@@ -85,6 +86,7 @@ export default buildConfig({
     Packages,
     Products,
     Media,
+    Pages,
     Variants,
     VariantOptions,
     VariantTypes,
@@ -122,6 +124,7 @@ export default buildConfig({
         categories: { isGlobal: false },
         media: { isGlobal: false },
         packages: { isGlobal: false },
+        pages: { isGlobal: false },
         products: { isGlobal: false },
         templates: { isGlobal: false },
         themes: { isGlobal: false },

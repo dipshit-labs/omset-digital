@@ -73,6 +73,7 @@ export interface Config {
     packages: Package;
     products: Product;
     media: Media;
+    pages: Page;
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
@@ -99,6 +100,7 @@ export interface Config {
     packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -500,38 +502,36 @@ export interface Variant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "themes".
+ * via the `definition` "pages".
  */
-export interface Theme {
+export interface Page {
   id: number;
   store?: (number | null) | Store;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   /**
-   * Display name of the theme
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  name: string;
-  /**
-   * Unique theme identifier matching the theme package slug
-   */
+  generateSlug?: boolean | null;
   slug: string;
   /**
-   * Installed theme package version
+   * Layout template assigned to this document
    */
-  version?: string | null;
-  /**
-   * Set this theme as active for the store
-   */
-  isLive?: boolean | null;
-  /**
-   * Branding settings, colors, and typography presets
-   */
-  settings?: {
-    primaryColor?: string | null;
-    accentColor?: string | null;
-    backgroundColor?: string | null;
-    textColor?: string | null;
-    fontHeading?: ('var(--font-plus-jakarta-sans)' | 'var(--font-inter)' | 'var(--font-outfit)') | null;
-    fontBody?: ('var(--font-inter)' | 'var(--font-roboto)') | null;
-  };
+  template?: (number | null) | Template;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -605,6 +605,44 @@ export interface Template {
           }
       )[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: number;
+  store?: (number | null) | Store;
+  /**
+   * Display name of the theme
+   */
+  name: string;
+  /**
+   * Unique theme identifier matching the theme package slug
+   */
+  slug: string;
+  /**
+   * Installed theme package version
+   */
+  version?: string | null;
+  /**
+   * Set this theme as active for the store
+   */
+  isLive?: boolean | null;
+  /**
+   * Branding settings, colors, and typography presets
+   */
+  settings?: {
+    primaryColor?: string | null;
+    accentColor?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    fontHeading?: ('var(--font-plus-jakarta-sans)' | 'var(--font-inter)' | 'var(--font-outfit)') | null;
+    fontBody?: ('var(--font-inter)' | 'var(--font-roboto)') | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -748,6 +786,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'variants';
@@ -1010,6 +1052,21 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  store?: T;
+  title?: T;
+  content?: T;
+  generateSlug?: T;
+  slug?: T;
+  template?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

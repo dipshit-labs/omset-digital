@@ -1,13 +1,18 @@
 // @vitest-environment node
-import type { Store, Template, Theme } from "@repo/types";
+import type { Page, Store, Template, Theme } from "@repo/types";
 import type { PaginatedDocs } from "payload";
 import { describe, expect, it } from "vitest";
 
 import type { StorefrontPayloadClient } from "./storefront";
-import { resolveStore, resolveStorefront } from "./storefront";
+import {
+  resolvePageStorefront,
+  resolveStore,
+  resolveStorefront,
+} from "./storefront";
 
 interface WhereCondition {
   customDomain?: { equals?: string };
+  id?: { equals?: number | string };
   isLive?: { equals?: boolean };
   slug?: { equals?: string };
   store?: { equals?: number | string };
@@ -61,6 +66,10 @@ const matchTemplate = (
   template: Template,
   condition: WhereCondition
 ): boolean => {
+  if (condition.id !== undefined && template.id !== condition.id.equals) {
+    return false;
+  }
+
   if (condition.type && template.type !== condition.type.equals) {
     return false;
   }
@@ -118,6 +127,36 @@ const filterTemplates = (templates: Template[], where: unknown): Template[] => {
   });
 };
 
+const matchPage = (page: Page, condition: WhereCondition): boolean => {
+  if (condition.slug && page.slug !== condition.slug.equals) {
+    return false;
+  }
+
+  if (condition.store !== undefined) {
+    const storeId =
+      typeof page.store === "object" ? page.store?.id : page.store;
+    if (storeId !== condition.store.equals) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const filterPages = (pages: Page[], where: unknown): Page[] => {
+  if (!where) {
+    return pages;
+  }
+  // SAFETY: Mock test payload receives structured query condition.
+  const query = where as WhereQuery;
+  return pages.filter((page) => {
+    if (query.and) {
+      return query.and.every((cond) => matchPage(page, cond));
+    }
+    return matchPage(page, query);
+  });
+};
+
 const toPaginatedDocs = <T>(docs: T[], limit = 10): PaginatedDocs<T> => ({
   docs,
   hasNextPage: docs.length > limit,
@@ -142,6 +181,7 @@ const createMockPayload = () => {
   const themes: Theme[] = [];
   const templates: Template[] = [];
 
+  const pages: Page[] = [];
   // SAFETY: Mock find method satisfies StorefrontPayloadClient signature.
   const find = (<T>({
     collection,
@@ -173,6 +213,13 @@ const createMockPayload = () => {
         toPaginatedDocs(filtered.slice(0, limit) as T[], limit)
       );
     }
+    if (collection === "pages") {
+      const filtered = filterPages(pages, where);
+      // SAFETY: Filtered pages collection matches requested Page array.
+      return Promise.resolve(
+        toPaginatedDocs(filtered.slice(0, limit) as T[], limit)
+      );
+    }
 
     const filtered = filterTemplates(templates, where);
     // SAFETY: Filtered templates collection matches requested Template array.
@@ -180,9 +227,8 @@ const createMockPayload = () => {
       toPaginatedDocs(filtered.slice(0, limit) as T[], limit)
     );
   }) as StorefrontPayloadClient["find"];
-
   const client = { find };
-  return { client, findCalls, stores, templates, themes };
+  return { client, findCalls, pages, stores, templates, themes };
 };
 
 const createMockStore = (overrides: Partial<Store> = {}): Store => ({
@@ -195,6 +241,28 @@ const createMockStore = (overrides: Partial<Store> = {}): Store => ({
   subscription: {
     status: "trial",
   },
+  ...overrides,
+});
+
+const createMockPage = (overrides: Partial<Page> = {}): Page => ({
+  createdAt: "",
+  id: 1,
+  slug: "about",
+  store: 1,
+  title: "About Us",
+  updatedAt: "",
+  ...overrides,
+});
+
+const createMockTheme = (overrides: Partial<Theme> = {}): Theme => ({
+  createdAt: "",
+  id: 10,
+  isLive: true,
+  name: "Default Theme",
+  settings: {},
+  slug: "default",
+  store: 1,
+  updatedAt: "",
   ...overrides,
 });
 
@@ -722,5 +790,184 @@ describe(resolveStorefront, () => {
     expect(restoredContext?.theme?.slug).toBe("default");
     expect(restoredContext?.sections[0]?.blockType).toBe("default_hero");
     expect(restoredContext?.themeCssVars["--primary"]).toBe("#003366");
+  });
+});
+
+describe(resolvePageStorefront, () => {
+  it("resolves custom page with store, active theme, and assigned template", async () => {
+    const { client, pages, stores, templates, themes } = createMockPayload();
+    stores.push(createMockStore({ id: 1, slug: "kopi" }));
+    themes.push(
+      createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
+    );
+    templates.push({
+      createdAt: "",
+      id: 100,
+      name: "About Page Layout",
+      store: 1,
+      theme: 10,
+      type: "page",
+      updatedAt: "",
+      sections: [
+        {
+          blockType: "default_hero",
+          cta: { url: "/about" },
+          heading: "Our Story",
+          id: "hero-1",
+        },
+      ],
+    });
+    pages.push(
+      createMockPage({
+        id: 50,
+        slug: "tentang-kami",
+        store: 1,
+        template: 100,
+        title: "Tentang Kami",
+      })
+    );
+
+    const context = await resolvePageStorefront({
+      payload: client,
+      slug: "tentang-kami",
+      storeSlug: "kopi",
+    });
+
+    expect(context?.page).toMatchObject({ id: 50, title: "Tentang Kami" });
+    expect(context?.store.slug).toBe("kopi");
+    expect(context?.theme?.slug).toBe("default");
+    expect(context?.template?.id).toBe(100);
+    expect(context?.sections).toMatchObject([
+      { blockType: "default_hero", heading: "Our Story" },
+    ]);
+  });
+
+  it("resolves populated template object directly from page", async () => {
+    const { client, pages, stores, themes } = createMockPayload();
+    stores.push(createMockStore({ id: 1, slug: "kopi" }));
+    themes.push(
+      createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
+    );
+    const populatedTemplate: Template = {
+      createdAt: "",
+      id: 200,
+      name: "Populated Layout",
+      store: 1,
+      theme: 10,
+      type: "page",
+      updatedAt: "",
+      sections: [
+        {
+          blockType: "default_hero",
+          cta: { url: "/contact" },
+          heading: "Populated Hero",
+          id: "hero-2",
+        },
+      ],
+    };
+    pages.push(
+      createMockPage({
+        id: 51,
+        slug: "kontak",
+        store: 1,
+        template: populatedTemplate,
+        title: "Hubungi Kami",
+      })
+    );
+
+    const context = await resolvePageStorefront({
+      payload: client,
+      slug: "kontak",
+      storeSlug: "kopi",
+    });
+
+    expect(context?.template?.id).toBe(200);
+    expect(context?.sections[0]?.heading).toBe("Populated Hero");
+  });
+
+  it("returns null template and empty sections when page has no template assigned", async () => {
+    const { client, pages, stores, themes } = createMockPayload();
+    stores.push(createMockStore({ id: 1, slug: "kopi" }));
+    themes.push(
+      createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
+    );
+    pages.push(
+      createMockPage({
+        id: 52,
+        slug: "faq",
+        store: 1,
+        template: null,
+        title: "FAQ",
+      })
+    );
+
+    const context = await resolvePageStorefront({
+      payload: client,
+      slug: "faq",
+      storeSlug: "kopi",
+    });
+
+    expect(context?.template).toBeNull();
+    expect(context?.sections).toStrictEqual([]);
+  });
+
+  it("passes draft and overrideAccess to queries when draft mode is enabled", async () => {
+    const { client, findCalls, pages, stores, themes } = createMockPayload();
+    stores.push(createMockStore({ id: 1, slug: "kopi" }));
+    themes.push(
+      createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
+    );
+    pages.push(
+      createMockPage({
+        id: 53,
+        slug: "draft-page",
+        store: 1,
+        template: 999,
+        title: "Draft Page",
+      })
+    );
+
+    await resolvePageStorefront({
+      draft: true,
+      payload: client,
+      slug: "draft-page",
+      storeSlug: "kopi",
+    });
+
+    const pageCall = findCalls.find((call) => call.collection === "pages");
+    expect(pageCall?.draft && pageCall?.overrideAccess).toBeTruthy();
+
+    const themeCall = findCalls.find((call) => call.collection === "themes");
+    expect(themeCall?.draft && themeCall?.overrideAccess).toBeTruthy();
+
+    const templateCall = findCalls.find(
+      (call) => call.collection === "templates"
+    );
+    expect(templateCall?.draft && templateCall?.overrideAccess).toBeTruthy();
+  });
+
+  it("returns null when page does not exist", async () => {
+    const { client, stores } = createMockPayload();
+    stores.push(createMockStore({ id: 1, slug: "kopi" }));
+
+    const context = await resolvePageStorefront({
+      payload: client,
+      slug: "non-existent",
+      storeSlug: "kopi",
+    });
+
+    expect(context).toBeNull();
+  });
+
+  it("returns null when store does not exist", async () => {
+    const { client } = createMockPayload();
+
+    const context = await resolvePageStorefront({
+      payload: client,
+      slug: "about",
+      storeSlug: "missing-store",
+    });
+
+    expect(context).toBeNull();
   });
 });
