@@ -1,6 +1,6 @@
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 import { describe, expect, it } from "vitest";
 
-import type { ThemeManifestDefinition } from "../types";
 import { createTemplatesCollection } from "./createTemplatesCollection";
 import { createThemesCollection } from "./createThemesCollection";
 

@@ -1,7 +1,10 @@
+import type {
+  ThemeManifestDefinition,
+  ThemeSettingValue,
+} from "@repo/theme-core";
 import { describe, expect, it } from "vitest";
 
 import { syncThemes } from "./onInit";
-import type { ThemeManifestDefinition, ThemeSettingValue } from "./types";
 
 interface MockDoc {
   id: string;

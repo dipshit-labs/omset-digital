@@ -7,7 +7,6 @@ import type { CreateThemesCollectionOptions } from "../types";
 import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
 import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
-export { enforceSingleLiveTheme as createEnsureSingleLiveThemeHook } from "../hooks/enforceSingleLiveTheme";
 export type { CreateThemesCollectionOptions } from "../types";
 
 export const createThemesCollection = (

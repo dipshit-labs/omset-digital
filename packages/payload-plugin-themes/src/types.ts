@@ -4,40 +4,6 @@ import type {
 } from "@repo/theme-core";
 import type { CollectionConfig, RelationshipField } from "payload";
 
-export {
-  defineSection,
-  defineTheme,
-  type AnySectionDefinition,
-  type ArraySettingField,
-  type BaseSettingField,
-  type BlocksSettingField,
-  type ColorSettingField,
-  type GroupSettingField,
-  type LinkSettingField,
-  type LinkSettingValue,
-  type NumberSettingField,
-  type RichTextSettingField,
-  type SectionBlockDefinition,
-  type SectionDefinition,
-  type SectionPreset,
-  type SectionProps,
-  type SelectOption,
-  type SelectSettingField,
-  type SettingField,
-  type SettingFieldType,
-  type TemplatePresetDefinition,
-  type TemplateSectionInstance,
-  type TemplateType,
-  type TextSettingField,
-  type TextareaSettingField,
-  type ThemeClientManifest,
-  type ThemeManifestDefinition,
-  type ThemeSettingsRecord,
-  type ThemeSettingValue,
-  type ToggleSettingField,
-  type UploadSettingField,
-} from "@repo/theme-core";
-
 export interface ThemesPluginSlugs {
   templates?: string;
   themes?: string;
