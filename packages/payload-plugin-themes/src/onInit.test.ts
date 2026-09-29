@@ -181,7 +181,7 @@ const mockMinimalManifest: ThemeManifestDefinition = {
 };
 
 describe(syncThemes, () => {
-  it("provisions fallback trial store if database has no stores", async () => {
+  it("does not auto-create stores when database has no stores", async () => {
     const { collections, payload } = createMockPayload();
 
     await syncThemes(payload, {
@@ -190,15 +190,21 @@ describe(syncThemes, () => {
       tenantsSlug: "stores",
     });
 
-    expect(collections.stores).toHaveLength(1);
+    expect(collections.stores).toHaveLength(0);
+    expect(collections.themes).toHaveLength(0);
+    expect(collections.templates).toHaveLength(0);
+  });
 
-    const [store] = collections.stores;
-    expect(store.name).toBe("Default Store");
-    expect(store.slug).toBe("default");
+  it("skips theme sync when tenantField is not provided", async () => {
+    const { collections, payload } = createMockPayload();
 
-    // SAFETY: Store subscription shape in mock doc conforms to Subscription group.
-    const sub = store.subscription as { status?: string } | undefined;
-    expect(sub?.status).toBe("trial");
+    await syncThemes(payload, {
+      manifests: [mockManifest],
+    });
+
+    expect(collections.stores).toHaveLength(0);
+    expect(collections.themes).toHaveLength(0);
+    expect(collections.templates).toHaveLength(0);
   });
 
   it("provisions theme and template for existing stores", async () => {
@@ -208,31 +214,27 @@ describe(syncThemes, () => {
       name: "Acme Store",
       slug: "acme",
     });
-
     await syncThemes(payload, {
       manifests: [mockManifest],
       tenantField: "store",
       tenantsSlug: "stores",
     });
 
-    expect(collections.themes).toHaveLength(1);
-
-    const [theme] = collections.themes;
-    expect(theme).toMatchObject({
-      isLive: true,
-      slug: "default",
-      store: "store-123",
-    });
-
-    expect(collections.templates).toHaveLength(1);
-
-    const [template] = collections.templates;
-    expect(template).toMatchObject({
-      name: "Home",
-      store: "store-123",
-      theme: theme.id,
-      type: "home",
-    });
+    expect(collections.themes).toStrictEqual([
+      expect.objectContaining({
+        isLive: true,
+        slug: "default",
+        store: "store-123",
+      }),
+    ]);
+    expect(collections.templates).toStrictEqual([
+      expect.objectContaining({
+        name: "Home",
+        store: "store-123",
+        theme: collections.themes[0]?.id,
+        type: "home",
+      }),
+    ]);
   });
 
   it("is idempotent on repeated sync runs", async () => {
@@ -254,28 +256,6 @@ describe(syncThemes, () => {
 
     expect(collections.themes).toHaveLength(1);
     expect(collections.templates).toHaveLength(1);
-  });
-
-  it("supports custom defaultStoreData when provisioning fallback store", async () => {
-    const { collections, payload } = createMockPayload();
-
-    await syncThemes(payload, {
-      manifests: [mockManifest],
-      tenantField: "store",
-      tenantsSlug: "stores",
-      defaultStoreData: {
-        customField: "custom-value",
-        name: "Custom Trial Store",
-        slug: "custom-trial",
-      },
-    });
-
-    expect(collections.stores).toHaveLength(1);
-
-    const [store] = collections.stores;
-    expect(store.name).toBe("Custom Trial Store");
-    expect(store.slug).toBe("custom-trial");
-    expect(store.customField).toBe("custom-value");
   });
 
   it("paginates through all stores when store count exceeds page size", async () => {

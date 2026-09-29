@@ -5,7 +5,6 @@ import type {
   ThemeSyncDoc,
   ThemeSyncPayload,
 } from "./types";
-import { ensureDefaultStore } from "./utilities/ensureDefaultStore";
 import { getSyncClient } from "./utilities/getSyncClient";
 import { syncTemplatesForTheme } from "./utilities/syncTemplatesForTheme";
 import { syncThemeForStore } from "./utilities/syncThemeForStore";
@@ -14,16 +13,15 @@ export const syncThemes = async (
   payload: Payload | ThemeSyncPayload,
   options: SyncThemesOptions
 ): Promise<void> => {
-  const client = getSyncClient(payload);
-
-  const tenantsSlug = options.tenantsSlug ?? "stores";
-  const tenantField = options.tenantField ?? "store";
   const manifests = options.manifests ?? [];
+  const { tenantField } = options;
 
-  if (manifests.length === 0) {
+  if (manifests.length === 0 || !tenantField) {
     return;
   }
 
+  const client = getSyncClient(payload);
+  const tenantsSlug = options.tenantsSlug ?? "stores";
   const pageSize = 100;
   let page = 1;
   let hasMore = true;
@@ -57,9 +55,7 @@ export const syncThemes = async (
   }
 
   if (stores.length === 0) {
-    stores.push(
-      await ensureDefaultStore(client, tenantsSlug, options.defaultStoreData)
-    );
+    return;
   }
 
   await Promise.all(

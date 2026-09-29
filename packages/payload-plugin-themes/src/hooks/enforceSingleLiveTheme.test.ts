@@ -220,4 +220,55 @@ describe("enforceSingleLiveTheme hook", () => {
     expect(result.isLive).toBeTruthy();
     expect(updateCalls).toHaveLength(0);
   });
+
+  it("deactivates other themes globally when tenantField is undefined on update", async () => {
+    const { req, updateCalls } = createMockReq();
+    const hook = enforceSingleLiveTheme(undefined, "themes");
+
+    const result = await runHook(hook, {
+      req,
+      data: {
+        id: "theme-2",
+        isLive: true,
+      },
+      originalDoc: {
+        id: "theme-2",
+        isLive: false,
+      },
+    });
+
+    expect(result.isLive).toBeTruthy();
+    expect(updateCalls).toHaveLength(1);
+    expect(updateCalls[0]).toMatchObject({
+      collection: "themes",
+      context: { preventLiveThemeSync: true },
+      data: { isLive: false },
+      where: {
+        and: [{ id: { not_equals: "theme-2" } }],
+      },
+    });
+  });
+
+  it("deactivates all existing themes globally when creating a new live theme without tenantField", async () => {
+    const { req, updateCalls } = createMockReq();
+    const hook = enforceSingleLiveTheme(undefined, "themes");
+
+    const result = await runHook(hook, {
+      originalDoc: undefined,
+      req,
+      data: {
+        isLive: true,
+        name: "New Live Theme",
+      },
+    });
+
+    expect(result.isLive).toBeTruthy();
+    expect(updateCalls).toHaveLength(1);
+    expect(updateCalls[0]).toMatchObject({
+      collection: "themes",
+      context: { preventLiveThemeSync: true },
+      data: { isLive: false },
+      where: {},
+    });
+  });
 });

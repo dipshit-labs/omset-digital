@@ -20,7 +20,6 @@ describe(toClientThemeManifest, () => {
       slug: "default",
       templates: [],
       version: "1.0.0",
-      cssVars: (settings) => ({ "--custom": String(settings.foo) }),
       sections: [
         {
           Component: DummyComponent,

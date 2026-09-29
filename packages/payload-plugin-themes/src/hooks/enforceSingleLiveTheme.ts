@@ -1,4 +1,8 @@
-import type { CollectionBeforeChangeHook, CollectionSlug } from "payload";
+import type {
+  CollectionBeforeChangeHook,
+  CollectionSlug,
+  Where,
+} from "payload";
 
 const resolveStoreId = (rawStore: unknown): number | string | undefined => {
   if (typeof rawStore === "string" || typeof rawStore === "number") {
@@ -14,7 +18,7 @@ const resolveStoreId = (rawStore: unknown): number | string | undefined => {
 };
 
 export const enforceSingleLiveTheme = (
-  tenantField = "store",
+  tenantField?: string,
   themesSlug = "themes"
 ): CollectionBeforeChangeHook =>
   async function deconflictLiveThemes({ data, originalDoc, req }) {
@@ -32,30 +36,33 @@ export const enforceSingleLiveTheme = (
       return data;
     }
 
-    const rawStore = data?.[tenantField] ?? originalDoc?.[tenantField];
-    const storeId = resolveStoreId(rawStore);
-    if (storeId === undefined) {
-      return data;
+    const currentId = originalDoc?.id ?? data.id;
+    const andConditions: Where[] = [];
+
+    if (tenantField) {
+      const rawStore = data?.[tenantField] ?? originalDoc?.[tenantField];
+      const storeId = resolveStoreId(rawStore);
+      if (storeId === undefined) {
+        return data;
+      }
+      andConditions.push({ [tenantField]: { equals: storeId } });
     }
 
-    const currentId = originalDoc?.id ?? data.id;
+    if (currentId !== undefined && currentId !== null) {
+      andConditions.push({ id: { not_equals: currentId } });
+    }
+
+    const where: Where = andConditions.length > 0 ? { and: andConditions } : {};
 
     await req.payload.update({
       // SAFETY: themesSlug dynamically resolves to the configured themes CollectionSlug.
       collection: themesSlug as CollectionSlug,
       data: { isLive: false },
       req,
+      where,
       context: {
         ...req.context,
         preventLiveThemeSync: true,
-      },
-      where: {
-        and: [
-          { [tenantField]: { equals: storeId } },
-          ...(currentId !== undefined && currentId !== null
-            ? [{ id: { not_equals: currentId } }]
-            : []),
-        ],
       },
     });
 

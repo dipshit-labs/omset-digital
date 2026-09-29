@@ -1,9 +1,6 @@
-import type { Block, Field } from "payload";
-
 import type {
   AnySectionDefinition,
   ArraySettingField,
-  ConvertFieldOptions,
   GroupSettingField,
   LinkSettingField,
   NumberSettingField,
@@ -15,7 +12,10 @@ import type {
   ThemeManifestDefinition,
   ToggleSettingField,
   UploadSettingField,
-} from "../../types";
+} from "@repo/theme-core";
+import type { Block, Field } from "payload";
+
+import type { ConvertFieldOptions } from "../../types";
 
 export type { ConvertFieldOptions } from "../../types";
 

@@ -1,55 +1,18 @@
+import { evaluateThemeCssVars as coreEvaluateThemeCssVars } from "@repo/theme-core";
 import type {
-  SettingField,
-  ThemeManifestDefinition,
-  ThemeSettingsRecord,
-} from "../types";
+  EvaluateThemeCssVarsOptions,
+  ThemeCssVars,
+} from "@repo/theme-core";
 
-export interface EvaluateThemeCssVarsOptions {
-  baseTokens?: Record<string, string>;
-  manifest?: Pick<ThemeManifestDefinition, "cssVars" | "settings"> | null;
-  settings?: ThemeSettingsRecord | null;
-}
+export {
+  evaluateFieldCssValue,
+  type EvaluateThemeCssVarsOptions,
+} from "@repo/theme-core";
 
-export const evaluateFieldCssValue = (
-  field: SettingField,
-  value: unknown
-): string | null => {
-  if (value === null || value === undefined || value === "") {
-    return null;
-  }
-  if (field.type === "number" && field.unit) {
-    return `${value}${field.unit}`;
-  }
-  return String(value);
-};
-
-export const evaluateThemeCssVars = ({
-  baseTokens,
-  manifest,
-  settings,
-}: EvaluateThemeCssVarsOptions) => {
-  const result = { ...baseTokens };
-  const fieldList = manifest?.settings ?? [];
-  const safeSettings = settings ?? {};
-
-  for (const field of fieldList) {
-    if (!field.cssVar) {
-      continue;
-    }
-
-    const rawValue =
-      safeSettings[field.name] ??
-      ("defaultValue" in field ? field.defaultValue : undefined);
-    const cssValue = evaluateFieldCssValue(field, rawValue);
-    if (cssValue !== null) {
-      result[field.cssVar] = cssValue;
-    }
-  }
-
-  if (typeof manifest?.cssVars === "function") {
-    const custom = manifest.cssVars(safeSettings);
-    Object.assign(result, custom);
-  }
-
-  return result;
-};
+export const evaluateThemeCssVars = (
+  options: EvaluateThemeCssVarsOptions = {}
+): ThemeCssVars =>
+  coreEvaluateThemeCssVars({
+    ...options,
+    baseTokens: options.baseTokens ?? {},
+  });

@@ -60,7 +60,7 @@
       "name": "@repo/payload-plugin-themes",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/ui": "workspace:*",
+        "@repo/theme-core": "workspace:*",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",

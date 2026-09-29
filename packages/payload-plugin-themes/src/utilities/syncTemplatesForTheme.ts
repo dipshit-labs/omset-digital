@@ -1,8 +1,6 @@
-import type {
-  ThemeManifestDefinition,
-  ThemeSyncDoc,
-  ThemeSyncPayload,
-} from "../types";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
+
+import type { ThemeSyncDoc, ThemeSyncPayload } from "../types";
 import { resolveTemplatesList } from "./resolveTemplatesList";
 
 export const syncTemplatesForTheme = async (
@@ -44,16 +42,18 @@ export const syncTemplatesForTheme = async (
           };
         });
 
+        const data = {
+          name: tpl.name,
+          sections,
+          [tenantField]: store.id,
+          theme: themeId,
+          type: tpl.type,
+        };
+
         await client.create({
           collection: "templates",
+          data,
           draft: false,
-          data: {
-            name: tpl.name,
-            sections,
-            [tenantField]: store.id,
-            theme: themeId,
-            type: tpl.type,
-          },
         });
       }
     })
