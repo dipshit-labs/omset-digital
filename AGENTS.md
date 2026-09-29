@@ -26,7 +26,7 @@ Single-context layout with `CONTEXT.md` at root and architecture decision record
 Turborepo monorepo managed with Bun. Packages export TypeScript source directly through explicit subpaths in `package.json`.
 - `apps/app`. Next.js 15 App Router with embedded Payload CMS 3. Routes isolate public buyer pages in `(storefront)` and admin API endpoints in `(payload)`. Runtime server environment variables must resolve through `@/env` at boot.
 - `packages/payload-plugin-themes`. Payload plugin managing themes and templates. Public entry points export through `./types`, `./fields`, `./utilities`, and `./client`.
-- `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts and primitives only from `@repo/theme-core`. Theme layouts structure code into `sections/`, `templates/`, and root `branding.ts`.
+- `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts and primitives only from `@repo/theme-core`. Theme layouts structure code into `sections/`, `templates/`, and root `index.ts`.
 - `packages/ui`. Shared design tokens, CSS variables, and primitives dedicated exclusively to Omset Digital marketing pages and admin interfaces.
 - `packages/types`. Monorepo types and generated Payload schema.
 

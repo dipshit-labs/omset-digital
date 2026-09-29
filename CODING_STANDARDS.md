@@ -61,7 +61,7 @@ Theme packages under `packages/themes/` are standalone TypeScript packages. They
 - **Depend only on the theme engine DSL.** Theme packages import manifest builders `defineTheme` and `defineSection`, settings field contracts, and type definitions strictly from `@repo/theme-core`.
 - **Declarative CSS variable bindings.** Setting fields bind directly to canonical CSS custom properties via `cssVar` (such as `cssVar: "--theme-primary"`) and optional `unit` on number fields (such as `unit: "px"`). Themes do not export custom `cssVars` mapping functions.
 - **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/theme-core`, merging declarative theme bindings over canonical `--theme-*` defaults.
-- **Theme package file organization.** Theme packages organize code flatly into `sections/`, `templates/`, and root `branding.ts`, `manifest.ts`, and `index.ts`. Do not use intermediate `config/` or `presets/` directories.
+- **Theme package file organization.** Theme packages organize code flatly into `sections/`, `templates/`, and root `index.ts`. All metadata, branding configuration, templates, and sections are declared in `defineTheme` within `index.ts`. Do not use intermediate `branding.ts`, `manifest.ts`, `config/`, or `presets/` directories.
 
 ### Storefront sections are React Server Components
 

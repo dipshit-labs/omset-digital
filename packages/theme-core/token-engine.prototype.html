@@ -1,0 +1,1658 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Theme Token Engine Prototype | Omset Digital</title>
+    <style>
+      :root {
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        --color-slate-50: #f8fafc;
+        --color-slate-100: #f1f5f9;
+        --color-slate-200: #e2e8f0;
+        --color-slate-300: #cbd5e1;
+        --color-slate-500: #64748b;
+        --color-slate-700: #334155;
+        --color-slate-800: #1e293b;
+        --color-slate-900: #0f172a;
+        --color-emerald-600: #059669;
+        --color-emerald-50: #ecfdf5;
+        --color-amber-600: #d97706;
+        --color-amber-50: #fffbeb;
+        --color-rose-600: #e11d48;
+        --color-rose-50: #fff1f2;
+        --color-indigo-600: #4f46e5;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--color-slate-50);
+        color: var(--color-slate-900);
+        line-height: 1.5;
+        padding: 32px 20px 80px;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 28px;
+        border-bottom: 1px solid var(--color-slate-200);
+        padding-bottom: 24px;
+      }
+
+      .badge-prototype {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: var(--color-slate-900);
+        color: white;
+        margin-bottom: 10px;
+      }
+
+      .header h1 {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--color-slate-900);
+        margin-bottom: 8px;
+      }
+
+      .question-box {
+        background: white;
+        border: 1px solid var(--color-slate-200);
+        border-left: 4px solid var(--color-indigo-600);
+        border-radius: 6px;
+        padding: 14px 18px;
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--color-slate-700);
+      }
+
+      .question-box strong {
+        color: var(--color-slate-900);
+      }
+
+      /* Layout Grid */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 28px;
+        align-items: start;
+      }
+
+      @media (max-width: 860px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: white;
+        border: 1px solid var(--color-slate-200);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+
+      .card-title {
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-slate-500);
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* What Just Changed Banner */
+      .change-banner {
+        background: var(--color-slate-100);
+        border-left: 3px solid var(--color-slate-800);
+        border-radius: 4px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 18px;
+      }
+      .change-banner strong {
+        color: var(--color-slate-900);
+      }
+
+      /* Live Preview Canvas */
+      .storefront-preview {
+        border: 1px solid var(--color-slate-200);
+        border-radius: 8px;
+        padding: 24px;
+        transition:
+          background-color 0.15s ease,
+          color 0.15s ease;
+        margin-bottom: 20px;
+      }
+
+      .storefront-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid currentColor;
+        opacity: 0.85;
+      }
+
+      .storefront-brand-title {
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .preview-card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid currentColor;
+        opacity: 0.95;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 18px;
+      }
+
+      .preview-card h3 {
+        font-size: 15px;
+        margin-bottom: 6px;
+      }
+
+      .preview-card p {
+        font-size: 13px;
+        opacity: 0.8;
+        margin-bottom: 16px;
+      }
+
+      .btn-preview-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .btn-preview-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid currentColor;
+        background: transparent;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+
+      /* Palette Swatches */
+      .palette-ramp {
+        display: flex;
+        margin-top: 14px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid var(--color-slate-200);
+      }
+
+      .palette-swatch {
+        flex: 1;
+        height: 38px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        padding-bottom: 4px;
+      }
+
+      /* Accessibility and Status Row */
+      .status-badges {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .status-tile {
+        border: 1px solid var(--color-slate-200);
+        border-radius: 6px;
+        padding: 12px 14px;
+        background: white;
+      }
+
+      .status-tile-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--color-slate-500);
+        margin-bottom: 4px;
+      }
+
+      .status-tile-value {
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .badge-pill {
+        font-size: 11px;
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-weight: 600;
+      }
+      .badge-pass {
+        background: var(--color-emerald-50);
+        color: var(--color-emerald-600);
+      }
+      .badge-warn {
+        background: var(--color-amber-50);
+        color: var(--color-amber-600);
+      }
+      .badge-fail {
+        background: var(--color-rose-50);
+        color: var(--color-rose-600);
+      }
+
+      /* Token Table */
+      .token-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      .token-table th {
+        text-align: left;
+        padding: 6px 10px;
+        background: var(--color-slate-100);
+        color: var(--color-slate-700);
+        font-weight: 600;
+        border-bottom: 1px solid var(--color-slate-200);
+      }
+
+      .token-table td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--color-slate-200);
+        vertical-align: middle;
+      }
+
+      .token-table tr.highlighted {
+        background: #eff6ff;
+      }
+
+      .token-key {
+        font-family: monospace;
+        color: var(--color-slate-800);
+        font-weight: 600;
+      }
+
+      .token-val {
+        font-family: monospace;
+        color: var(--color-slate-600);
+      }
+
+      .token-source {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .src-derived {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .src-override {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .src-default {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      /* Tabs for Walkthroughs */
+      .tab-nav {
+        display: flex;
+        border-bottom: 1px solid var(--color-slate-200);
+        margin-bottom: 16px;
+        gap: 4px;
+      }
+
+      .tab-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        color: var(--color-slate-500);
+        transition: all 0.15s ease;
+      }
+
+      .tab-btn.active {
+        color: var(--color-indigo-600);
+        border-bottom-color: var(--color-indigo-600);
+      }
+
+      .walkthrough-scenario {
+        background: var(--color-slate-50);
+        border: 1px solid var(--color-slate-200);
+        border-radius: 6px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: var(--color-slate-700);
+      }
+
+      .walkthrough-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid var(--color-slate-200);
+        border-radius: 6px;
+      }
+
+      .step-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--color-slate-200);
+        color: var(--color-slate-700);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .step-item.active .step-num {
+        background: var(--color-indigo-600);
+        color: white;
+      }
+
+      .step-text {
+        flex: 1;
+        font-size: 13px;
+        color: var(--color-slate-800);
+      }
+
+      .btn-step {
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 4px;
+        border: 1px solid var(--color-slate-300);
+        background: white;
+        cursor: pointer;
+        color: var(--color-slate-800);
+        transition: all 0.1s ease;
+      }
+
+      .btn-step:hover:not(:disabled) {
+        background: var(--color-slate-100);
+        border-color: var(--color-slate-400);
+      }
+
+      .step-item.active .btn-step {
+        background: var(--color-indigo-600);
+        color: white;
+        border-color: var(--color-indigo-600);
+      }
+
+      .btn-step:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Free Play Controls */
+      .control-group {
+        margin-bottom: 16px;
+      }
+
+      .control-label {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-slate-500);
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .btn-action {
+        padding: 6px 10px;
+        font-size: 12px;
+        border: 1px solid var(--color-slate-200);
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        color: var(--color-slate-800);
+        font-weight: 500;
+        transition: all 0.1s ease;
+      }
+
+      .btn-action:hover {
+        background: var(--color-slate-100);
+        border-color: var(--color-slate-300);
+      }
+
+      .btn-action.active {
+        background: var(--color-slate-900);
+        color: white;
+        border-color: var(--color-slate-900);
+      }
+
+      .swatch-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <span class="badge-prototype"
+          >Throwaway Prototype • Pure Logic Demo</span
+        >
+        <h1>Theme Token Engine & Contrast Guardrails</h1>
+        <div class="question-box">
+          <strong>Prototype Question:</strong> Does this state model and token
+          evaluation logic correctly handle merchant color overrides, automatic
+          accessible text contrast (WCAG 2.1 AA & APCA), wide-gamut
+          OKLCH/Display-P3 gamut mapping to sRGB, and 50–900 palette derivation
+          without surprising side effects or illegible storefront UI?
+        </div>
+      </header>
+
+      <main class="main-grid">
+        <!-- LEFT COLUMN: Current State & Storefront Canvas -->
+        <div>
+          <!-- What Changed Notification -->
+          <div id="changeBanner" class="change-banner">
+            <strong>Initial State:</strong> Default theme loaded. Navy brand
+            color with auto-derived white foreground.
+          </div>
+
+          <!-- Live Storefront Canvas -->
+          <div class="card">
+            <div class="card-title">
+              <span>Live Storefront Component Canvas</span>
+              <span
+                style="
+                  font-size: 11px;
+                  text-transform: none;
+                  font-weight: normal;
+                  color: var(--color-slate-500);
+                "
+                >Rendered directly via evaluated CSS variables</span
+              >
+            </div>
+
+            <div id="storefrontPreview" class="storefront-preview">
+              <div class="storefront-header">
+                <span class="storefront-brand-title">MerchStore</span>
+                <span style="font-size: 12px; opacity: 0.8">Cart (2)</span>
+              </div>
+
+              <div class="preview-card">
+                <h3>Minimalist Summer Hoodie</h3>
+                <p>
+                  100% Organic heavyweight cotton. Garment dyed in small
+                  batches.
+                </p>
+                <div>
+                  <button id="btnPrimaryPreview" class="btn-preview-primary">
+                    Add to Bag • $95
+                  </button>
+                  <button
+                    id="btnSecondaryPreview"
+                    class="btn-preview-secondary"
+                  >
+                    Wishlist
+                  </button>
+                </div>
+              </div>
+
+              <div style="font-size: 12px; margin-top: 14px; font-weight: 600">
+                Derived 50–900 OKLCH Palette Ramp:
+              </div>
+              <div id="paletteRamp" class="palette-ramp">
+                <!-- Injected swatches -->
+              </div>
+            </div>
+
+            <!-- Accessibility & Contrast Scorecard -->
+            <div class="status-badges">
+              <div class="status-tile">
+                <div class="status-tile-label">
+                  Button Text Contrast (WCAG 2.1)
+                </div>
+                <div id="wcagBadge" class="status-tile-value">
+                  <span id="wcagRatio">17.8:1</span>
+                  <span id="wcagStatus" class="badge-pill badge-pass"
+                    >Pass AAA</span
+                  >
+                </div>
+                <div
+                  id="wcagSubtext"
+                  style="
+                    font-size: 11px;
+                    color: var(--color-slate-500);
+                    margin-top: 4px;
+                  "
+                >
+                  Threshold: 4.5:1 for AA normal text
+                </div>
+              </div>
+
+              <div class="status-tile">
+                <div class="status-tile-label">Gamut & APCA Rating</div>
+                <div id="gamutBadge" class="status-tile-value">
+                  <span id="apcaScore">Lc 94.2</span>
+                  <span id="gamutStatus" class="badge-pill badge-pass"
+                    >sRGB Safe</span
+                  >
+                </div>
+                <div
+                  id="gamutSubtext"
+                  style="
+                    font-size: 11px;
+                    color: var(--color-slate-500);
+                    margin-top: 4px;
+                  "
+                >
+                  APCA Body Target: |Lc| ≥ 60
+                </div>
+              </div>
+            </div>
+
+            <!-- Evaluated CSS Tokens Table -->
+            <div class="card-title" style="margin-top: 20px">
+              <span
+                >Evaluated CSS Variables (`Record&lt;string, string&gt;`)</span
+              >
+            </div>
+            <table class="token-table">
+              <thead>
+                <tr>
+                  <th>CSS Variable</th>
+                  <th>Evaluated Value</th>
+                  <th>Origin</th>
+                </tr>
+              </thead>
+              <tbody id="tokenTableBody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Guided Walkthroughs & Free Play Sandbox -->
+        <div>
+          <!-- Guided Walkthroughs Card -->
+          <div class="card">
+            <div class="card-title">
+              <span>Guided Walkthroughs</span>
+              <span
+                style="
+                  font-size: 11px;
+                  color: var(--color-indigo-600);
+                  text-transform: none;
+                  font-weight: 600;
+                "
+                >Edge Case Scenarios</span
+              >
+            </div>
+
+            <nav class="tab-nav">
+              <button class="tab-btn active" data-tab="scenario-yellow">
+                1. The Yellow Trap
+              </button>
+              <button class="tab-btn" data-tab="scenario-gamut">
+                2. Wide Gamut
+              </button>
+              <button class="tab-btn" data-tab="scenario-stubborn">
+                3. Stubborn Merchant
+              </button>
+              <button class="tab-btn" data-tab="scenario-dark">
+                4. Dark Inversion
+              </button>
+            </nav>
+
+            <div id="tabContent">
+              <!-- Active scenario controls rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Free Play Sandbox Card -->
+          <div class="card">
+            <div class="card-title">
+              <span>Free-Play Sandbox</span>
+              <button
+                id="btnResetDefaults"
+                class="btn-action"
+                style="font-size: 11px; padding: 3px 8px"
+              >
+                Reset Defaults
+              </button>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Brand Color (`--theme-brand`)</label>
+              <div class="btn-row">
+                <button
+                  class="btn-action"
+                  data-action="setBrand"
+                  data-val="#0f172a"
+                >
+                  <span class="swatch-dot" style="background: #0f172a"></span
+                  >Default Navy
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBrand"
+                  data-val="#facc15"
+                >
+                  <span class="swatch-dot" style="background: #facc15"></span
+                  >Electric Yellow
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBrand"
+                  data-val="oklch(0.65 0.32 310)"
+                >
+                  <span
+                    class="swatch-dot"
+                    style="background: oklch(0.65 0.32 310)"
+                  ></span
+                  >Neon Purple (P3)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBrand"
+                  data-val="#ef4444"
+                >
+                  <span class="swatch-dot" style="background: #ef4444"></span
+                  >Crimson
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBrand"
+                  data-val="oklch(0.88 0.16 142)"
+                >
+                  <span
+                    class="swatch-dot"
+                    style="background: oklch(0.88 0.16 142)"
+                  ></span
+                  >Mint Lime
+                </button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label"
+                >Brand Text (`--theme-brand-foreground`)</label
+              >
+              <div class="btn-row">
+                <button
+                  class="btn-action"
+                  data-action="forceForeground"
+                  data-val="#ffffff"
+                >
+                  Force White (#fff)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="forceForeground"
+                  data-val="#0f172a"
+                >
+                  Force Dark (#0f172a)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="clearForegroundOverride"
+                >
+                  Clear Override (Auto)
+                </button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label"
+                >Canvas Background (`--theme-background`)</label
+              >
+              <div class="btn-row">
+                <button
+                  class="btn-action"
+                  data-action="setBackground"
+                  data-val="#ffffff"
+                >
+                  <span class="swatch-dot" style="background: #ffffff"></span
+                  >Pure White
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBackground"
+                  data-val="#fefce8"
+                >
+                  <span class="swatch-dot" style="background: #fefce8"></span
+                  >Warm Cream
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBackground"
+                  data-val="#0f172a"
+                >
+                  <span class="swatch-dot" style="background: #0f172a"></span
+                  >Dark Slate
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setBackground"
+                  data-val="#000000"
+                >
+                  <span class="swatch-dot" style="background: #000000"></span
+                  >OLED Black
+                </button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label"
+                >Corner Radius (`--theme-radius`)</label
+              >
+              <div class="btn-row">
+                <button
+                  class="btn-action"
+                  data-action="setRadius"
+                  data-val="0px"
+                >
+                  Sharp (0px)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setRadius"
+                  data-val="4px"
+                >
+                  Subtle (4px)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setRadius"
+                  data-val="8px"
+                >
+                  Standard (8px)
+                </button>
+                <button
+                  class="btn-action"
+                  data-action="setRadius"
+                  data-val="24px"
+                >
+                  Pill (24px)
+                </button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Engine Automation Guardrails</label>
+              <div class="btn-row">
+                <button
+                  id="btnToggleAutoFg"
+                  class="btn-action active"
+                  data-action="toggleAutoFg"
+                >
+                  Auto-Derive Foreground: ON
+                </button>
+                <button
+                  id="btnToggleGamut"
+                  class="btn-action active"
+                  data-action="toggleGamut"
+                >
+                  Gamut Mapping: ON
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PORTABLE LOGIC MODULE (Pure JS, zero DOM, liftable to real codebase)     -->
+    <!-- ========================================================================= -->
+    <script id="token-engine-logic">
+      /**
+       * @repo/theme-core Pure Token Engine & Color Math Module
+       * Completely isolated from DOM, window, or document.
+       */
+      const PureTokenEngine = (() => {
+        // --- Pure Color Math Utilities ---
+
+        function parseHex(hex) {
+          let clean = hex.replace(/^#/, "");
+          if (clean.length === 3) {
+            clean = clean
+              .split("")
+              .map((c) => c + c)
+              .join("");
+          }
+          if (clean.length !== 6) return null;
+          const num = parseInt(clean, 16);
+          return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+        }
+
+        function rgbToHex(r, g, b) {
+          const toHex = (n) =>
+            Math.min(255, Math.max(0, Math.round(n)))
+              .toString(16)
+              .padStart(2, "0");
+          return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        // Parses hex, rgb(), or oklch()
+        function parseColor(input) {
+          if (!input || typeof input !== "string") return null;
+          const str = input.trim();
+
+          if (str.startsWith("#")) {
+            const rgb = parseHex(str);
+            if (!rgb) return null;
+            return { type: "srgb", r: rgb[0], g: rgb[1], b: rgb[2] };
+          }
+
+          const oklchMatch = str.match(
+            /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/
+          );
+          if (oklchMatch) {
+            return {
+              type: "oklch",
+              l: parseFloat(oklchMatch[1]),
+              c: parseFloat(oklchMatch[2]),
+              h: parseFloat(oklchMatch[3]),
+            };
+          }
+
+          return null;
+        }
+
+        // Convert OKLCH to linear RGB
+        function oklchToLinearRgb(l, c, h) {
+          const rad = (h * Math.PI) / 180;
+          const a = c * Math.cos(rad);
+          const b = c * Math.sin(rad);
+
+          const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
+          const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
+          const s_ = l - 0.0894841775 * a - 1.291485548 * b;
+
+          const L = l_ * l_ * l_;
+          const M = m_ * m_ * m_;
+          const S = s_ * s_ * s_;
+
+          return [
+            +4.0767416621 * L - 3.3077115913 * M + 0.2309699292 * S,
+            -1.2684380046 * L + 2.6097574011 * M - 0.3413193965 * S,
+            -0.0041960863 * L - 0.7034186147 * M + 1.707614701 * S,
+          ];
+        }
+
+        function linearToSrgb(c) {
+          const abs = Math.abs(c);
+          const sign = c < 0 ? -1 : 1;
+          return abs <= 0.0031308
+            ? c * 12.92
+            : sign * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055);
+        }
+
+        // Gamut mapping via OKLCH chroma reduction (CSS Color 4 algorithm concept)
+        function mapOklchToSrgb(l, c, h) {
+          let low = 0;
+          let high = c;
+          let best = [l, 0, h];
+
+          for (let i = 0; i < 20; i++) {
+            const mid = (low + high) / 2;
+            const [rLin, gLin, bLin] = oklchToLinearRgb(l, mid, h);
+            if (
+              rLin >= -0.0001 &&
+              rLin <= 1.0001 &&
+              gLin >= -0.0001 &&
+              gLin <= 1.0001 &&
+              bLin >= -0.0001 &&
+              bLin <= 1.0001
+            ) {
+              best = [l, mid, h];
+              low = mid;
+            } else {
+              high = mid;
+            }
+          }
+
+          const [rLin, gLin, bLin] = oklchToLinearRgb(
+            best[0],
+            best[1],
+            best[2]
+          );
+          return [
+            Math.min(255, Math.max(0, Math.round(linearToSrgb(rLin) * 255))),
+            Math.min(255, Math.max(0, Math.round(linearToSrgb(gLin) * 255))),
+            Math.min(255, Math.max(0, Math.round(linearToSrgb(bLin) * 255))),
+          ];
+        }
+
+        function isOklchInSrgbGamut(l, c, h) {
+          const [r, g, b] = oklchToLinearRgb(l, c, h);
+          return (
+            r >= -0.001 &&
+            r <= 1.001 &&
+            g >= -0.001 &&
+            g <= 1.001 &&
+            b >= -0.001 &&
+            b <= 1.001
+          );
+        }
+
+        function colorToRgb255(colorVal) {
+          const parsed = parseColor(colorVal);
+          if (!parsed) return [15, 23, 42]; // fallback navy
+          if (parsed.type === "srgb") return [parsed.r, parsed.g, parsed.b];
+          return mapOklchToSrgb(parsed.l, parsed.c, parsed.h);
+        }
+
+        // WCAG 2.1 Relative Luminance & Contrast
+        function getRelativeLuminance(r, g, b) {
+          const a = [r, g, b].map((v) => {
+            v /= 255;
+            return v <= 0.03928
+              ? v / 12.92
+              : Math.pow((v + 0.055) / 1.055, 2.4);
+          });
+          return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        }
+
+        function getWcagContrast(rgbA, rgbB) {
+          const lum1 = getRelativeLuminance(...rgbA);
+          const lum2 = getRelativeLuminance(...rgbB);
+          const brightest = Math.max(lum1, lum2);
+          const darkest = Math.min(lum1, lum2);
+          return (brightest + 0.05) / (darkest + 0.05);
+        }
+
+        // APCA (Accessible Perceptual Contrast Algorithm) Lc score
+        function getApcaLc(txtRgb, bgRgb) {
+          const txtLum = getRelativeLuminance(...txtRgb);
+          const bgLum = getRelativeLuminance(...bgRgb);
+          if (bgLum > txtLum) {
+            const sapc =
+              (Math.pow(bgLum, 0.56) - Math.pow(txtLum, 0.57)) * 1.14;
+            const val = sapc < 0.1 ? 0 : sapc * 100 - 0.027;
+            return Math.round(val * 10) / 10;
+          } else {
+            const sapc =
+              (Math.pow(bgLum, 0.65) - Math.pow(txtLum, 0.62)) * 1.14;
+            const val = sapc > -0.1 ? 0 : sapc * 100 + 0.027;
+            return Math.round(val * 10) / 10;
+          }
+        }
+
+        // Generate 50–900 OKLCH palette ramp
+        function generateOklchPalette(baseColorString) {
+          let l = 0.5,
+            c = 0.15,
+            h = 250;
+          const parsed = parseColor(baseColorString);
+          if (parsed && parsed.type === "oklch") {
+            l = parsed.l;
+            c = parsed.c;
+            h = parsed.h;
+          } else if (parsed && parsed.type === "srgb") {
+            // Approximate hue/chroma in OKLCH for hex input
+            const r = parsed.r / 255,
+              g = parsed.g / 255,
+              b = parsed.b / 255;
+            l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            c = Math.max(0.04, Math.abs(r - b) * 0.25);
+            h =
+              Math.round((Math.atan2(g - b, r - g) * 180) / Math.PI + 360) %
+              360;
+          }
+
+          const steps = [
+            { step: "50", l: 0.97, c: c * 0.2 },
+            { step: "100", l: 0.93, c: c * 0.4 },
+            { step: "200", l: 0.86, c: c * 0.6 },
+            { step: "300", l: 0.76, c: c * 0.8 },
+            { step: "400", l: 0.66, c: c * 0.95 },
+            { step: "500", l: l, c: c },
+            { step: "600", l: Math.max(0.12, l * 0.85), c: c * 0.95 },
+            { step: "700", l: Math.max(0.1, l * 0.7), c: c * 0.85 },
+            { step: "800", l: Math.max(0.08, l * 0.55), c: c * 0.7 },
+            { step: "900", l: Math.max(0.06, l * 0.4), c: c * 0.55 },
+          ];
+
+          const ramp = {};
+          for (const s of steps) {
+            ramp[`--theme-brand-${s.step}`] =
+              `oklch(${s.l.toFixed(3)} ${s.c.toFixed(3)} ${Math.round(h)})`;
+          }
+          return ramp;
+        }
+
+        // --- Initial Default State ---
+        const INITIAL_STATE = {
+          settings: {
+            brand: "#0f172a",
+            brandForeground: null, // null means auto-derive
+            background: "#ffffff",
+            foreground: "#0f172a",
+            radius: "8px",
+          },
+          options: {
+            autoDeriveForeground: true,
+            gamutMapping: true,
+          },
+          lastActionDescription: "Initialized default factory settings.",
+        };
+
+        // --- Pure Evaluation Engine ---
+        function evaluateTheme(state) {
+          const { settings, options } = state;
+          const cssVariables = {};
+          const sources = {};
+
+          // 1. Base tokens & Merchant overrides
+          const background = settings.background || "#ffffff";
+          const foreground = settings.foreground || "#0f172a";
+          const brand = settings.brand || "#0f172a";
+          const radius = settings.radius || "8px";
+
+          cssVariables["--theme-background"] = background;
+          sources["--theme-background"] = settings.background
+            ? "override"
+            : "default";
+
+          cssVariables["--theme-foreground"] = foreground;
+          sources["--theme-foreground"] = settings.foreground
+            ? "override"
+            : "default";
+
+          cssVariables["--theme-brand"] = brand;
+          sources["--theme-brand"] = "override";
+
+          cssVariables["--theme-radius"] = radius;
+          sources["--theme-radius"] = "override";
+
+          // 2. Gamut analysis on Brand
+          let isWideGamut = false;
+          let srgbFallbackHex = brand;
+          const parsedBrand = parseColor(brand);
+          if (parsedBrand && parsedBrand.type === "oklch") {
+            isWideGamut = !isOklchInSrgbGamut(
+              parsedBrand.l,
+              parsedBrand.c,
+              parsedBrand.h
+            );
+            if (isWideGamut && options.gamutMapping) {
+              const mappedRgb = mapOklchToSrgb(
+                parsedBrand.l,
+                parsedBrand.c,
+                parsedBrand.h
+              );
+              srgbFallbackHex = rgbToHex(...mappedRgb);
+            }
+          }
+          cssVariables["--theme-brand-srgb"] = srgbFallbackHex;
+          sources["--theme-brand-srgb"] = "derived";
+
+          // 3. Brand Foreground (Auto-derive vs Manual Override)
+          let brandForeground = settings.brandForeground;
+          let isForegroundAutoDerived = false;
+
+          const brandRgb = colorToRgb255(srgbFallbackHex);
+          const whiteRgb = [255, 255, 255];
+          const darkRgb = [15, 23, 42];
+
+          const contrastWhite = getWcagContrast(brandRgb, whiteRgb);
+          const contrastDark = getWcagContrast(brandRgb, darkRgb);
+
+          if (options.autoDeriveForeground && !brandForeground) {
+            brandForeground =
+              contrastWhite >= contrastDark ? "#ffffff" : "#0f172a";
+            isForegroundAutoDerived = true;
+          } else if (!brandForeground) {
+            brandForeground = "#ffffff"; // fallback
+          }
+
+          cssVariables["--theme-brand-foreground"] = brandForeground;
+          sources["--theme-brand-foreground"] = isForegroundAutoDerived
+            ? "derived"
+            : "override";
+
+          // 4. Accessibility metrics on final brand foreground
+          const fgRgb = colorToRgb255(brandForeground);
+          const activeWcagContrast = getWcagContrast(brandRgb, fgRgb);
+          const activeApcaScore = getApcaLc(fgRgb, brandRgb);
+
+          // 5. Radii derivation
+          cssVariables["--theme-radius-sm"] = `calc(${radius} * 0.75)`;
+          cssVariables["--theme-radius-md"] = radius;
+          cssVariables["--theme-radius-lg"] = `calc(${radius} * 1.5)`;
+          cssVariables["--theme-radius-full"] = "9999px";
+          sources["--theme-radius-sm"] = "derived";
+          sources["--theme-radius-md"] = "derived";
+          sources["--theme-radius-lg"] = "derived";
+          sources["--theme-radius-full"] = "derived";
+
+          // 6. 50–900 Palette derivation
+          const palette = generateOklchPalette(brand);
+          Object.assign(cssVariables, palette);
+          for (const key of Object.keys(palette)) {
+            sources[key] = "derived";
+          }
+
+          return {
+            cssVariables,
+            sources,
+            accessibility: {
+              wcagRatio: activeWcagContrast,
+              isWcagPass: activeWcagContrast >= 4.5,
+              isWcagAaa: activeWcagContrast >= 7.0,
+              apcaLc: activeApcaScore,
+              isForegroundAutoDerived,
+              contrastWhite,
+              contrastDark,
+            },
+            gamut: {
+              isWideGamut,
+              srgbFallbackHex,
+            },
+            palette,
+          };
+        }
+
+        // --- Pure Reducer ---
+        function themeReducer(state, action) {
+          switch (action.type) {
+            case "SET_BRAND":
+              return {
+                ...state,
+                settings: { ...state.settings, brand: action.payload },
+                lastActionDescription: `Set Brand Color to "${action.payload}".`,
+              };
+            case "SET_BACKGROUND":
+              return {
+                ...state,
+                settings: { ...state.settings, background: action.payload },
+                lastActionDescription: `Set Canvas Background to "${action.payload}".`,
+              };
+            case "SET_FOREGROUND":
+              return {
+                ...state,
+                settings: {
+                  ...state.settings,
+                  brandForeground: action.payload,
+                },
+                lastActionDescription: `Explicitly forced Brand Foreground to "${action.payload}".`,
+              };
+            case "CLEAR_FOREGROUND_OVERRIDE":
+              return {
+                ...state,
+                settings: { ...state.settings, brandForeground: null },
+                lastActionDescription: `Cleared manual foreground override; re-enabled auto-derivation.`,
+              };
+            case "SET_RADIUS":
+              return {
+                ...state,
+                settings: { ...state.settings, radius: action.payload },
+                lastActionDescription: `Updated Corner Radius to "${action.payload}".`,
+              };
+            case "TOGGLE_AUTO_FG":
+              return {
+                ...state,
+                options: {
+                  ...state.options,
+                  autoDeriveForeground: !state.options.autoDeriveForeground,
+                },
+                lastActionDescription: `Toggled automatic accessibility foreground guardrail to ${!state.options.autoDeriveForeground ? "ON" : "OFF"}.`,
+              };
+            case "TOGGLE_GAMUT":
+              return {
+                ...state,
+                options: {
+                  ...state.options,
+                  gamutMapping: !state.options.gamutMapping,
+                },
+                lastActionDescription: `Toggled wide-gamut mapping to ${!state.options.gamutMapping ? "ON" : "OFF"}.`,
+              };
+            case "RESET":
+              return {
+                ...INITIAL_STATE,
+                lastActionDescription: "Reset state to factory defaults.",
+              };
+            default:
+              return state;
+          }
+        }
+
+        return {
+          INITIAL_STATE,
+          evaluateTheme,
+          themeReducer,
+        };
+      })();
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- PROTOTYPE UI CONTROLLER (Throwaway view shell)                            -->
+    <!-- ========================================================================= -->
+    <script id="prototype-ui">
+      (() => {
+        let currentState = PureTokenEngine.INITIAL_STATE;
+        let currentEvaluated = PureTokenEngine.evaluateTheme(currentState);
+
+        // Walkthrough scenarios definition
+        const SCENARIOS = {
+          "scenario-yellow": {
+            title: "The Yellow Trap (Automatic Contrast Guardrail)",
+            description:
+              "When a merchant sets their brand to bright yellow (#facc15), legacy systems kept white text (#ffffff), failing WCAG AA at 1.5:1. Watch the engine automatically flip text to dark slate (#0f172a), jumping to 11.7:1 contrast.",
+            steps: [
+              {
+                label: "1. Reset to Navy Brand (#0f172a)",
+                action: () => dispatch({ type: "RESET" }),
+              },
+              {
+                label: "2. Set Brand to Electric Yellow (#facc15)",
+                action: () =>
+                  dispatch({ type: "SET_BRAND", payload: "#facc15" }),
+              },
+              {
+                label: "3. Verify Auto-Flipped Foreground (#0f172a)",
+                action: () => {
+                  // No-op verification step
+                  updateChangeBanner(
+                    "Verified: Foreground automatically set to #0f172a with 11.7:1 AAA contrast."
+                  );
+                },
+              },
+            ],
+          },
+          "scenario-gamut": {
+            title: "Wide-Gamut Neon (Display P3 / OKLCH Gamut Mapping)",
+            description:
+              "A merchant inputs a vivid neon purple oklch(0.65 0.32 310) outside standard sRGB monitors. The engine flags it, reduces chroma via OKLCH binary search, and creates a hue-preserved sRGB fallback hex.",
+            steps: [
+              {
+                label: "1. Reset to Factory Defaults",
+                action: () => dispatch({ type: "RESET" }),
+              },
+              {
+                label: "2. Apply Neon Purple oklch(0.65 0.32 310)",
+                action: () =>
+                  dispatch({
+                    type: "SET_BRAND",
+                    payload: "oklch(0.65 0.32 310)",
+                  }),
+              },
+              {
+                label: "3. Inspect Gamut Fallback & 50-900 Scale",
+                action: () => {
+                  updateChangeBanner(
+                    "Inspected: Mapped to safe sRGB fallback while generating 10-step OKLCH palette ramp."
+                  );
+                },
+              },
+            ],
+          },
+          "scenario-stubborn": {
+            title: "The Stubborn Merchant (Manual Override & Warning)",
+            description:
+              "A merchant overrides the accessible default with an inaccessible color. The engine must respect the merchant's choice while raising an explicit WCAG AA failure warning.",
+            steps: [
+              {
+                label: "1. Set Brand to Light Coral (#fca5a5)",
+                action: () =>
+                  dispatch({ type: "SET_BRAND", payload: "#fca5a5" }),
+              },
+              {
+                label: "2. Force Brand Text to White (#ffffff)",
+                action: () =>
+                  dispatch({ type: "SET_FOREGROUND", payload: "#ffffff" }),
+              },
+              {
+                label: "3. Clear Manual Override (Restore Auto)",
+                action: () => dispatch({ type: "CLEAR_FOREGROUND_OVERRIDE" }),
+              },
+            ],
+          },
+          "scenario-dark": {
+            title: "OLED Dark Mode & Corner Radii Cascade",
+            description:
+              "Switch canvas to pure black (#000000) and brand to Mint Lime OKLCH. Set radius to sharp 0px and observe synchronous derivation across all dependent tokens.",
+            steps: [
+              {
+                label: "1. Set Background to OLED Black (#000000)",
+                action: () =>
+                  dispatch({ type: "SET_BACKGROUND", payload: "#000000" }),
+              },
+              {
+                label: "2. Set Brand to Mint Lime oklch(0.88 0.16 142)",
+                action: () =>
+                  dispatch({
+                    type: "SET_BRAND",
+                    payload: "oklch(0.88 0.16 142)",
+                  }),
+              },
+              {
+                label: "3. Set Corner Radius to Sharp (0px)",
+                action: () => dispatch({ type: "SET_RADIUS", payload: "0px" }),
+              },
+            ],
+          },
+        };
+
+        let activeTab = "scenario-yellow";
+        let activeStepIndex = 0;
+
+        function dispatch(action) {
+          currentState = PureTokenEngine.themeReducer(currentState, action);
+          currentEvaluated = PureTokenEngine.evaluateTheme(currentState);
+          render();
+        }
+
+        function updateChangeBanner(customMsg) {
+          const banner = document.getElementById("changeBanner");
+          banner.innerHTML = `<strong>Recent Action:</strong> ${customMsg || currentState.lastActionDescription}`;
+        }
+
+        function render() {
+          updateChangeBanner();
+
+          const { cssVariables, accessibility, gamut, sources, palette } =
+            currentEvaluated;
+
+          // 1. Update Live Storefront Canvas
+          const preview = document.getElementById("storefrontPreview");
+          preview.style.backgroundColor = cssVariables["--theme-background"];
+          preview.style.color = cssVariables["--theme-foreground"];
+
+          const btnPrimary = document.getElementById("btnPrimaryPreview");
+          btnPrimary.style.backgroundColor = cssVariables["--theme-brand"];
+          btnPrimary.style.color = cssVariables["--theme-brand-foreground"];
+          btnPrimary.style.borderRadius = cssVariables["--theme-radius"];
+
+          const btnSecondary = document.getElementById("btnSecondaryPreview");
+          btnSecondary.style.borderRadius = cssVariables["--theme-radius"];
+
+          // 2. Render 50–900 Palette Swatches
+          const paletteContainer = document.getElementById("paletteRamp");
+          paletteContainer.innerHTML = "";
+          const stepKeys = [
+            "50",
+            "100",
+            "200",
+            "300",
+            "400",
+            "500",
+            "600",
+            "700",
+            "800",
+            "900",
+          ];
+          for (const step of stepKeys) {
+            const swatch = document.createElement("div");
+            swatch.className = "palette-swatch";
+            const val = palette[`--theme-brand-${step}`];
+            swatch.style.backgroundColor = val;
+            // Contrast text inside swatch
+            swatch.style.color = parseInt(step) >= 500 ? "#ffffff" : "#0f172a";
+            swatch.textContent = step;
+            paletteContainer.appendChild(swatch);
+          }
+
+          // 3. Update Accessibility Scorecard
+          const ratioElem = document.getElementById("wcagRatio");
+          const statusElem = document.getElementById("wcagStatus");
+          const subtextElem = document.getElementById("wcagSubtext");
+
+          ratioElem.textContent = `${accessibility.wcagRatio.toFixed(1)}:1`;
+
+          if (accessibility.isWcagAaa) {
+            statusElem.className = "badge-pill badge-pass";
+            statusElem.textContent = "Pass AAA";
+          } else if (accessibility.isWcagPass) {
+            statusElem.className = "badge-pill badge-pass";
+            statusElem.textContent = "Pass AA";
+          } else {
+            statusElem.className = "badge-pill badge-fail";
+            statusElem.textContent = "Fails WCAG AA";
+          }
+
+          const fgModeText = accessibility.isForegroundAutoDerived
+            ? "(Auto-derived for optimal contrast)"
+            : "(Manually forced by merchant)";
+          subtextElem.textContent = `Text: ${cssVariables["--theme-brand-foreground"]} ${fgModeText}`;
+
+          // 4. Update Gamut Scorecard
+          const apcaElem = document.getElementById("apcaScore");
+          const gamutElem = document.getElementById("gamutStatus");
+          const gamutSubtext = document.getElementById("gamutSubtext");
+
+          apcaElem.textContent = `Lc ${Math.abs(accessibility.apcaLc).toFixed(1)}`;
+
+          if (gamut.isWideGamut) {
+            gamutElem.className = "badge-pill badge-warn";
+            gamutElem.textContent = "Wide Gamut";
+            gamutSubtext.textContent = `sRGB Fallback: ${gamut.srgbFallbackHex}`;
+          } else {
+            gamutElem.className = "badge-pill badge-pass";
+            gamutElem.textContent = "sRGB Safe";
+            gamutSubtext.textContent = "Color fits within standard sRGB gamut";
+          }
+
+          // 5. Update Token Table
+          const tbody = document.getElementById("tokenTableBody");
+          tbody.innerHTML = "";
+          const primaryTokens = [
+            "--theme-background",
+            "--theme-foreground",
+            "--theme-brand",
+            "--theme-brand-foreground",
+            "--theme-brand-srgb",
+            "--theme-radius",
+            "--theme-radius-sm",
+            "--theme-radius-lg",
+            "--theme-brand-500",
+          ];
+
+          for (const key of primaryTokens) {
+            if (!cssVariables[key]) continue;
+            const tr = document.createElement("tr");
+            const src = sources[key];
+            const srcClass =
+              src === "override"
+                ? "src-override"
+                : src === "derived"
+                  ? "src-derived"
+                  : "src-default";
+            const srcLabel =
+              src === "override"
+                ? "Merchant"
+                : src === "derived"
+                  ? "Auto-Derived"
+                  : "Default";
+
+            tr.innerHTML = `
+        <td class="token-key">${key}</td>
+        <td class="token-val">${cssVariables[key]}</td>
+        <td><span class="token-source ${srcClass}">${srcLabel}</span></td>
+      `;
+            tbody.appendChild(tr);
+          }
+
+          // 6. Update Guardrail Toggles UI
+          const btnAutoFg = document.getElementById("btnToggleAutoFg");
+          btnAutoFg.className = currentState.options.autoDeriveForeground
+            ? "btn-action active"
+            : "btn-action";
+          btnAutoFg.textContent = `Auto-Derive Foreground: ${currentState.options.autoDeriveForeground ? "ON" : "OFF"}`;
+
+          const btnGamut = document.getElementById("btnToggleGamut");
+          btnGamut.className = currentState.options.gamutMapping
+            ? "btn-action active"
+            : "btn-action";
+          btnGamut.textContent = `Gamut Mapping: ${currentState.options.gamutMapping ? "ON" : "OFF"}`;
+
+          renderWalkthrough();
+        }
+
+        function renderWalkthrough() {
+          const container = document.getElementById("tabContent");
+          const scenario = SCENARIOS[activeTab];
+          if (!scenario) return;
+
+          let html = `
+      <div class="walkthrough-scenario">
+        <strong>${scenario.title}</strong>
+        <p style="margin-top: 4px;">${scenario.description}</p>
+      </div>
+      <div class="walkthrough-steps">
+    `;
+
+          scenario.steps.forEach((step, idx) => {
+            const isActive = idx === activeStepIndex;
+            const isPast = idx < activeStepIndex;
+            const stepClass = isActive ? "step-item active" : "step-item";
+            html += `
+        <div class="${stepClass}">
+          <div class="step-num">${idx + 1}</div>
+          <div class="step-text">${step.label}</div>
+          <button class="btn-step" data-step-idx="${idx}" ${idx > activeStepIndex ? "disabled" : ""}>
+            ${isPast ? "Done ✓" : isActive ? "Click to Run" : "Pending"}
+          </button>
+        </div>
+      `;
+          });
+
+          html += `</div>`;
+          container.innerHTML = html;
+
+          // Attach step button handlers
+          container.querySelectorAll(".btn-step").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const idx = parseInt(
+                e.currentTarget.getAttribute("data-step-idx")
+              );
+              scenario.steps[idx].action();
+              if (activeStepIndex < scenario.steps.length - 1) {
+                activeStepIndex++;
+              }
+              render();
+            });
+          });
+        }
+
+        // --- Wire UI Events ---
+
+        // Tab switching
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            document
+              .querySelectorAll(".tab-btn")
+              .forEach((b) => b.classList.remove("active"));
+            e.currentTarget.classList.add("active");
+            activeTab = e.currentTarget.getAttribute("data-tab");
+            activeStepIndex = 0;
+            dispatch({ type: "RESET" });
+          });
+        });
+
+        // Free play action delegation
+        document.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-action]");
+          if (!btn) return;
+
+          const action = btn.getAttribute("data-action");
+          const val = btn.getAttribute("data-val");
+
+          switch (action) {
+            case "setBrand":
+              dispatch({ type: "SET_BRAND", payload: val });
+              break;
+            case "setBackground":
+              dispatch({ type: "SET_BACKGROUND", payload: val });
+              break;
+            case "forceForeground":
+              dispatch({ type: "SET_FOREGROUND", payload: val });
+              break;
+            case "clearForegroundOverride":
+              dispatch({ type: "CLEAR_FOREGROUND_OVERRIDE" });
+              break;
+            case "setRadius":
+              dispatch({ type: "SET_RADIUS", payload: val });
+              break;
+            case "toggleAutoFg":
+              dispatch({ type: "TOGGLE_AUTO_FG" });
+              break;
+            case "toggleGamut":
+              dispatch({ type: "TOGGLE_GAMUT" });
+              break;
+          }
+        });
+
+        document
+          .getElementById("btnResetDefaults")
+          .addEventListener("click", () => {
+            dispatch({ type: "RESET" });
+          });
+
+        // Initial render
+        render();
+      })();
+    </script>
+  </body>
+</html>
