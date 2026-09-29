@@ -122,13 +122,13 @@
       "name": "@repo/theme-default",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/payload-plugin-themes": "workspace:*",
-        "@repo/ui": "workspace:*",
+        "@repo/theme-core": "workspace:*",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "@testing-library/dom": "catalog:test",
         "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
         "@types/react": "catalog:react",
         "@types/react-dom": "catalog:react",
         "@vitejs/plugin-react": "catalog:test",
@@ -146,13 +146,13 @@
       "name": "@repo/theme-minimal",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/payload-plugin-themes": "workspace:*",
-        "@repo/ui": "workspace:*",
+        "@repo/theme-core": "workspace:*",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "@testing-library/dom": "catalog:test",
         "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
         "@types/react": "catalog:react",
         "@types/react-dom": "catalog:react",
         "@vitejs/plugin-react": "catalog:test",

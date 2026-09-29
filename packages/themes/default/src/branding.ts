@@ -1,36 +1,37 @@
-import type { SettingField } from "@repo/payload-plugin-themes/types";
+import { MERCHANT_THEME_VARIABLES } from "@repo/theme-core";
+import type { SettingField } from "@repo/theme-core";
 
 export const brandingSettings: SettingField[] = [
   {
-    cssVar: "--primary",
+    cssVar: MERCHANT_THEME_VARIABLES.brand,
     defaultValue: "#0f122a",
     label: "Primary Color",
     name: "primaryColor",
     type: "color",
   },
   {
-    cssVar: "--accent",
+    cssVar: MERCHANT_THEME_VARIABLES.muted,
     defaultValue: "#3b82f6",
     label: "Accent Color",
     name: "accentColor",
     type: "color",
   },
   {
-    cssVar: "--background",
+    cssVar: MERCHANT_THEME_VARIABLES.background,
     defaultValue: "#ffffff",
     label: "Background Color",
     name: "backgroundColor",
     type: "color",
   },
   {
-    cssVar: "--foreground",
+    cssVar: MERCHANT_THEME_VARIABLES.foreground,
     defaultValue: "#0f172a",
     label: "Text Color",
     name: "textColor",
     type: "color",
   },
   {
-    cssVar: "--font-template-heading",
+    cssVar: MERCHANT_THEME_VARIABLES.fontHeading,
     defaultValue: "var(--font-plus-jakarta-sans)",
     label: "Heading Font",
     name: "fontHeading",
@@ -42,7 +43,7 @@ export const brandingSettings: SettingField[] = [
     ],
   },
   {
-    cssVar: "--font-template-body",
+    cssVar: MERCHANT_THEME_VARIABLES.fontBody,
     defaultValue: "var(--font-inter)",
     label: "Body Font",
     name: "fontBody",

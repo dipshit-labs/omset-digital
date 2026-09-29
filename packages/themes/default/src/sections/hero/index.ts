@@ -1,5 +1,5 @@
-import { defineSection } from "@repo/payload-plugin-themes/types";
-import type { SettingField } from "@repo/payload-plugin-themes/types";
+import { defineSection } from "@repo/theme-core";
+import type { SettingField } from "@repo/theme-core";
 
 import { Hero } from "./Hero";
 import type { HeroBulletBlock, HeroSettings } from "./Hero";

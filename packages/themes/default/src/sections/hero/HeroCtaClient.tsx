@@ -1,6 +1,7 @@
 "use client";
 
-import { cn } from "@repo/ui/lib/utils";
+import { Link } from "@repo/theme-core/primitives";
+import { cn } from "@repo/theme-core/utils";
 import type { MouseEvent, ReactElement } from "react";
 
 export interface HeroCtaClientProps {
@@ -18,7 +19,7 @@ export const HeroCtaClient = ({
   onClick,
   url,
 }: HeroCtaClientProps): ReactElement => (
-  <a
+  <Link
     className={cn(
       "bg-primary text-primary-foreground inline-flex items-center rounded-lg px-6 py-3 text-base font-medium shadow-sm transition hover:opacity-90",
       className
@@ -29,5 +30,5 @@ export const HeroCtaClient = ({
     target={newTab ? "_blank" : undefined}
   >
     {label}
-  </a>
+  </Link>
 );

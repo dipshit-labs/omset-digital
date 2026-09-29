@@ -1,5 +1,5 @@
-import { defineTheme } from "@repo/payload-plugin-themes/types";
-import type { ThemeManifestDefinition } from "@repo/payload-plugin-themes/types";
+import { defineTheme } from "@repo/theme-core";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 
 import { brandingSettings } from "./branding";
 import { heroSection } from "./sections/hero";

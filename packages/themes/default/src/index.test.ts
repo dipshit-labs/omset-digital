@@ -1,5 +1,7 @@
-import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/utilities";
-import { THEME_CSS_VARIABLE_KEYS, THEME_CSS_VARIABLES } from "@repo/ui/tokens";
+import {
+  evaluateThemeCssVars,
+  MERCHANT_THEME_VARIABLES,
+} from "@repo/theme-core";
 import { describe, expect, it } from "vitest";
 
 import { defaultTheme, heroSection, homePreset } from "./index";
@@ -42,23 +44,46 @@ describe("default-theme package", () => {
     expect(homePreset.sections[0].blocks?.length).toBe(2);
   });
 
-  it("declares declarative cssVar mappings on branding settings", () => {
+  it("declares color cssVar mappings on branding settings adhering to theme-core contract", () => {
     const primaryField = defaultTheme.settings?.find(
       (s) => s.name === "primaryColor"
     );
-    expect(primaryField?.cssVar).toBe(THEME_CSS_VARIABLES.primary);
+    expect(primaryField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.brand);
 
+    const accentField = defaultTheme.settings?.find(
+      (s) => s.name === "accentColor"
+    );
+    expect(accentField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.muted);
+
+    const bgField = defaultTheme.settings?.find(
+      (s) => s.name === "backgroundColor"
+    );
+    expect(bgField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.background);
+
+    const textField = defaultTheme.settings?.find(
+      (s) => s.name === "textColor"
+    );
+    expect(textField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.foreground);
+  });
+
+  it("declares typography cssVar mappings on branding settings adhering to theme-core contract", () => {
     const fontHeadingField = defaultTheme.settings?.find(
       (s) => s.name === "fontHeading"
     );
+    expect(fontHeadingField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.fontHeading);
     const defaultValue =
       fontHeadingField && "defaultValue" in fontHeadingField
         ? fontHeadingField.defaultValue
         : undefined;
     expect(defaultValue).toBe("var(--font-plus-jakarta-sans)");
+
+    const fontBodyField = defaultTheme.settings?.find(
+      (s) => s.name === "fontBody"
+    );
+    expect(fontBodyField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.fontBody);
   });
 
-  it("evaluates default theme CSS variables via plugin evaluator", () => {
+  it("evaluates default theme CSS variables via theme-core evaluator", () => {
     const vars = evaluateThemeCssVars({
       manifest: defaultTheme,
       settings: {
@@ -72,14 +97,12 @@ describe("default-theme package", () => {
     });
 
     expect(vars).toMatchObject({
-      "--accent": "#445566",
-      "--background": "#ffffff",
-      "--font-template-body": "var(--font-roboto)",
-      "--font-template-heading": "var(--font-outfit)",
-      "--foreground": "#000000",
-      "--primary": "#112233",
+      "--theme-background": "#ffffff",
+      "--theme-brand": "#112233",
+      "--theme-font-body": "var(--font-roboto)",
+      "--theme-font-heading": "var(--font-outfit)",
+      "--theme-foreground": "#000000",
+      "--theme-muted": "#445566",
     });
-    const keys = Object.keys(vars);
-    expect(keys.toSorted()).toStrictEqual(THEME_CSS_VARIABLE_KEYS.toSorted());
   });
 });
