@@ -25,9 +25,17 @@ export const FIXED_THEME_VARIABLES = {
   warningForeground: "--theme-warning-foreground",
 } as const;
 
+export const DERIVED_THEME_VARIABLES = {
+  brandHover: "--theme-brand-hover",
+  brandSrgb: "--theme-brand-srgb",
+  brandSubtle: "--theme-brand-subtle",
+  brandSubtleForeground: "--theme-brand-subtle-foreground",
+} as const;
+
 export const THEME_VARIABLES = {
   ...MERCHANT_THEME_VARIABLES,
   ...FIXED_THEME_VARIABLES,
+  ...DERIVED_THEME_VARIABLES,
 } as const;
 
 export const THEME_CSS_VARIABLES = THEME_VARIABLES;
@@ -38,10 +46,15 @@ export type MerchantThemeVariable =
 export type FixedThemeVariable =
   (typeof FIXED_THEME_VARIABLES)[keyof typeof FIXED_THEME_VARIABLES];
 
-export type ThemeVariable = MerchantThemeVariable | FixedThemeVariable;
+export type DerivedThemeVariable =
+  (typeof DERIVED_THEME_VARIABLES)[keyof typeof DERIVED_THEME_VARIABLES];
+
+export type ThemeVariable =
+  | MerchantThemeVariable
+  | FixedThemeVariable
+  | DerivedThemeVariable;
 
 export type ThemeCssVariable = ThemeVariable;
-
 export type ThemeCssVars = Record<string, string>;
 
 export const calculateDerivedRadii = (
@@ -62,7 +75,7 @@ export const calculateDerivedRadii = (
 export const DEFAULT_MERCHANT_TOKENS = {
   "--theme-background": "#ffffff",
   "--theme-border": "#e2e8f0",
-  "--theme-brand": "#0f172a",
+  "--theme-brand": "oklch(0.208 0.040 265.755)",
   "--theme-brand-foreground": "#ffffff",
   "--theme-font-body": "sans-serif",
   "--theme-font-heading": "sans-serif",
@@ -83,9 +96,17 @@ export const FIXED_THEME_TOKENS = {
   ...calculateDerivedRadii("var(--theme-radius)"),
 } as const satisfies Record<FixedThemeVariable, string>;
 
+export const DEFAULT_BRAND_RAMP_TOKENS = {
+  "--theme-brand-hover": "oklch(0.148 0.040 265.755)",
+  "--theme-brand-srgb": "#0f172a",
+  "--theme-brand-subtle": "oklch(0.965 0.025 265.755)",
+  "--theme-brand-subtle-foreground": "oklch(0.380 0.040 265.755)",
+} as const satisfies Record<DerivedThemeVariable, string>;
+
 export const DEFAULT_THEME_TOKENS = {
   ...DEFAULT_MERCHANT_TOKENS,
   ...FIXED_THEME_TOKENS,
+  ...DEFAULT_BRAND_RAMP_TOKENS,
 } as const satisfies Record<ThemeVariable, string>;
 
 export type ThemeTokens = typeof DEFAULT_THEME_TOKENS;

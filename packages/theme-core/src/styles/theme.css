@@ -17,8 +17,12 @@
   --theme-border: #e2e8f0;
 
   /* Merchant Controlled Tokens - Brand */
-  --theme-brand: #0f172a;
+  --theme-brand: oklch(0.208 0.04 265.755);
+  --theme-brand-srgb: #0f172a;
   --theme-brand-foreground: #ffffff;
+  --theme-brand-hover: oklch(0.148 0.04 265.755);
+  --theme-brand-subtle: oklch(0.965 0.025 265.755);
+  --theme-brand-subtle-foreground: oklch(0.38 0.04 265.755);
 
   /* Merchant Controlled Tokens - Shape */
   --theme-radius: 0.5rem;
@@ -52,6 +56,9 @@
 
   --color-brand: var(--theme-brand);
   --color-brand-foreground: var(--theme-brand-foreground);
+  --color-brand-hover: var(--theme-brand-hover);
+  --color-brand-subtle: var(--theme-brand-subtle);
+  --color-brand-subtle-foreground: var(--theme-brand-subtle-foreground);
   --color-primary: var(--theme-brand);
   --color-primary-foreground: var(--theme-brand-foreground);
 
@@ -157,4 +164,20 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+@utility bg-brand {
+  background-color: var(--color-brand);
+}
+
+@utility bg-brand-hover {
+  background-color: var(--color-brand-hover);
+}
+
+@utility bg-brand-subtle {
+  background-color: var(--color-brand-subtle);
+}
+
+@utility text-brand-subtle-foreground {
+  color: var(--color-brand-subtle-foreground);
 }

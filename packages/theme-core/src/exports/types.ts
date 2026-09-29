@@ -33,6 +33,7 @@ export type {
 } from "../types";
 
 export type {
+  DerivedThemeVariable,
   FixedThemeVariable,
   MerchantThemeVariable,
   ThemeCssVars,
@@ -40,3 +41,14 @@ export type {
   ThemeTokens,
   ThemeVariable,
 } from "../tokens";
+
+export type {
+  BrandRamp,
+  DeriveBrandRampOptions,
+  OklchColor,
+} from "../utils/color";
+
+export type {
+  EvaluateThemeCssVarsOptions,
+  ThemeMode,
+} from "../utils/evaluateThemeCssVars";

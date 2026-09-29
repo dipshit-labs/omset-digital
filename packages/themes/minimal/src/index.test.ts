@@ -93,7 +93,7 @@ describe("minimal-theme package", () => {
 
     expect(vars).toMatchObject({
       "--theme-background": "#fafafa",
-      "--theme-brand": "#18181b",
+      "--theme-brand": "oklch(0.210 0.006 285.885)",
       "--theme-font-body": "var(--font-inter)",
       "--theme-font-heading": "var(--font-inter)",
       "--theme-foreground": "#18181b",

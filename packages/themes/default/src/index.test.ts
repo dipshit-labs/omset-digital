@@ -98,7 +98,7 @@ describe("default-theme package", () => {
 
     expect(vars).toMatchObject({
       "--theme-background": "#ffffff",
-      "--theme-brand": "#112233",
+      "--theme-brand": "oklch(0.246 0.040 249.732)",
       "--theme-font-body": "var(--font-roboto)",
       "--theme-font-heading": "var(--font-outfit)",
       "--theme-foreground": "#000000",

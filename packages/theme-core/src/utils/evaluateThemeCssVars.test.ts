@@ -7,6 +7,7 @@ import {
   MERCHANT_THEME_VARIABLES,
 } from "../tokens";
 import type { SettingField, ThemeManifestDefinition } from "../types";
+import { getWcagContrast, parseOklch } from "./color";
 import {
   evaluateFieldCssValue,
   evaluateThemeCssVars,
@@ -108,7 +109,7 @@ describe(evaluateThemeCssVars, () => {
     });
 
     expect(vars["--theme-background"]).toBe("#000000");
-    expect(vars["--theme-brand"]).toBe("#6366f1");
+    expect(vars["--theme-brand"]).toBe("oklch(0.585 0.204 277.117)");
     expect(vars["--theme-radius"]).toBe("16px");
     expect(vars["--theme-success"]).toBe(FIXED_THEME_TOKENS["--theme-success"]);
   });
@@ -167,6 +168,140 @@ describe(evaluateThemeCssVars, () => {
     });
 
     expect(vars["--theme-border"]).toBe("#e2e8f0");
+  });
+
+  it("derives dark navy foreground (#0f172a) for electric yellow (#facc15) with WCAG contrast >= 4.5:1", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#facc15",
+      },
+    });
+
+    expect(vars["--theme-brand-foreground"]).toBe("#0f172a");
+    const contrast = getWcagContrast(
+      vars["--theme-brand"],
+      vars["--theme-brand-foreground"]
+    );
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+    expect(contrast).toBeGreaterThanOrEqual(11);
+  });
+
+  it("derives white foreground (#ffffff) for dark navy (#0f172a) with WCAG contrast >= 4.5:1", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#0f172a",
+      },
+    });
+
+    expect(vars["--theme-brand-foreground"]).toBe("#ffffff");
+    const contrast = getWcagContrast(
+      vars["--theme-brand"],
+      vars["--theme-brand-foreground"]
+    );
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+    expect(contrast).toBeGreaterThanOrEqual(17);
+  });
+
+  it("evaluates brand hover token with a 0.06 lightness delta from primary brand color in light mode", () => {
+    const vars = evaluateThemeCssVars({
+      mode: "light",
+      settings: {
+        brand: "#facc15",
+      },
+    });
+
+    const parsedBrand = parseOklch(vars["--theme-brand"]);
+    const parsedHover = parseOklch(vars["--theme-brand-hover"]);
+
+    expect(parsedBrand).toBeDefined();
+    expect(parsedHover).toBeDefined();
+    expect((parsedBrand?.l ?? 0) - (parsedHover?.l ?? 0)).toBeCloseTo(0.06, 3);
+  });
+
+  it("evaluates brand hover token with a 0.06 lightness delta from primary brand color in dark mode", () => {
+    const vars = evaluateThemeCssVars({
+      mode: "dark",
+      settings: {
+        brand: "#0f172a",
+      },
+    });
+
+    const parsedBrand = parseOklch(vars["--theme-brand"]);
+    const parsedHover = parseOklch(vars["--theme-brand-hover"]);
+
+    expect(parsedBrand).toBeDefined();
+    expect(parsedHover).toBeDefined();
+    expect((parsedHover?.l ?? 0) - (parsedBrand?.l ?? 0)).toBeCloseTo(0.06, 3);
+  });
+
+  it("evaluates subtle brand background with matching hue", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#facc15",
+      },
+    });
+
+    const parsedBrand = parseOklch(vars["--theme-brand"]);
+    const parsedSubtle = parseOklch(vars["--theme-brand-subtle"]);
+
+    expect(parsedSubtle?.l).toBeCloseTo(0.965, 3);
+    expect(parsedSubtle?.c).toBeCloseTo(0.025, 3);
+    expect(parsedSubtle?.h).toBeCloseTo(parsedBrand?.h ?? 0, 1);
+  });
+
+  it("evaluates subtle brand foreground with matching hue and accessible contrast", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#facc15",
+      },
+    });
+
+    const parsedBrand = parseOklch(vars["--theme-brand"]);
+    const parsedSubtleFg = parseOklch(vars["--theme-brand-subtle-foreground"]);
+
+    expect(parsedSubtleFg?.l).toBeCloseTo(0.38, 3);
+    expect(parsedSubtleFg?.h).toBeCloseTo(parsedBrand?.h ?? 0, 1);
+
+    const contrast = getWcagContrast(
+      vars["--theme-brand-subtle"],
+      vars["--theme-brand-subtle-foreground"]
+    );
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("formats evaluated color variables as valid CSS oklch(...) strings", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#facc15",
+      },
+    });
+
+    expect(vars["--theme-brand"]).toMatch(/^oklch\(/u);
+    expect(vars["--theme-brand-hover"]).toMatch(/^oklch\(/u);
+    expect(vars["--theme-brand-subtle"]).toMatch(/^oklch\(/u);
+    expect(vars["--theme-brand-subtle-foreground"]).toMatch(/^oklch\(/u);
+  });
+
+  it("respects explicit merchant brandForeground override", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "#facc15",
+        brandForeground: "#123456",
+      },
+    });
+
+    expect(vars["--theme-brand-foreground"]).toBe("#123456");
+  });
+
+  it("handles wide-gamut OKLCH brand input with valid sRGB fallback", () => {
+    const vars = evaluateThemeCssVars({
+      settings: {
+        brand: "oklch(0.65 0.32 310)",
+      },
+    });
+
+    expect(vars["--theme-brand-srgb"]).toMatch(/^#[0-9a-f]{6}$/iu);
+    expect(vars["--theme-brand"]).toMatch(/^oklch\(/u);
   });
 });
 

@@ -34,12 +34,14 @@
   "dependencies": {
     "@base-ui/react": "catalog:ui",
     "cn": "catalog:ui",
+    "culori": "catalog:core",
     "tw-animate-css": "catalog:ui"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@testing-library/dom": "catalog:test",
     "@testing-library/react": "catalog:test",
+    "@types/culori": "catalog:types",
     "@types/node": "catalog:types",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",

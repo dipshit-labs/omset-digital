@@ -19,6 +19,14 @@ describe("@repo/theme-core public export entry points", () => {
     expect(UtilsExports.renderThemeSections).toBeDefined();
   });
 
+  it("exports color math engine utilities from utils subpath", () => {
+    expect(UtilsExports.deriveBrandRamp).toBeDefined();
+    expect(UtilsExports.getAccessibleForeground).toBeDefined();
+    expect(UtilsExports.ensureSrgb).toBeDefined();
+    expect(UtilsExports.formatOklch).toBeDefined();
+    expect(UtilsExports.parseOklch).toBeDefined();
+  });
+
   it("exports DSL creators from types", () => {
     expect(TypesExports.defineTheme).toBeDefined();
     expect(TypesExports.defineSection).toBeDefined();

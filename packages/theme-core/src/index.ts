@@ -2,14 +2,18 @@ export {
   evaluateFieldCssValue,
   evaluateThemeCssVars,
   type EvaluateThemeCssVarsOptions,
+  type ThemeMode,
 } from "./utils/evaluateThemeCssVars";
 
 export { toClientThemeManifest } from "./utils/toClientThemeManifest";
 
 export {
   calculateDerivedRadii,
+  DEFAULT_BRAND_RAMP_TOKENS,
   DEFAULT_MERCHANT_TOKENS,
   DEFAULT_THEME_TOKENS,
+  DERIVED_THEME_VARIABLES,
+  type DerivedThemeVariable,
   FIXED_THEME_TOKENS,
   FIXED_THEME_VARIABLES,
   type FixedThemeVariable,
