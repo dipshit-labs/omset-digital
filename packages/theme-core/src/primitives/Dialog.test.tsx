@@ -79,7 +79,7 @@ describe("Dialog primitive", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("applies functional positioning without color or border defaults", () => {
+  it("applies functional positioning and elevated surface class", () => {
     render(
       <Dialog defaultOpen>
         <DialogContent className="p-6">
@@ -94,7 +94,7 @@ describe("Dialog primitive", () => {
     expect(dialog.dataset.slot).toBe("dialog-content");
     expect(dialog.className).toContain("p-6");
     expect(dialog.className).toContain("fixed");
-    expect(dialog.className).not.toContain("bg-");
+    expect(dialog.className).toContain("bg-surface-elevated");
     expect(dialog.className).not.toContain("border-");
   });
 });

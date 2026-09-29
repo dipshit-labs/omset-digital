@@ -46,7 +46,7 @@ export const CartSheetContent = ({
   ...props
 }: CartSheetContentProps): ReactElement => (
   <SheetContent
-    className={cn(className)}
+    className={cn("bg-surface-elevated", className)}
     data-slot="cart-sheet-content"
     side={side}
     {...props}

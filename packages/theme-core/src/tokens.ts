@@ -1,15 +1,19 @@
 export const MERCHANT_THEME_VARIABLES = {
   background: "--theme-background",
+  backgroundSubtle: "--theme-background-subtle",
   border: "--theme-border",
+  borderStrong: "--theme-border-strong",
   brand: "--theme-brand",
   brandForeground: "--theme-brand-foreground",
   fontBody: "--theme-font-body",
   fontHeading: "--theme-font-heading",
   foreground: "--theme-foreground",
+  foregroundBody: "--theme-foreground-body",
   muted: "--theme-muted",
   mutedForeground: "--theme-muted-foreground",
   radius: "--theme-radius",
   surface: "--theme-surface",
+  surfaceElevated: "--theme-surface-elevated",
 } as const;
 
 export const FIXED_THEME_VARIABLES = {
@@ -73,17 +77,21 @@ export const calculateDerivedRadii = (
 });
 
 export const DEFAULT_MERCHANT_TOKENS = {
-  "--theme-background": "#ffffff",
-  "--theme-border": "#e2e8f0",
+  "--theme-background": "oklch(0.985 0.005 265.755)",
+  "--theme-background-subtle": "oklch(0.960 0.008 265.755)",
+  "--theme-border": "oklch(0.910 0.008 265.755)",
+  "--theme-border-strong": "oklch(0.750 0.015 265.755)",
   "--theme-brand": "oklch(0.208 0.040 265.755)",
   "--theme-brand-foreground": "#ffffff",
   "--theme-font-body": "sans-serif",
   "--theme-font-heading": "sans-serif",
-  "--theme-foreground": "#0f172a",
+  "--theme-foreground": "oklch(0.180 0.015 265.755)",
+  "--theme-foreground-body": "oklch(0.300 0.015 265.755)",
   "--theme-muted": "#f1f5f9",
-  "--theme-muted-foreground": "#64748b",
+  "--theme-muted-foreground": "oklch(0.550 0.015 265.755)",
   "--theme-radius": "0.5rem",
   "--theme-surface": "#ffffff",
+  "--theme-surface-elevated": "#ffffff",
 } as const satisfies Record<MerchantThemeVariable, string>;
 
 export const FIXED_THEME_TOKENS = {

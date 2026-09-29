@@ -45,6 +45,8 @@ export type {
 export type {
   BrandRamp,
   DeriveBrandRampOptions,
+  DeriveNeutralTokensOptions,
+  NeutralTokens,
   OklchColor,
 } from "../utils/color";
 

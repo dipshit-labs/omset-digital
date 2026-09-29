@@ -46,7 +46,9 @@ describe("CartSheet primitive", () => {
     const trigger = screen.getByRole("button", { name: "View Cart (2)" });
     fireEvent.click(trigger);
 
-    expect(screen.getByRole("dialog")).toBeDefined();
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeDefined();
+    expect(dialog.className).toContain("bg-surface-elevated");
     expect(screen.getByText("Shopping Cart")).toBeDefined();
     expect(screen.getByTestId("cart-item-1")).toBeDefined();
   });
@@ -69,7 +71,7 @@ describe("CartSheet primitive", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("applies slide-over positioning without color or border defaults", () => {
+  it("applies slide-over positioning and elevated surface class", () => {
     render(
       <CartSheet defaultOpen>
         <CartSheetContent className="p-6">
@@ -85,6 +87,6 @@ describe("CartSheet primitive", () => {
     expect(dialog.className).toContain("p-6");
     expect(dialog.className).toContain("fixed");
     expect(dialog.className).toContain("right-0");
-    expect(dialog.className).not.toContain("bg-");
+    expect(dialog.className).toContain("bg-surface-elevated");
   });
 });

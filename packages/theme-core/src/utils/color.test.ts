@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   deriveBrandRamp,
+  deriveNeutralTokens,
   ensureSrgb,
   formatOklch,
   getAccessibleForeground,
@@ -196,6 +197,160 @@ describe("color utilities", () => {
       const ramp = deriveBrandRamp("not-a-color");
       expect(ramp.brand).toMatch(/^oklch\(/u);
       expect(ramp.brandForeground).toBe("#ffffff");
+    });
+
+    it("shifts primary brand to 300-400 range (L ~ 0.70 to 0.76) in dark mode to prevent chromatic aberration", () => {
+      const darkRamp = deriveBrandRamp("#0f172a", { mode: "dark" });
+      const parsedBrand = parseOklch(darkRamp.brand);
+      expect(parsedBrand).toBeDefined();
+      expect(parsedBrand?.l).toBeGreaterThanOrEqual(0.7);
+      expect(parsedBrand?.l).toBeLessThanOrEqual(0.76);
+
+      // Brand foreground should be dark on the shifted light brand
+      expect(darkRamp.brandForeground).toBe("#0f172a");
+    });
+  });
+});
+describe(deriveNeutralTokens, () => {
+  // Tailwind blue-500
+  const brand = "#3b82f6";
+  describe("light mode hierarchy", () => {
+    it("evaluates base canvas to off-white tint with L ~ 0.985 and C <= 0.005", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      const parsed = parseOklch(neutrals.background);
+      expect(parsed).toBeDefined();
+      expect(parsed?.l).toBeCloseTo(0.985, 3);
+      expect(parsed?.c).toBeLessThanOrEqual(0.005);
+    });
+
+    it("evaluates subtle background to oklch(0.960 0.008 h)", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      const parsed = parseOklch(neutrals.backgroundSubtle);
+      const brandParsed = parseOklch(brand);
+      expect(parsed).toBeDefined();
+      expect(parsed?.l).toBeCloseTo(0.96, 3);
+      expect(parsed?.c).toBeCloseTo(0.008, 3);
+      expect(parsed?.h).toBeCloseTo(brandParsed?.h ?? 0, 1);
+    });
+
+    it("evaluates card surface and elevated surface to pure white #ffffff", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      expect(neutrals.surface).toBe("#ffffff");
+      expect(neutrals.surfaceElevated).toBe("#ffffff");
+    });
+
+    it("evaluates stroke layers in light mode", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      const border = parseOklch(neutrals.border);
+      const borderStrong = parseOklch(neutrals.borderStrong);
+
+      expect(border?.l).toBeCloseTo(0.91, 3);
+      expect(border?.c).toBeCloseTo(0.008, 3);
+
+      expect(borderStrong?.l).toBeCloseTo(0.75, 3);
+      expect(borderStrong?.c).toBeCloseTo(0.015, 3);
+    });
+
+    it("evaluates heading and body text variants in light mode", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      const heading = parseOklch(neutrals.foreground);
+      const body = parseOklch(neutrals.foregroundBody);
+
+      expect(heading?.l).toBeCloseTo(0.18, 3);
+      expect(heading?.c).toBeCloseTo(0.015, 3);
+      expect(body?.l).toBeCloseTo(0.3, 3);
+      expect(body?.c).toBeCloseTo(0.015, 3);
+    });
+
+    it("evaluates muted text variant in light mode", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "light" });
+      const muted = parseOklch(neutrals.mutedForeground);
+
+      expect(muted?.l).toBeCloseTo(0.55, 3);
+      expect(muted?.c).toBeCloseTo(0.015, 3);
+    });
+
+    it("constrains neutral chroma to 0 for achromatic brand colors", () => {
+      const neutrals = deriveNeutralTokens("#000000", { mode: "light" });
+      const bg = parseOklch(neutrals.background);
+      const border = parseOklch(neutrals.border);
+
+      expect(bg?.c).toBe(0);
+      expect(border?.c).toBe(0);
+    });
+
+    it("caps neutral chroma to brand chroma when brand chroma is below cap", () => {
+      const neutrals = deriveNeutralTokens("oklch(0.5 0.002 180)", {
+        mode: "light",
+      });
+      const bg = parseOklch(neutrals.background);
+      const border = parseOklch(neutrals.border);
+
+      expect(bg?.c).toBeCloseTo(0.002, 3);
+      expect(border?.c).toBeCloseTo(0.002, 3);
+    });
+  });
+
+  describe("dark mode hierarchy", () => {
+    it("evaluates dark mode background layers", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "dark" });
+      const bg = parseOklch(neutrals.background);
+      const subtle = parseOklch(neutrals.backgroundSubtle);
+      const surface = parseOklch(neutrals.surface);
+      const elevated = parseOklch(neutrals.surfaceElevated);
+
+      expect(bg?.l).toBeCloseTo(0.13, 3);
+      expect(subtle?.l).toBeCloseTo(0.165, 3);
+      expect(surface?.l).toBeCloseTo(0.205, 3);
+      expect(elevated?.l).toBeCloseTo(0.255, 3);
+    });
+
+    it("progressively elevates background layers with 4% to 6% lightness step", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "dark" });
+      const bg = parseOklch(neutrals.background);
+      const subtle = parseOklch(neutrals.backgroundSubtle);
+      const surface = parseOklch(neutrals.surface);
+      const elevated = parseOklch(neutrals.surfaceElevated);
+
+      const step1 = (subtle?.l ?? 0) - (bg?.l ?? 0);
+      const step2 = (surface?.l ?? 0) - (subtle?.l ?? 0);
+      const step3 = (elevated?.l ?? 0) - (surface?.l ?? 0);
+
+      expect(step1).toBeGreaterThanOrEqual(0.03);
+      expect(step2).toBeGreaterThanOrEqual(0.03);
+      expect(step3).toBeGreaterThanOrEqual(0.04);
+    });
+
+    it("evaluates dark mode borders brighter than the canvas", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "dark" });
+      const bg = parseOklch(neutrals.background);
+      const border = parseOklch(neutrals.border);
+      const borderStrong = parseOklch(neutrals.borderStrong);
+
+      expect(border?.l).toBeCloseTo(0.28, 3);
+      expect(borderStrong?.l).toBeCloseTo(0.42, 3);
+
+      expect(border?.l).toBeGreaterThan(bg?.l ?? 0);
+      expect(borderStrong?.l).toBeGreaterThan(border?.l ?? 0);
+    });
+
+    it("evaluates softened off-white heading in dark mode to prevent halation", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "dark" });
+      const heading = parseOklch(neutrals.foreground);
+
+      expect(heading?.l).toBeCloseTo(0.95, 3);
+      expect(heading?.c).toBeCloseTo(0.005, 3);
+    });
+
+    it("evaluates body and muted text variants in dark mode", () => {
+      const neutrals = deriveNeutralTokens(brand, { mode: "dark" });
+      const body = parseOklch(neutrals.foregroundBody);
+      const muted = parseOklch(neutrals.mutedForeground);
+
+      expect(body?.l).toBeCloseTo(0.85, 3);
+      expect(body?.c).toBeCloseTo(0.008, 3);
+      expect(muted?.l).toBeCloseTo(0.65, 3);
+      expect(muted?.c).toBeCloseTo(0.01, 3);
     });
   });
 });

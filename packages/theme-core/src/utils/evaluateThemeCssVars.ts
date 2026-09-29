@@ -5,7 +5,8 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "../types";
-import { deriveBrandRamp } from "./color";
+import { deriveBrandRamp, deriveNeutralTokens } from "./color";
+import type { NeutralTokens } from "./color";
 
 export type ThemeMode = "light" | "dark";
 
@@ -78,6 +79,51 @@ const applyBrandRamp = (
     explicitForeground ?? ramp.brandForeground;
 };
 
+const NEUTRAL_VARIABLE_MAP = {
+  "--theme-background": "background",
+  "--theme-background-subtle": "backgroundSubtle",
+  "--theme-border": "border",
+  "--theme-border-strong": "borderStrong",
+  "--theme-foreground": "foreground",
+  "--theme-foreground-body": "foregroundBody",
+  "--theme-muted-foreground": "mutedForeground",
+  "--theme-surface": "surface",
+  "--theme-surface-elevated": "surfaceElevated",
+} as const satisfies Record<string, keyof NeutralTokens>;
+
+const applyNeutralTokens = (
+  result: ThemeCssVars,
+  rawBrand: string,
+  mode: ThemeMode,
+  safeSettings: ThemeSettingsRecord,
+  fieldList: SettingField[]
+): void => {
+  const neutrals = deriveNeutralTokens(rawBrand, { mode });
+
+  for (const [cssVar, key] of Object.entries(NEUTRAL_VARIABLE_MAP)) {
+    const field = fieldList.find((f) => f.cssVar === cssVar);
+    const hasFieldVal = field ? hasValue(safeSettings[field.name]) : false;
+    const hasDirectKeyVal = hasValue(safeSettings[key]);
+    const hasCssVarVal = hasValue(safeSettings[cssVar]);
+
+    if (hasCssVarVal) {
+      result[cssVar] = String(safeSettings[cssVar]);
+    } else if (hasDirectKeyVal) {
+      result[cssVar] = String(safeSettings[key]);
+    } else if (hasFieldVal && field) {
+      result[cssVar] = String(safeSettings[field.name]);
+    } else if (
+      mode === "light" &&
+      field &&
+      "defaultValue" in field &&
+      hasValue(field.defaultValue)
+    ) {
+      // Manifest author explicitly configured defaultValue on this field for light mode; preserve it
+    } else {
+      result[cssVar] = neutrals[key];
+    }
+  }
+};
 export const evaluateThemeCssVars = ({
   baseTokens = DEFAULT_THEME_TOKENS,
   manifest,
@@ -121,6 +167,7 @@ export const evaluateThemeCssVars = ({
 
   if (rawBrand) {
     applyBrandRamp(result, rawBrand, mode, safeSettings, fieldList);
+    applyNeutralTokens(result, rawBrand, mode, safeSettings, fieldList);
   }
 
   return result;

@@ -5,17 +5,20 @@
 
 :root {
   /* Merchant Controlled Tokens - Backgrounds */
-  --theme-background: #ffffff;
+  --theme-background: oklch(0.985 0.005 265.755);
+  --theme-background-subtle: oklch(0.96 0.008 265.755);
   --theme-surface: #ffffff;
+  --theme-surface-elevated: #ffffff;
   --theme-muted: #f1f5f9;
 
   /* Merchant Controlled Tokens - Text */
-  --theme-foreground: #0f172a;
-  --theme-muted-foreground: #64748b;
+  --theme-foreground: oklch(0.18 0.015 265.755);
+  --theme-foreground-body: oklch(0.3 0.015 265.755);
+  --theme-muted-foreground: oklch(0.55 0.015 265.755);
 
   /* Merchant Controlled Tokens - Border */
-  --theme-border: #e2e8f0;
-
+  --theme-border: oklch(0.91 0.008 265.755);
+  --theme-border-strong: oklch(0.75 0.015 265.755);
   /* Merchant Controlled Tokens - Brand */
   --theme-brand: oklch(0.208 0.04 265.755);
   --theme-brand-srgb: #0f172a;
@@ -48,11 +51,15 @@
 
 @theme inline {
   --color-background: var(--theme-background);
+  --color-background-subtle: var(--theme-background-subtle);
   --color-surface: var(--theme-surface);
+  --color-surface-elevated: var(--theme-surface-elevated);
   --color-muted: var(--theme-muted);
   --color-muted-foreground: var(--theme-muted-foreground);
   --color-foreground: var(--theme-foreground);
+  --color-foreground-body: var(--theme-foreground-body);
   --color-border: var(--theme-border);
+  --color-border-strong: var(--theme-border-strong);
 
   --color-brand: var(--theme-brand);
   --color-brand-foreground: var(--theme-brand-foreground);
@@ -180,4 +187,20 @@
 
 @utility text-brand-subtle-foreground {
   color: var(--color-brand-subtle-foreground);
+}
+
+@utility bg-background-subtle {
+  background-color: var(--color-background-subtle);
+}
+
+@utility bg-surface-elevated {
+  background-color: var(--color-surface-elevated);
+}
+
+@utility border-border-strong {
+  border-color: var(--color-border-strong);
+}
+
+@utility text-foreground-body {
+  color: var(--color-foreground-body);
 }

@@ -2,6 +2,7 @@ export { cn } from "../utils/cn";
 
 export {
   deriveBrandRamp,
+  deriveNeutralTokens,
   ensureSrgb,
   formatOklch,
   getAccessibleForeground,

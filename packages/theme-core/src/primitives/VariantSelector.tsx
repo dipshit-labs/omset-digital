@@ -106,6 +106,7 @@ export const VariantSelector = ({
                   className={cn(
                     "cursor-pointer",
                     disabled && "cursor-not-allowed opacity-50",
+                    isSelected && "border-border-strong",
                     optionButtonClassName
                   )}
                   data-selected={isSelected ? "" : undefined}

@@ -70,6 +70,24 @@ describe("VariantSelector primitive", () => {
     expect(redOption.checked).toBeTruthy();
   });
 
+  it("applies border-border-strong class to selected variant option labels", () => {
+    render(
+      <VariantSelector
+        options={options}
+        selectedOptions={{ Color: "Red", Size: "M" }}
+      />
+    );
+
+    const mOption = screen.getByRole("radio", { name: "M" });
+    const sOption = screen.getByRole("radio", { name: "S" });
+
+    const mLabel = mOption.closest("label");
+    const sLabel = sOption.closest("label");
+
+    expect(mLabel?.className).toContain("border-border-strong");
+    expect(sLabel?.className).not.toContain("border-border-strong");
+  });
+
   it("fires onSelectOption when an option is clicked", () => {
     const handleSelect = vi.fn<(group: string, value: string) => void>();
     render(

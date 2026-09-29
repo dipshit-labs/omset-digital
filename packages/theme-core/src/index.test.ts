@@ -6,9 +6,12 @@ import * as UtilsExports from "./exports/utils";
 import * as RootExports from "./index";
 
 describe("@repo/theme-core public export entry points", () => {
-  it("exports theme engine, manifest mapper, tokens, and DSL from root", () => {
+  it("exports theme engine and manifest mapper from root", () => {
     expect(RootExports.evaluateThemeCssVars).toBeDefined();
     expect(RootExports.toClientThemeManifest).toBeDefined();
+  });
+
+  it("exports tokens and DSL from root", () => {
     expect(RootExports.defineTheme).toBeDefined();
     expect(RootExports.defineSection).toBeDefined();
     expect(RootExports.DEFAULT_THEME_TOKENS).toBeDefined();
@@ -19,9 +22,13 @@ describe("@repo/theme-core public export entry points", () => {
     expect(UtilsExports.renderThemeSections).toBeDefined();
   });
 
-  it("exports color math engine utilities from utils subpath", () => {
+  it("exports brand ramp and neutral derivation utilities from utils subpath", () => {
     expect(UtilsExports.deriveBrandRamp).toBeDefined();
+    expect(UtilsExports.deriveNeutralTokens).toBeDefined();
     expect(UtilsExports.getAccessibleForeground).toBeDefined();
+  });
+
+  it("exports color conversion and parsing utilities from utils subpath", () => {
     expect(UtilsExports.ensureSrgb).toBeDefined();
     expect(UtilsExports.formatOklch).toBeDefined();
     expect(UtilsExports.parseOklch).toBeDefined();

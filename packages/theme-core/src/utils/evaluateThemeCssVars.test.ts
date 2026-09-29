@@ -303,6 +303,149 @@ describe(evaluateThemeCssVars, () => {
     expect(vars["--theme-brand-srgb"]).toMatch(/^#[0-9a-f]{6}$/iu);
     expect(vars["--theme-brand"]).toMatch(/^oklch\(/u);
   });
+
+  describe("neutral foundation evaluation", () => {
+    it("evaluates light mode background layers", () => {
+      const vars = evaluateThemeCssVars({
+        mode: "light",
+        settings: {
+          brand: "#3b82f6",
+        },
+      });
+
+      const bg = parseOklch(vars["--theme-background"]);
+      const subtle = parseOklch(vars["--theme-background-subtle"]);
+
+      expect(bg?.l).toBeCloseTo(0.985, 3);
+      expect(bg?.c).toBeLessThanOrEqual(0.005);
+      expect(vars["--theme-surface"]).toBe("#ffffff");
+      expect(vars["--theme-surface-elevated"]).toBe("#ffffff");
+      expect(subtle?.l).toBeCloseTo(0.96, 3);
+    });
+
+    it("evaluates light mode stroke layers", () => {
+      const vars = evaluateThemeCssVars({
+        mode: "light",
+        settings: {
+          brand: "#3b82f6",
+        },
+      });
+
+      const border = parseOklch(vars["--theme-border"]);
+      const borderStrong = parseOklch(vars["--theme-border-strong"]);
+      expect(border?.l).toBeCloseTo(0.91, 3);
+      expect(border?.c).toBeCloseTo(0.008, 3);
+      expect(borderStrong?.l).toBeCloseTo(0.75, 3);
+      expect(borderStrong?.c).toBeCloseTo(0.015, 3);
+    });
+
+    it("evaluates light mode text hierarchy", () => {
+      const vars = evaluateThemeCssVars({
+        mode: "light",
+        settings: {
+          brand: "#3b82f6",
+        },
+      });
+
+      const heading = parseOklch(vars["--theme-foreground"]);
+      const body = parseOklch(vars["--theme-foreground-body"]);
+      const muted = parseOklch(vars["--theme-muted-foreground"]);
+      expect(heading?.l).toBeCloseTo(0.18, 3);
+      expect(body?.l).toBeCloseTo(0.3, 3);
+      expect(muted?.l).toBeCloseTo(0.55, 3);
+    });
+
+    it("evaluates dark mode background layers with progressive elevation", () => {
+      const vars = evaluateThemeCssVars({
+        settings: {
+          brand: "#3b82f6",
+          storeMode: "dark",
+        },
+      });
+
+      const bg = parseOklch(vars["--theme-background"]);
+      const subtle = parseOklch(vars["--theme-background-subtle"]);
+      const surface = parseOklch(vars["--theme-surface"]);
+      const elevated = parseOklch(vars["--theme-surface-elevated"]);
+
+      expect(bg?.l).toBeCloseTo(0.13, 3);
+      expect(subtle?.l).toBeCloseTo(0.165, 3);
+      expect(surface?.l).toBeCloseTo(0.205, 3);
+      expect(elevated?.l).toBeCloseTo(0.255, 3);
+      expect((elevated?.l ?? 0) - (surface?.l ?? 0)).toBeGreaterThanOrEqual(
+        0.04
+      );
+    });
+
+    it("evaluates dark mode strokes brighter than canvas", () => {
+      const vars = evaluateThemeCssVars({
+        settings: {
+          brand: "#3b82f6",
+          storeMode: "dark",
+        },
+      });
+
+      const bg = parseOklch(vars["--theme-background"]);
+      const border = parseOklch(vars["--theme-border"]);
+      const borderStrong = parseOklch(vars["--theme-border-strong"]);
+      expect(border?.l).toBeCloseTo(0.28, 3);
+      expect(borderStrong?.l).toBeCloseTo(0.42, 3);
+      expect(border?.l).toBeGreaterThan(bg?.l ?? 0);
+      expect(borderStrong?.l).toBeGreaterThan(border?.l ?? 0);
+    });
+
+    it("evaluates dark mode text hierarchy with softened heading to prevent halation", () => {
+      const vars = evaluateThemeCssVars({
+        settings: {
+          brand: "#3b82f6",
+          storeMode: "dark",
+        },
+      });
+
+      const heading = parseOklch(vars["--theme-foreground"]);
+      const body = parseOklch(vars["--theme-foreground-body"]);
+      const muted = parseOklch(vars["--theme-muted-foreground"]);
+      expect(heading?.l).toBeCloseTo(0.95, 3);
+      expect(body?.l).toBeCloseTo(0.85, 3);
+      expect(muted?.l).toBeCloseTo(0.65, 3);
+    });
+
+    it("respects explicit merchant background and surface overrides", () => {
+      const vars = evaluateThemeCssVars({
+        mode: "light",
+        settings: {
+          background: "#000000",
+          brand: "#3b82f6",
+          surface: "#666666",
+          surfaceElevated: "#777777",
+        },
+      });
+
+      expect(vars["--theme-background"]).toBe("#000000");
+      expect(vars["--theme-surface"]).toBe("#666666");
+      expect(vars["--theme-surface-elevated"]).toBe("#777777");
+    });
+
+    it("respects explicit merchant border and text overrides", () => {
+      const vars = evaluateThemeCssVars({
+        mode: "light",
+        settings: {
+          border: "#111111",
+          borderStrong: "#222222",
+          brand: "#3b82f6",
+          foreground: "#333333",
+          foregroundBody: "#444444",
+          mutedForeground: "#555555",
+        },
+      });
+
+      expect(vars["--theme-border"]).toBe("#111111");
+      expect(vars["--theme-border-strong"]).toBe("#222222");
+      expect(vars["--theme-foreground"]).toBe("#333333");
+      expect(vars["--theme-foreground-body"]).toBe("#444444");
+      expect(vars["--theme-muted-foreground"]).toBe("#555555");
+    });
+  });
 });
 
 describe(calculateDerivedRadii, () => {

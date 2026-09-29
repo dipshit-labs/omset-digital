@@ -38,6 +38,22 @@ export interface BrandRamp {
   brandSubtleForeground: string;
 }
 
+export interface DeriveNeutralTokensOptions {
+  mode?: "light" | "dark";
+}
+
+export interface NeutralTokens {
+  background: string;
+  backgroundSubtle: string;
+  border: string;
+  borderStrong: string;
+  foreground: string;
+  foregroundBody: string;
+  mutedForeground: string;
+  surface: string;
+  surfaceElevated: string;
+}
+
 interface ModeRampConfig {
   hoverLightnessDelta: number;
   subtleBackgroundChroma: number;
@@ -170,7 +186,14 @@ export const deriveBrandRamp = (
     };
   }
 
-  const { c, h = 0, l } = parsed;
+  const { c, h = 0 } = parsed;
+  let { l } = parsed;
+
+  if (mode === "dark") {
+    // In dark mode, primary brand shifts to 300-400 range (L ~ 0.70 to 0.76) to eliminate chromatic aberration
+    l = Math.max(0.7, Math.min(0.76, l < 0.7 ? 0.72 : l));
+  }
+
   const config = MODE_RAMP_CONFIGS[mode];
 
   // Solid primary color in canonical OKLCH
@@ -203,9 +226,9 @@ export const deriveBrandRamp = (
     l: config.subtleForegroundLightness,
   });
 
-  // sRGB fallback
-  const brandSrgb = ensureSrgb(effectiveInput);
-
+  // sRGB fallback (computed from shifted brand in dark mode so foreground contrast matches)
+  const brandSrgb =
+    mode === "dark" ? ensureSrgb(brand) : ensureSrgb(effectiveInput);
   // Solid foreground: selects #ffffff or #0f172a using WCAG 2.1 AA contrast math on sRGB
   const brandForeground = getAccessibleForeground(brandSrgb);
 
@@ -216,5 +239,124 @@ export const deriveBrandRamp = (
     brandSrgb,
     brandSubtle,
     brandSubtleForeground,
+  };
+};
+
+export const deriveNeutralTokens = (
+  brandInput: string,
+  options: DeriveNeutralTokensOptions = {}
+): NeutralTokens => {
+  const mode = options.mode ?? "light";
+  const parsed = parseOklch(brandInput);
+  const brandH = parsed?.h ?? 0;
+  const brandC = parsed?.c ?? 0;
+  if (mode === "dark") {
+    // In dark mode:
+    // Canvas: oklch(0.130 0.010 h)
+    // Subtle: oklch(0.165 0.012 h)
+    // Surface: oklch(0.205 0.015 h)
+    // Surface Elevated: oklch(0.255 0.018 h) (+5% lightness step for physical elevation)
+    // Border: oklch(0.280 0.015 h)
+    // Border Strong: oklch(0.420 0.020 h)
+    // Foreground: softened oklch(0.950 0.005 h) to prevent halation
+    // Foreground Body: oklch(0.850 0.008 h)
+    // Muted Foreground: oklch(0.650 0.010 h)
+    return {
+      background: formatOklch({
+        c: Math.min(brandC, 0.01),
+        h: brandH,
+        l: 0.13,
+      }),
+      backgroundSubtle: formatOklch({
+        c: Math.min(brandC, 0.012),
+        h: brandH,
+        l: 0.165,
+      }),
+      border: formatOklch({
+        c: Math.min(brandC, 0.015),
+        h: brandH,
+        l: 0.28,
+      }),
+      borderStrong: formatOklch({
+        c: Math.min(brandC, 0.02),
+        h: brandH,
+        l: 0.42,
+      }),
+      foreground: formatOklch({
+        c: Math.min(brandC, 0.005),
+        h: brandH,
+        l: 0.95,
+      }),
+      foregroundBody: formatOklch({
+        c: Math.min(brandC, 0.008),
+        h: brandH,
+        l: 0.85,
+      }),
+      mutedForeground: formatOklch({
+        c: Math.min(brandC, 0.01),
+        h: brandH,
+        l: 0.65,
+      }),
+      surface: formatOklch({
+        c: Math.min(brandC, 0.015),
+        h: brandH,
+        l: 0.205,
+      }),
+      surfaceElevated: formatOklch({
+        c: Math.min(brandC, 0.018),
+        h: brandH,
+        l: 0.255,
+      }),
+    };
+  }
+
+  // Light mode:
+  // Background (base canvas): Off-white tint oklch(0.985 0.005 h), making white product cards pop naturally
+  // Subtle: oklch(0.960 0.008 h)
+  // Surface (product cards): #ffffff to protect product photo white balance
+  // Surface Elevated (modals, popovers, drawers): #ffffff
+  // Border: oklch(0.910 0.008 h)
+  // Border Strong: oklch(0.750 0.015 h)
+  // Foreground: oklch(0.180 0.015 h)
+  // Foreground Body: oklch(0.300 0.015 h)
+  // Muted Foreground: oklch(0.550 0.015 h)
+  return {
+    surface: "#ffffff",
+    surfaceElevated: "#ffffff",
+    background: formatOklch({
+      c: Math.min(brandC, 0.005),
+      h: brandH,
+      l: 0.985,
+    }),
+    backgroundSubtle: formatOklch({
+      c: Math.min(brandC, 0.008),
+      h: brandH,
+      l: 0.96,
+    }),
+    border: formatOklch({
+      c: Math.min(brandC, 0.008),
+      h: brandH,
+      l: 0.91,
+    }),
+    borderStrong: formatOklch({
+      c: Math.min(brandC, 0.015),
+      h: brandH,
+      l: 0.75,
+    }),
+    foreground: formatOklch({
+      c: Math.min(brandC, 0.015),
+      h: brandH,
+      l: 0.18,
+    }),
+    foregroundBody: formatOklch({
+      c: Math.min(brandC, 0.015),
+      h: brandH,
+      l: 0.3,
+    }),
+    mutedForeground: formatOklch({
+      c: Math.min(brandC, 0.015),
+      h: brandH,
+      l: 0.55,
+    }),
   };
 };
