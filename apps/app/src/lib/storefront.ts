@@ -1,14 +1,13 @@
+import { DEFAULT_THEME_TOKENS, evaluateThemeCssVars } from "@repo/theme-core";
 import type {
   TemplateSectionInstance,
   TemplateType,
+  ThemeCssVars,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
-} from "@repo/payload-plugin-themes/types";
-import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/utilities";
+} from "@repo/theme-core/types";
 import { defaultTheme } from "@repo/theme-default";
 import type { Page, Store, Template, Theme } from "@repo/types";
-import { DEFAULT_THEME_TOKENS } from "@repo/ui/tokens";
-import type { ThemeCssVars } from "@repo/ui/tokens";
 import type { Payload } from "payload";
 
 import { getThemeManifest } from "./themes";

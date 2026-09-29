@@ -22,6 +22,7 @@
     "@payloadcms/richtext-lexical": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
     "@repo/payload-plugin-themes": "workspace:*",
+    "@repo/theme-core": "workspace:*",
     "@repo/theme-default": "workspace:*",
     "@repo/theme-minimal": "workspace:*",
     "@repo/types": "workspace:*",

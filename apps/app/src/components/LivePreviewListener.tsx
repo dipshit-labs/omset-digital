@@ -4,7 +4,7 @@ import { ThemeLivePreviewListener } from "@repo/payload-plugin-themes/client";
 import type {
   ThemeClientManifest,
   ThemeManifestDefinition,
-} from "@repo/payload-plugin-themes/types";
+} from "@repo/theme-core/types";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 

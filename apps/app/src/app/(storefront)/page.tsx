@@ -1,6 +1,6 @@
 import config from "@payload-config";
-import type { TemplateType } from "@repo/payload-plugin-themes/types";
-import { toClientThemeManifest } from "@repo/payload-plugin-themes/utilities";
+import { toClientThemeManifest } from "@repo/theme-core";
+import type { TemplateType } from "@repo/theme-core/types";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";

@@ -1,7 +1,8 @@
 @import "tailwindcss";
-@import "@repo/ui/shared.css";
+@import "@repo/theme-core/styles";
 
 @source "../../../../../packages/themes/**/*.{ts,tsx}";
+@source "../../../../../packages/theme-core/**/*.{ts,tsx}";
 
 @layer base {
   body {

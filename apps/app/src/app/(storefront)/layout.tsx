@@ -1,5 +1,13 @@
+import { cn } from "@repo/theme-core/utils";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Inter,
+  Outfit,
+  Plus_Jakarta_Sans,
+  Roboto,
+} from "next/font/google";
 
 import "./globals.css";
 
@@ -13,6 +21,27 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  weight: ["400", "500", "700"],
+});
+
 export const metadata: Metadata = {
   description: "Multi-tenant storefront platform for Indonesian SMEs.",
   title: "Omset Digital",
@@ -20,7 +49,15 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: LayoutProps<"/">) => (
   <html
-    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    className={cn(
+      geistSans.variable,
+      geistMono.variable,
+      plusJakartaSans.variable,
+      inter.variable,
+      outfit.variable,
+      roboto.variable,
+      "h-full antialiased"
+    )}
     lang="en"
   >
     <body className="flex min-h-full flex-col">{children}</body>

@@ -1,6 +1,6 @@
 import config from "@payload-config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { toClientThemeManifest } from "@repo/payload-plugin-themes/utilities";
+import { toClientThemeManifest } from "@repo/theme-core";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";

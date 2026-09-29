@@ -407,8 +407,8 @@ describe(resolveStorefront, () => {
     expect(context?.store.id).toBe(1);
     expect(context?.theme?.id).toBe(10);
     expect(context?.sections).toHaveLength(1);
-    expect(context?.themeCssVars["--primary"]).toBe("#ff0000");
-    expect(context?.themeCssVars["--foreground"]).toBe("#111111");
+    expect(context?.themeCssVars["--theme-brand"]).toBe("#ff0000");
+    expect(context?.themeCssVars["--theme-foreground"]).toBe("#111111");
   });
 
   it("passes draft: true and overrideAccess: true to payload.find when draft mode is enabled", async () => {
@@ -601,7 +601,7 @@ describe(resolveStorefront, () => {
     expect(context?.manifest.slug).toBe("minimal");
     expect(context?.template?.id).toBe(200);
     expect(context?.sections[0]?.blockType).toBe("minimal_hero");
-    expect(context?.themeCssVars["--primary"]).toBe("#18181b");
+    expect(context?.themeCssVars["--theme-brand"]).toBe("#18181b");
   });
 
   it("switches active theme from default to minimal dynamically", async () => {
@@ -688,7 +688,7 @@ describe(resolveStorefront, () => {
     });
     expect(defaultContext?.theme?.slug).toBe("default");
     expect(defaultContext?.sections[0]?.blockType).toBe("default_hero");
-    expect(defaultContext?.themeCssVars["--primary"]).toBe("#003366");
+    expect(defaultContext?.themeCssVars["--theme-brand"]).toBe("#003366");
 
     // Merchant switches active theme to minimal
     defaultThemeDoc.isLive = false;
@@ -789,7 +789,7 @@ describe(resolveStorefront, () => {
     });
     expect(restoredContext?.theme?.slug).toBe("default");
     expect(restoredContext?.sections[0]?.blockType).toBe("default_hero");
-    expect(restoredContext?.themeCssVars["--primary"]).toBe("#003366");
+    expect(restoredContext?.themeCssVars["--theme-brand"]).toBe("#003366");
   });
 });
 
