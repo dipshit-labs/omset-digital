@@ -16,17 +16,27 @@ export const MERCHANT_THEME_VARIABLES = {
   surfaceElevated: "--theme-surface-elevated",
 } as const;
 
-export const FIXED_THEME_VARIABLES = {
+export const SEMANTIC_THEME_VARIABLES = {
   error: "--theme-error",
   errorForeground: "--theme-error-foreground",
+  errorSubtle: "--theme-error-subtle",
+  info: "--theme-info",
+  infoForeground: "--theme-info-foreground",
+  infoSubtle: "--theme-info-subtle",
+  success: "--theme-success",
+  successForeground: "--theme-success-foreground",
+  successSubtle: "--theme-success-subtle",
+  warning: "--theme-warning",
+  warningForeground: "--theme-warning-foreground",
+  warningSubtle: "--theme-warning-subtle",
+} as const;
+
+export const FIXED_THEME_VARIABLES = {
+  ...SEMANTIC_THEME_VARIABLES,
   radiusFull: "--theme-radius-full",
   radiusLg: "--theme-radius-lg",
   radiusMd: "--theme-radius-md",
   radiusSm: "--theme-radius-sm",
-  success: "--theme-success",
-  successForeground: "--theme-success-foreground",
-  warning: "--theme-warning",
-  warningForeground: "--theme-warning-foreground",
 } as const;
 
 export const DERIVED_THEME_VARIABLES = {
@@ -49,6 +59,9 @@ export type MerchantThemeVariable =
 
 export type FixedThemeVariable =
   (typeof FIXED_THEME_VARIABLES)[keyof typeof FIXED_THEME_VARIABLES];
+
+export type SemanticThemeVariable =
+  (typeof SEMANTIC_THEME_VARIABLES)[keyof typeof SEMANTIC_THEME_VARIABLES];
 
 export type DerivedThemeVariable =
   (typeof DERIVED_THEME_VARIABLES)[keyof typeof DERIVED_THEME_VARIABLES];
@@ -94,13 +107,23 @@ export const DEFAULT_MERCHANT_TOKENS = {
   "--theme-surface-elevated": "#ffffff",
 } as const satisfies Record<MerchantThemeVariable, string>;
 
-export const FIXED_THEME_TOKENS = {
+export const SEMANTIC_THEME_TOKENS = {
   "--theme-error": "oklch(0.636 0.207 25.3)",
-  "--theme-error-foreground": "#ffffff",
+  "--theme-error-foreground": "oklch(0.380 0.160 25.3)",
+  "--theme-error-subtle": "oklch(0.965 0.035 25.3)",
+  "--theme-info": "oklch(0.623 0.188 245.0)",
+  "--theme-info-foreground": "oklch(0.380 0.140 245.0)",
+  "--theme-info-subtle": "oklch(0.965 0.035 245.0)",
   "--theme-success": "oklch(0.623 0.188 145.2)",
-  "--theme-success-foreground": "#ffffff",
+  "--theme-success-foreground": "oklch(0.350 0.140 145.2)",
+  "--theme-success-subtle": "oklch(0.965 0.040 145.2)",
   "--theme-warning": "oklch(0.769 0.188 70.1)",
-  "--theme-warning-foreground": "#0f172a",
+  "--theme-warning-foreground": "oklch(0.380 0.140 70.1)",
+  "--theme-warning-subtle": "oklch(0.965 0.045 70.1)",
+} as const satisfies Record<SemanticThemeVariable, string>;
+
+export const FIXED_THEME_TOKENS = {
+  ...SEMANTIC_THEME_TOKENS,
   ...calculateDerivedRadii("var(--theme-radius)"),
 } as const satisfies Record<FixedThemeVariable, string>;
 

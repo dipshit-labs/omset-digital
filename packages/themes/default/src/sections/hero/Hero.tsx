@@ -82,7 +82,7 @@ export const Hero = ({
               >
                 <span
                   aria-hidden="true"
-                  className="bg-primary/10 text-primary flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold"
+                  className="bg-success-subtle text-success-foreground flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold"
                 >
                   {renderBulletIcon(block.icon)}
                 </span>

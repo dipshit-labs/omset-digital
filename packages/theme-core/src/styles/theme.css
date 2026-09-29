@@ -35,12 +35,18 @@
   --theme-font-body: sans-serif;
 
   /* Fixed Tokens - Semantic feedback states */
-  --theme-success: oklch(0.623 0.188 145.2);
-  --theme-success-foreground: #ffffff;
   --theme-error: oklch(0.636 0.207 25.3);
-  --theme-error-foreground: #ffffff;
+  --theme-error-subtle: oklch(0.965 0.035 25.3);
+  --theme-error-foreground: oklch(0.38 0.16 25.3);
+  --theme-success: oklch(0.623 0.188 145.2);
+  --theme-success-subtle: oklch(0.965 0.04 145.2);
+  --theme-success-foreground: oklch(0.35 0.14 145.2);
   --theme-warning: oklch(0.769 0.188 70.1);
-  --theme-warning-foreground: #0f172a;
+  --theme-warning-subtle: oklch(0.965 0.045 70.1);
+  --theme-warning-foreground: oklch(0.38 0.14 70.1);
+  --theme-info: oklch(0.623 0.188 245);
+  --theme-info-subtle: oklch(0.965 0.035 245);
+  --theme-info-foreground: oklch(0.38 0.14 245);
 
   /* Fixed Tokens - Derived radii */
   --theme-radius-sm: calc(var(--theme-radius) * 0.75);
@@ -69,12 +75,18 @@
   --color-primary: var(--theme-brand);
   --color-primary-foreground: var(--theme-brand-foreground);
 
-  --color-success: var(--theme-success);
-  --color-success-foreground: var(--theme-success-foreground);
   --color-error: var(--theme-error);
+  --color-error-subtle: var(--theme-error-subtle);
   --color-error-foreground: var(--theme-error-foreground);
+  --color-success: var(--theme-success);
+  --color-success-subtle: var(--theme-success-subtle);
+  --color-success-foreground: var(--theme-success-foreground);
   --color-warning: var(--theme-warning);
+  --color-warning-subtle: var(--theme-warning-subtle);
   --color-warning-foreground: var(--theme-warning-foreground);
+  --color-info: var(--theme-info);
+  --color-info-subtle: var(--theme-info-subtle);
+  --color-info-foreground: var(--theme-info-foreground);
 
   --radius-sm: var(--theme-radius-sm);
   --radius-md: var(--theme-radius-md);
@@ -171,36 +183,4 @@
   &::-webkit-scrollbar {
     display: none;
   }
-}
-
-@utility bg-brand {
-  background-color: var(--color-brand);
-}
-
-@utility bg-brand-hover {
-  background-color: var(--color-brand-hover);
-}
-
-@utility bg-brand-subtle {
-  background-color: var(--color-brand-subtle);
-}
-
-@utility text-brand-subtle-foreground {
-  color: var(--color-brand-subtle-foreground);
-}
-
-@utility bg-background-subtle {
-  background-color: var(--color-background-subtle);
-}
-
-@utility bg-surface-elevated {
-  background-color: var(--color-surface-elevated);
-}
-
-@utility border-border-strong {
-  border-color: var(--color-border-strong);
-}
-
-@utility text-foreground-body {
-  color: var(--color-foreground-body);
 }

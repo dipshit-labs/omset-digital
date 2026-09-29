@@ -11,10 +11,16 @@ describe("@repo/theme-core public export entry points", () => {
     expect(RootExports.toClientThemeManifest).toBeDefined();
   });
 
-  it("exports tokens and DSL from root", () => {
+  it("exports DSL creators and base tokens from root", () => {
     expect(RootExports.defineTheme).toBeDefined();
     expect(RootExports.defineSection).toBeDefined();
     expect(RootExports.DEFAULT_THEME_TOKENS).toBeDefined();
+  });
+
+  it("exports fixed and semantic token dictionaries from root", () => {
+    expect(RootExports.FIXED_THEME_TOKENS).toBeDefined();
+    expect(RootExports.SEMANTIC_THEME_TOKENS).toBeDefined();
+    expect(RootExports.SEMANTIC_THEME_VARIABLES).toBeDefined();
   });
 
   it("exports class merger and section renderer from utils", () => {

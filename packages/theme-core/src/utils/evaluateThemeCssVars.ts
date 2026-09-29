@@ -1,4 +1,4 @@
-import { DEFAULT_THEME_TOKENS } from "../tokens";
+import { DEFAULT_THEME_TOKENS, FIXED_THEME_TOKENS } from "../tokens";
 import type { ThemeCssVars } from "../tokens";
 import type {
   SettingField,
@@ -135,7 +135,7 @@ export const evaluateThemeCssVars = ({
   const safeSettings = settings ?? {};
 
   for (const field of fieldList) {
-    if (!field.cssVar) {
+    if (!field.cssVar || field.cssVar in FIXED_THEME_TOKENS) {
       continue;
     }
 

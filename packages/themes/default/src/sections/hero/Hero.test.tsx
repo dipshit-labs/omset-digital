@@ -42,6 +42,24 @@ describe("Hero section component", () => {
     expect(screen.getByText("♥").textContent).toBe("♥");
   });
 
+  it("renders bullet badges with canonical semantic classes instead of opacity modifiers", () => {
+    const { container } = render(
+      <Hero
+        blocks={[
+          { blockType: "bullet", icon: "check", text: "Guaranteed Quality" },
+        ]}
+        blockType="default_hero"
+        settings={{ heading: "Features" }}
+      />
+    );
+
+    const checkBadge = container.querySelector("span[aria-hidden='true']");
+    expect(checkBadge).toBeDefined();
+    expect(checkBadge?.className).toContain("bg-success-subtle");
+    expect(checkBadge?.className).toContain("text-success-foreground");
+    expect(checkBadge?.className).not.toContain("bg-primary/10");
+  });
+
   it("renders call to action link when cta url is provided", () => {
     render(
       <Hero

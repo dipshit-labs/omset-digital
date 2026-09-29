@@ -36,6 +36,7 @@ export type {
   DerivedThemeVariable,
   FixedThemeVariable,
   MerchantThemeVariable,
+  SemanticThemeVariable,
   ThemeCssVars,
   ThemeCssVariable,
   ThemeTokens,

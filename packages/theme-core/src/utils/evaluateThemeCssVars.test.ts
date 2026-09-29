@@ -4,8 +4,10 @@ import {
   calculateDerivedRadii,
   DEFAULT_MERCHANT_TOKENS,
   FIXED_THEME_TOKENS,
+  FIXED_THEME_VARIABLES,
   MERCHANT_THEME_VARIABLES,
 } from "../tokens";
+import type { FixedThemeVariable } from "../tokens";
 import type { SettingField, ThemeManifestDefinition } from "../types";
 import { getWcagContrast, parseOklch } from "./color";
 import {
@@ -444,6 +446,95 @@ describe(evaluateThemeCssVars, () => {
       expect(vars["--theme-foreground"]).toBe("#333333");
       expect(vars["--theme-foreground-body"]).toBe("#444444");
       expect(vars["--theme-muted-foreground"]).toBe("#555555");
+    });
+  });
+
+  describe("3-slot semantic feedback contract", () => {
+    const SEMANTIC_FEEDBACK_TOKENS = [
+      "--theme-error",
+      "--theme-error-subtle",
+      "--theme-error-foreground",
+      "--theme-success",
+      "--theme-success-subtle",
+      "--theme-success-foreground",
+      "--theme-warning",
+      "--theme-warning-subtle",
+      "--theme-warning-foreground",
+      "--theme-info",
+      "--theme-info-subtle",
+      "--theme-info-foreground",
+    ] as const satisfies readonly FixedThemeVariable[];
+
+    it("exports all 12 semantic tokens in FIXED_THEME_VARIABLES and FIXED_THEME_TOKENS", () => {
+      const fixedVarValues = Object.values(FIXED_THEME_VARIABLES);
+      for (const token of SEMANTIC_FEEDBACK_TOKENS) {
+        expect(fixedVarValues).toContain(token);
+        expect(token in FIXED_THEME_TOKENS).toBeTruthy();
+      }
+    });
+
+    it("evaluates all 12 semantic feedback tokens by default", () => {
+      const vars = evaluateThemeCssVars();
+
+      for (const token of SEMANTIC_FEEDBACK_TOKENS) {
+        expect(vars[token]).toBeDefined();
+        expect(vars[token]).toBe(FIXED_THEME_TOKENS[token]);
+      }
+    });
+
+    it("guarantees WCAG 2.1 AA contrast ratio >= 4.5:1 for text on subtle backgrounds", () => {
+      const feedbackPairs = [
+        { fg: "--theme-error-foreground", subtle: "--theme-error-subtle" },
+        { fg: "--theme-success-foreground", subtle: "--theme-success-subtle" },
+        { fg: "--theme-warning-foreground", subtle: "--theme-warning-subtle" },
+        { fg: "--theme-info-foreground", subtle: "--theme-info-subtle" },
+      ] as const satisfies readonly {
+        fg: FixedThemeVariable;
+        subtle: FixedThemeVariable;
+      }[];
+
+      for (const { fg, subtle } of feedbackPairs) {
+        const subtleColor = FIXED_THEME_TOKENS[subtle];
+        const fgColor = FIXED_THEME_TOKENS[fg];
+
+        expect(subtleColor).toBeDefined();
+        expect(fgColor).toBeDefined();
+
+        const contrast = getWcagContrast(subtleColor, fgColor);
+        expect(contrast).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it("prevents merchants from overriding fixed semantic tokens via manifest settings", () => {
+      const manifest: ThemeManifestDefinition = {
+        author: "Test",
+        name: "test-theme",
+        sections: [],
+        slug: "test-theme",
+        templates: [],
+        version: "1.0.0",
+        settings: SEMANTIC_FEEDBACK_TOKENS.map((token, idx) => ({
+          cssVar: token,
+          label: `Hacked ${token}`,
+          name: `hacked_${idx}`,
+          type: "color",
+        })),
+      };
+
+      const maliciousSettings: Record<string, string> = {};
+      for (const [idx, token] of SEMANTIC_FEEDBACK_TOKENS.entries()) {
+        maliciousSettings[`hacked_${idx}`] = "#000000";
+        maliciousSettings[token] = "#000000";
+      }
+
+      const vars = evaluateThemeCssVars({
+        manifest,
+        settings: maliciousSettings,
+      });
+
+      for (const token of SEMANTIC_FEEDBACK_TOKENS) {
+        expect(vars[token]).toBe(FIXED_THEME_TOKENS[token]);
+      }
     });
   });
 });
