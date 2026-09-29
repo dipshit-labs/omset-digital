@@ -1,4 +1,4 @@
-import type { TemplatePresetDefinition } from "@repo/payload-plugin-themes/types";
+import type { TemplatePresetDefinition } from "@repo/theme-core";
 
 export const homeTemplate: TemplatePresetDefinition = {
   name: "Home",

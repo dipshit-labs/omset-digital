@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import type { ReactElement } from "react";
-
 import type {
   ThemeClientManifest,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
-} from "../../types";
+} from "@repo/theme-core";
+import { useEffect } from "react";
+import type { ReactElement } from "react";
+
 import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import { subscribeThemeLivePreview } from "./subscribe";
 import type { ThemeLivePreviewUpdate } from "./subscribe";

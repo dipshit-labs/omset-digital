@@ -1,11 +1,11 @@
+import { THEME_CSS_VARIABLES } from "@repo/theme-core";
 import type {
   SectionProps,
   ThemeManifestDefinition,
-} from "@repo/payload-plugin-themes/types";
+} from "@repo/theme-core/types";
 import { defaultTheme } from "@repo/theme-default";
 import { minimalTheme } from "@repo/theme-minimal";
 import type { Store } from "@repo/types";
-import { THEME_CSS_VARIABLES } from "@repo/ui/tokens";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -60,12 +60,12 @@ describe(StorefrontCanvas, () => {
 
   it("renders root container with active theme CSS custom properties", () => {
     const customCssVars = {
-      [THEME_CSS_VARIABLES.accent]: "#00ffff",
       [THEME_CSS_VARIABLES.background]: "#ffffff",
+      [THEME_CSS_VARIABLES.brand]: "#ff0077",
       [THEME_CSS_VARIABLES.fontBody]: "Inter",
       [THEME_CSS_VARIABLES.fontHeading]: "Plus Jakarta Sans",
       [THEME_CSS_VARIABLES.foreground]: "#123456",
-      [THEME_CSS_VARIABLES.primary]: "#ff0077",
+      [THEME_CSS_VARIABLES.muted]: "#00ffff",
     };
 
     const context: StorefrontContext = {
@@ -84,9 +84,11 @@ describe(StorefrontCanvas, () => {
 
     // SAFETY: Container first element is validated as HTMLElement.
     const htmlElement = rootWrapper as HTMLElement;
-    expect(htmlElement.style.getPropertyValue("--primary")).toBe("#ff0077");
-    expect(htmlElement.style.getPropertyValue("--foreground")).toBe("#123456");
-    expect(htmlElement.style.getPropertyValue("--accent")).toBe("#00ffff");
+    expect(htmlElement.style.getPropertyValue("--theme-brand")).toBe("#ff0077");
+    expect(htmlElement.style.getPropertyValue("--theme-foreground")).toBe(
+      "#123456"
+    );
+    expect(htmlElement.style.getPropertyValue("--theme-muted")).toBe("#00ffff");
   });
 
   it("matches {themeSlug}_{sectionSlug} block to active theme section component", () => {

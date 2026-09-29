@@ -6,10 +6,6 @@
   "exports": {
     "./shared.css": "./src/styles/shared.css",
     "./postcss": "./postcss.config.mjs",
-    "./tokens": {
-      "types": "./src/tokens/index.ts",
-      "default": "./src/tokens/index.ts"
-    },
     "./components/*": {
       "types": "./src/components/*.tsx",
       "default": "./src/components/*.tsx"

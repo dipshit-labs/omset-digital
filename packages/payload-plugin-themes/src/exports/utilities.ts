@@ -1,11 +1,3 @@
-export { renderThemeSections } from "../utilities/renderThemeSections";
-
-export {
-  evaluateFieldCssValue,
-  evaluateThemeCssVars,
-  type EvaluateThemeCssVarsOptions,
-} from "../utilities/evaluateThemeCssVars";
-
 export {
   generateThemePreviewPath,
   type GenerateThemePreviewPathOptions,
@@ -23,5 +15,3 @@ export {
   resolveTenantStoreSlug,
   type ResolveTenantStoreSlugOptions,
 } from "../utilities/resolveTenantStoreSlug";
-
-export { toClientThemeManifest } from "../utilities/toClientThemeManifest";

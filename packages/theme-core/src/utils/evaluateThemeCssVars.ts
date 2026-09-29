@@ -1,3 +1,5 @@
+import { DEFAULT_THEME_TOKENS } from "../tokens";
+import type { ThemeCssVars } from "../tokens";
 import type {
   SettingField,
   ThemeManifestDefinition,
@@ -6,29 +8,31 @@ import type {
 
 export interface EvaluateThemeCssVarsOptions {
   baseTokens?: Record<string, string>;
-  manifest?: Pick<ThemeManifestDefinition, "cssVars" | "settings"> | null;
+  manifest?: Pick<ThemeManifestDefinition, "settings"> | null;
   settings?: ThemeSettingsRecord | null;
 }
 
 export const evaluateFieldCssValue = (
   field: SettingField,
-  value: unknown
+  value?: unknown
 ): string | null => {
   if (value === null || value === undefined || value === "") {
     return null;
   }
+
   if (field.type === "number" && field.unit) {
     return `${value}${field.unit}`;
   }
+
   return String(value);
 };
 
 export const evaluateThemeCssVars = ({
-  baseTokens,
+  baseTokens = DEFAULT_THEME_TOKENS,
   manifest,
   settings,
-}: EvaluateThemeCssVarsOptions) => {
-  const result = { ...baseTokens };
+}: EvaluateThemeCssVarsOptions = {}): ThemeCssVars => {
+  const result: ThemeCssVars = { ...baseTokens };
   const fieldList = manifest?.settings ?? [];
   const safeSettings = settings ?? {};
 
@@ -37,18 +41,23 @@ export const evaluateThemeCssVars = ({
       continue;
     }
 
-    const rawValue =
-      safeSettings[field.name] ??
-      ("defaultValue" in field ? field.defaultValue : undefined);
+    const settingValue = safeSettings[field.name];
+    const hasSettingValue =
+      settingValue !== undefined &&
+      settingValue !== null &&
+      settingValue !== "";
+
+    let rawValue: unknown;
+    if (hasSettingValue) {
+      rawValue = settingValue;
+    } else if ("defaultValue" in field) {
+      rawValue = field.defaultValue;
+    }
+
     const cssValue = evaluateFieldCssValue(field, rawValue);
     if (cssValue !== null) {
       result[field.cssVar] = cssValue;
     }
-  }
-
-  if (typeof manifest?.cssVars === "function") {
-    const custom = manifest.cssVars(safeSettings);
-    Object.assign(result, custom);
   }
 
   return result;

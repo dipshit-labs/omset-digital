@@ -1,15 +1,12 @@
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { CollectionConfig, Field } from "payload";
 
 import { buildThemeSettingsFields } from "../fields/buildThemeSettingsFields";
 import { enforceSingleLiveTheme } from "../hooks/enforceSingleLiveTheme";
-import type {
-  CreateThemesCollectionOptions,
-  ThemeManifestDefinition,
-} from "../types";
+import type { CreateThemesCollectionOptions } from "../types";
 import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
 import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
-export { enforceSingleLiveTheme as createEnsureSingleLiveThemeHook } from "../hooks/enforceSingleLiveTheme";
 export type { CreateThemesCollectionOptions } from "../types";
 
 export const createThemesCollection = (
@@ -22,7 +19,7 @@ export const createThemesCollection = (
     : optionsOrManifests;
 
   const manifests = options.manifests ?? [];
-  const tenantField = options.tenantField ?? "store";
+  const { tenantField } = options;
 
   const settingsFields = buildThemeSettingsFields(
     manifests,
@@ -88,12 +85,14 @@ export const createThemesCollection = (
       useAsTitle: "name",
       livePreview: {
         url: async ({ data, req }) => {
-          const storeSlug = await resolveTenantStoreSlug({
-            data,
-            req,
-            tenantField,
-            tenantsSlug: options.tenantsSlug ?? "stores",
-          });
+          const storeSlug = tenantField
+            ? await resolveTenantStoreSlug({
+                data,
+                req,
+                tenantField,
+                tenantsSlug: options.tenantsSlug ?? "stores",
+              })
+            : null;
 
           return generateThemePreviewPath({
             collection: options.slug ?? "themes",

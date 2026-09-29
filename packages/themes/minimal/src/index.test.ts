@@ -1,5 +1,7 @@
-import { evaluateThemeCssVars } from "@repo/payload-plugin-themes/utilities";
-import { THEME_CSS_VARIABLE_KEYS, THEME_CSS_VARIABLES } from "@repo/ui/tokens";
+import {
+  evaluateThemeCssVars,
+  MERCHANT_THEME_VARIABLES,
+} from "@repo/theme-core";
 import { describe, expect, it } from "vitest";
 
 import { heroSection, homePreset, minimalTheme } from "./index";
@@ -42,41 +44,41 @@ describe("minimal-theme package", () => {
     expect(homePreset.sections[0].blocks?.length).toBe(2);
   });
 
-  it("declares color cssVar mappings on branding settings adhering to UI contract", () => {
+  it("declares color cssVar mappings on branding settings adhering to theme-core contract", () => {
     const primaryField = minimalTheme.settings?.find(
       (s) => s.name === "primaryColor"
     );
-    expect(primaryField?.cssVar).toBe(THEME_CSS_VARIABLES.primary);
+    expect(primaryField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.brand);
 
     const accentField = minimalTheme.settings?.find(
       (s) => s.name === "accentColor"
     );
-    expect(accentField?.cssVar).toBe(THEME_CSS_VARIABLES.accent);
+    expect(accentField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.muted);
 
     const bgField = minimalTheme.settings?.find(
       (s) => s.name === "backgroundColor"
     );
-    expect(bgField?.cssVar).toBe(THEME_CSS_VARIABLES.background);
+    expect(bgField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.background);
 
     const textField = minimalTheme.settings?.find(
       (s) => s.name === "textColor"
     );
-    expect(textField?.cssVar).toBe(THEME_CSS_VARIABLES.foreground);
+    expect(textField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.foreground);
   });
 
-  it("declares typography cssVar mappings on branding settings adhering to UI contract", () => {
+  it("declares typography cssVar mappings on branding settings adhering to theme-core contract", () => {
     const fontHeadingField = minimalTheme.settings?.find(
       (s) => s.name === "fontHeading"
     );
-    expect(fontHeadingField?.cssVar).toBe(THEME_CSS_VARIABLES.fontHeading);
+    expect(fontHeadingField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.fontHeading);
 
     const fontBodyField = minimalTheme.settings?.find(
       (s) => s.name === "fontBody"
     );
-    expect(fontBodyField?.cssVar).toBe(THEME_CSS_VARIABLES.fontBody);
+    expect(fontBodyField?.cssVar).toBe(MERCHANT_THEME_VARIABLES.fontBody);
   });
 
-  it("evaluates minimal theme CSS variables via plugin evaluator", () => {
+  it("evaluates minimal theme CSS variables via theme-core evaluator", () => {
     const vars = evaluateThemeCssVars({
       manifest: minimalTheme,
       settings: {
@@ -90,14 +92,12 @@ describe("minimal-theme package", () => {
     });
 
     expect(vars).toMatchObject({
-      "--accent": "#71717a",
-      "--background": "#fafafa",
-      "--font-template-body": "var(--font-inter)",
-      "--font-template-heading": "var(--font-inter)",
-      "--foreground": "#18181b",
-      "--primary": "#18181b",
+      "--theme-background": "#fafafa",
+      "--theme-brand": "#18181b",
+      "--theme-font-body": "var(--font-inter)",
+      "--theme-font-heading": "var(--font-inter)",
+      "--theme-foreground": "#18181b",
+      "--theme-muted": "#71717a",
     });
-    const keys = Object.keys(vars);
-    expect(keys.toSorted()).toStrictEqual(THEME_CSS_VARIABLE_KEYS.toSorted());
   });
 });

@@ -46,9 +46,9 @@ export const renderThemeSections = (
     } = section;
 
     const hasExplicitSettings =
-      explicitSettings &&
-      typeof explicitSettings === "object" &&
-      Object.keys(explicitSettings).length > 0;
+      explicitSettings !== undefined &&
+      explicitSettings !== null &&
+      typeof explicitSettings === "object";
 
     // SAFETY: Non-block properties on the template section document correspond to the section settings schema.
     const settings = (

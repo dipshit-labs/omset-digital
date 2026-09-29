@@ -1,8 +1,25 @@
 // @vitest-environment node
-import type { Block, CollectionConfig, Field, GroupField } from "payload";
+import type {
+  Block,
+  CollectionConfig,
+  Field,
+  GroupField,
+  PayloadRequest,
+} from "payload";
 import { describe, expect, it } from "vitest";
 
+import { env } from "@/env";
+
 import payloadConfig from "./payload.config";
+
+type LivePreviewUrlFunction = (args: {
+  data: Record<string, unknown>;
+  req: PayloadRequest;
+}) => Promise<string>;
+
+const createMockRequest = (mock: unknown): PayloadRequest =>
+  // SAFETY: Duck-typed mock request fulfills PayloadRequest requirements for test.
+  mock as PayloadRequest;
 
 describe("Theme Plugin Integration", () => {
   it("injects themes collection into Payload config", async () => {
@@ -143,5 +160,104 @@ describe("Theme Plugin Integration", () => {
     const childBlockSlugs = childBlocksField.blocks.map((b: Block) => b.slug);
 
     expect(childBlockSlugs).toContain("tag");
+  });
+
+  it("generates theme live preview url with tenant store resolution", async () => {
+    const config = await payloadConfig;
+    const themes = config.collections?.find(
+      (c: CollectionConfig) => c.slug === "themes"
+    );
+    const rawUrlGetter = themes?.admin?.livePreview?.url;
+    expect(rawUrlGetter).toBeTypeOf("function");
+
+    if (typeof rawUrlGetter !== "function") {
+      throw new TypeError("Themes admin livePreview url is not a function");
+    }
+    // SAFETY: Live preview url getter matches LivePreviewUrlFunction contract in tests.
+    const urlGetter = rawUrlGetter as LivePreviewUrlFunction;
+    const mockPayload = {
+      findByID: () => Promise.resolve({ id: 10, slug: "toko-kopi" }),
+    };
+    const mockReq = createMockRequest({ payload: mockPayload });
+
+    const url = await urlGetter({
+      req: mockReq,
+      data: {
+        name: "Default Theme",
+        slug: "default",
+        store: 10,
+      },
+    });
+
+    expect(url).toBe(
+      `/next/preview?path=%2Ftoko-kopi&previewSecret=${env.PREVIEW_SECRET}`
+    );
+  });
+
+  it("generates template live preview url with tenant store resolution for each template type", async () => {
+    const config = await payloadConfig;
+    const templates = config.collections?.find(
+      (c: CollectionConfig) => c.slug === "templates"
+    );
+    const rawUrlGetter = templates?.admin?.livePreview?.url;
+    expect(rawUrlGetter).toBeTypeOf("function");
+
+    if (typeof rawUrlGetter !== "function") {
+      throw new TypeError("Templates admin livePreview url is not a function");
+    }
+    // SAFETY: Live preview url getter matches LivePreviewUrlFunction contract in tests.
+    const urlGetter = rawUrlGetter as LivePreviewUrlFunction;
+    const mockPayload = {
+      findByID: () => Promise.resolve({ id: 10, slug: "toko-kopi" }),
+    };
+    const mockReq = createMockRequest({ payload: mockPayload });
+
+    const homeUrl = await urlGetter({
+      req: mockReq,
+      data: {
+        name: "Home Layout",
+        store: 10,
+        type: "home",
+      },
+    });
+    expect(homeUrl).toBe(
+      `/next/preview?path=%2Ftoko-kopi&previewSecret=${env.PREVIEW_SECRET}`
+    );
+
+    const productUrl = await urlGetter({
+      req: mockReq,
+      data: {
+        name: "Product Layout",
+        store: 10,
+        type: "product",
+      },
+    });
+    expect(productUrl).toBe(
+      `/next/preview?path=%2Ftoko-kopi%2Fproducts&previewSecret=${env.PREVIEW_SECRET}`
+    );
+
+    const collectionUrl = await urlGetter({
+      req: mockReq,
+      data: {
+        name: "Collection Layout",
+        store: 10,
+        type: "collection",
+      },
+    });
+    expect(collectionUrl).toBe(
+      `/next/preview?path=%2Ftoko-kopi%2Fcollections&previewSecret=${env.PREVIEW_SECRET}`
+    );
+
+    const pageUrl = await urlGetter({
+      req: mockReq,
+      data: {
+        name: "Page Layout",
+        store: 10,
+        type: "page",
+      },
+    });
+    expect(pageUrl).toBe(
+      `/next/preview?path=%2Ftoko-kopi%3FtemplateType%3Dpage&previewSecret=${env.PREVIEW_SECRET}`
+    );
   });
 });

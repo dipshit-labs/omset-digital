@@ -7,8 +7,12 @@ A multi-tenant SaaS platform where Indonesian SMEs (Merchants) operate branded s
 ### Platform roles
 
 **Merchant**:
-A business owner who subscribes to Omset Digital to operate a storefront. Owns all configuration, products, and orders within their Store.
-_Avoid_: Seller, user, admin, vendor
+A business owner who subscribes to Omset Digital and holds the owner role for their Store. Owns all configuration, products, orders, and BYOK credentials.
+_Avoid_: Seller, user, admin, vendor, shop owner
+
+**Manager**:
+A staff member assigned to a Store with operational access to catalog items and packages, but restricted from modifying store settings, managing users, or viewing sensitive BYOK credentials.
+_Avoid_: Staff, employee, operator, assistant
 
 **Buyer**:
 A person who visits a Merchant's storefront and places orders.
@@ -21,7 +25,7 @@ _Avoid_: Super-user, root, operator
 ### Store
 
 **Store**:
-The platform record representing one Merchant's business in the `stores` collection. Holds the store's identity, subscription status, BYOK credentials (payments, shipping, WhatsApp), and joins to installed Themes.
+The platform entity representing one Merchant's business. Holds the store's identity, subscription status, BYOK credentials (payments, shipping, WhatsApp), and links to installed Themes.
 _Avoid_: Tenant, shop, account, workspace
 
 **Slug**:
@@ -67,17 +71,24 @@ An inner child element within a Section (e.g. feature bullet, testimonial card, 
 _Avoid_: Sub-block, component, item
 
 **Theme Package**:
-An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, declarative settings schemas with CSS variable bindings, and template presets using the DSL from `@repo/payload-plugin-themes/types`. Maps theme settings directly to the `@repo/ui` styling contract without custom mapping functions.
+An independent TypeScript package (`@repo/theme-*`) exporting React components, section definitions, declarative settings schemas with CSS variable bindings, and template presets using the DSL from `@repo/theme-core`. Maps theme settings directly to the Theme Styling Contract without custom mapping functions. Depends exclusively on `@repo/theme-core`.
 _Avoid_: Template package, theme bundle, addon
 
-**Styling Contract**:
-The canonical design tokens and CSS custom properties defined and owned by `@repo/ui` (`@repo/ui/tokens`, `shared.css`). Theme packages map their settings to these variables rather than declaring arbitrary custom property names.
-_Avoid_: Theme variables, custom styling schema
+**Theme Engine**:
+The standalone library (`@repo/theme-core`) providing the theme DSL contracts, template and section registries, CSS custom property generators, unstyled layout and e-commerce primitives, and section renderers, with zero Payload dependencies.
+_Avoid_: Theme loader, theme plugin, UI kit
+
+**Theme Styling Contract**:
+The canonical design tokens and CSS custom properties prefixed with `--theme-*` defined and owned by `@repo/theme-core`. Organized into Merchant Controlled Tokens (backgrounds, surfaces, muted layers, text, borders, brand, shape, typography) and Fixed Tokens (status feedback and calculated radii). Theme packages map their settings to these variables rather than declaring arbitrary custom property names. Isolated from the platform branding styles in `@repo/ui`.
+_Avoid_: Theme variables, custom styling schema, UI tokens
+
+**Theme Primitive**:
+An unstyled, accessible UI or domain building block exported from `@repo/theme-core/primitives`. Governs structural positioning, viewport clamping, motion, and interaction states while leaving all visual styling to theme authors.
+_Avoid_: UI component, widget, element
 
 **Theme Plugin**:
-The Payload CMS plugin (`@repo/payload-plugin-themes`) that injects the theme engine collections (`themes`, `templates`), DSL contracts, field helpers, live preview integration, and boot-time auto-sync.
+The Payload CMS plugin (`@repo/payload-plugin-themes`) that bridges the Theme Engine to Payload, registering the `themes` and `templates` collections, converting theme setting schemas into Payload fields, and wiring admin live preview.
 _Avoid_: Theme loader, template engine
-
 ### Products
 
 **Product**:
@@ -95,8 +106,13 @@ _Avoid_: Attribute, option group, dimension, variant axis
 **Variant Option**:
 A discrete choice on a Variant Type (e.g. Red, Blue, Small, Large). Linked to a Variant Type.
 _Avoid_: Value, choice, attribute value
+
+**Category**:
+A taxonomy classification used to organize and group Products within a Store.
+_Avoid_: Tag, collection, department, genre
+
 **Digital Asset**:
-A file attached to a Product of type `digital`, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
+A downloadable file associated with a non-physical Product, delivered to Buyers as a signed time-limited download URL after payment is confirmed.
 _Avoid_: Download, file, attachment
 
 ### Orders and payments
@@ -134,3 +150,7 @@ _Avoid_: Shipping integration, ongkir API
 **Courier Option**:
 A specific shipping service offered by a courier (name, service level, cost in IDR, estimated days). Returned by `ShippingProvider.getCosts()`.
 _Avoid_: Shipping rate, delivery option
+
+**Package**:
+A physical container or shipping box with defined dimensions and tare weight, scoped to a Store and used to calculate total shipment weight and volumetric costs.
+_Avoid_: Box, parcel, container, carton

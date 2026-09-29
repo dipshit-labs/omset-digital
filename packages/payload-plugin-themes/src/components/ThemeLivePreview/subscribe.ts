@@ -1,10 +1,11 @@
+import { evaluateThemeCssVars } from "@repo/theme-core";
 import type {
   TemplateSectionInstance,
   ThemeClientManifest,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
-} from "../../types";
-import { evaluateThemeCssVars } from "../../utilities/evaluateThemeCssVars";
+} from "@repo/theme-core";
+
 import { isThemePreviewMessage } from "../../utilities/isThemePreviewMessage";
 import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import { ready } from "./ready";

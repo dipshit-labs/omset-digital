@@ -58,9 +58,9 @@ Each collection in `apps/app/src/payload/collections/` lives in its own director
 
 Theme packages under `packages/themes/` are standalone TypeScript packages. They must never import `payload`, `@payloadcms/*`, or `@repo/types`.
 
-- **Depend only on the theme plugin DSL.** Theme packages import manifest builders `defineTheme` and `defineSection`, settings field contracts, and type definitions strictly from `@repo/payload-plugin-themes/types`.
-- **Declarative CSS variable bindings.** Setting fields bind directly to canonical CSS custom properties via `cssVar` (such as `cssVar: "--primary"`) and optional `unit` on number fields (such as `unit: "px"`). Themes do not export custom `cssVars` mapping functions.
-- **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/payload-plugin-themes/utilities`, merging declarative theme bindings over `@repo/ui/tokens` defaults.
+- **Depend only on the theme engine DSL.** Theme packages import manifest builders `defineTheme` and `defineSection`, settings field contracts, and type definitions strictly from `@repo/theme-core`.
+- **Declarative CSS variable bindings.** Setting fields bind directly to canonical CSS custom properties via `cssVar` (such as `cssVar: "--theme-primary"`) and optional `unit` on number fields (such as `unit: "px"`). Themes do not export custom `cssVars` mapping functions.
+- **Centralized CSS variable evaluation.** Storefront consumers evaluate theme variables using `evaluateThemeCssVars({ baseTokens, manifest, settings })` from `@repo/theme-core`, merging declarative theme bindings over canonical `--theme-*` defaults.
 - **Theme package file organization.** Theme packages organize code flatly into `sections/`, `templates/`, and root `branding.ts`, `manifest.ts`, and `index.ts`. Do not use intermediate `config/` or `presets/` directories.
 
 ### Storefront sections are React Server Components
@@ -69,7 +69,7 @@ All storefront layouts, pages, and theme section components run as React Server 
 
 - **Omit `'use client'` from theme sections.** Theme sections receive their settings and blocks as serializable props. Do not add `'use client'` to a section component.
 - **Push client interactivity to leaf components.** Interactive elements like quantity pickers or mobile drawers live in isolated leaf components marked `'use client'`.
-- **Merge classes using `cn`.** Always use `cn(...)` from `@repo/ui/lib/utils` for conditional styles and class composition. Do not concatenate class names with template strings.
+- **Merge classes using `cn`.** Always use `cn(...)` from `@repo/theme-core/utils` (in storefront themes) or `@repo/ui/lib/utils` (in marketing/admin pages) for conditional styles and class composition. Do not concatenate class names with template strings.
 - **Avoid `React.FC`.** Declare components as standard functions with typed props destructured in the signature.
 
 ## Monorepo and package boundaries

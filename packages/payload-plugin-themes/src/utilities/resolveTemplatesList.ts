@@ -1,7 +1,7 @@
 import type {
   TemplatePresetDefinition,
   ThemeManifestDefinition,
-} from "../types";
+} from "@repo/theme-core";
 
 export const resolveTemplatesList = (
   rawTemplates: ThemeManifestDefinition["templates"]

@@ -28,6 +28,7 @@
         "@payloadcms/richtext-lexical": "catalog:payload",
         "@payloadcms/ui": "catalog:payload",
         "@repo/payload-plugin-themes": "workspace:*",
+        "@repo/theme-core": "workspace:*",
         "@repo/theme-default": "workspace:*",
         "@repo/theme-minimal": "workspace:*",
         "@repo/types": "workspace:*",
@@ -60,7 +61,7 @@
       "name": "@repo/payload-plugin-themes",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/ui": "workspace:*",
+        "@repo/theme-core": "workspace:*",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
@@ -84,17 +85,51 @@
         "react",
       ],
     },
-    "packages/themes/default": {
-      "name": "@repo/theme-default",
+    "packages/theme-core": {
+      "name": "@repo/theme-core",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/payload-plugin-themes": "workspace:*",
-        "@repo/ui": "workspace:*",
+        "@base-ui/react": "catalog:ui",
+        "cn": "catalog:ui",
+        "tw-animate-css": "catalog:ui",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "@testing-library/dom": "catalog:test",
         "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react",
+        "jsdom": "catalog:test",
+        "next": "catalog:react",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+        "tailwindcss": "catalog:ui",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+      "peerDependencies": {
+        "next": "^15.0.0 || ^16.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "optionalPeers": [
+        "next",
+        "react",
+        "react-dom",
+      ],
+    },
+    "packages/themes/default": {
+      "name": "@repo/theme-default",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/theme-core": "workspace:*",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@testing-library/dom": "catalog:test",
+        "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
         "@types/react": "catalog:react",
         "@types/react-dom": "catalog:react",
         "@vitejs/plugin-react": "catalog:test",
@@ -112,13 +147,13 @@
       "name": "@repo/theme-minimal",
       "version": "0.0.0",
       "dependencies": {
-        "@repo/payload-plugin-themes": "workspace:*",
-        "@repo/ui": "workspace:*",
+        "@repo/theme-core": "workspace:*",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "@testing-library/dom": "catalog:test",
         "@testing-library/react": "catalog:test",
+        "@types/node": "catalog:types",
         "@types/react": "catalog:react",
         "@types/react-dom": "catalog:react",
         "@vitejs/plugin-react": "catalog:test",
@@ -762,6 +797,8 @@
     "@preact/signals-core": ["@preact/signals-core@1.14.4", "", {}, "sha512-HNB6HYeYKhQbJ1aKl+YRjrS4+QWHLKX6qKoUsfS/m0vqzsVaEBiZiaKbG/e+NKk2ch5ALQr/ihWaMHxiCuuWHA=="],
 
     "@repo/payload-plugin-themes": ["@repo/payload-plugin-themes@workspace:packages/payload-plugin-themes"],
+
+    "@repo/theme-core": ["@repo/theme-core@workspace:packages/theme-core"],
 
     "@repo/theme-default": ["@repo/theme-default@workspace:packages/themes/default"],
 

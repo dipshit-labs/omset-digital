@@ -32,7 +32,7 @@ const mockThemeManifest: ThemeManifestDefinition = {
   sections: [
     {
       Component: MockHeroComponent,
-      name: "Hero",
+      name: "Hero Section",
       slug: "hero",
     },
   ],
@@ -46,32 +46,30 @@ describe(renderThemeSections, () => {
   it("renders matching section component with explicit settings and blocks", () => {
     const sections: TemplateSectionInstance[] = [
       {
+        blocks: [{ blockType: "bullet", label: "Fast shipping" }],
         blockType: "mock_hero",
         id: "hero-1",
-        settings: { headline: "Welcome to Omset" },
-        blocks: [
-          { blockType: "bullet", label: "Bullet 1" },
-          { blockType: "bullet", label: "Bullet 2" },
-        ],
+        settings: {
+          headline: "Welcome to Omset",
+        },
       },
     ];
 
     const rendered = renderThemeSections(mockThemeManifest, sections);
     render(<div>{rendered}</div>);
 
-    const hero = screen.getByTestId("mock-hero");
-    expect(hero).toBeDefined();
-    expect(hero.getAttribute("id")).toBe("hero-1");
-    expect(screen.getByText("Welcome to Omset")).toBeDefined();
-    expect(screen.getByText("Bullet 1")).toBeDefined();
-    expect(screen.getByText("Bullet 2")).toBeDefined();
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.textContent).toBe("Welcome to Omset");
+
+    const bullet = screen.getByText("Fast shipping");
+    expect(bullet).not.toBeNull();
   });
 
   it("handles flat settings on section document when explicit settings object is absent", () => {
     const sections: TemplateSectionInstance[] = [
       {
         blockType: "mock_hero",
-        headline: "Flat Heading",
+        headline: "Direct Headline",
         id: "hero-flat",
       },
     ];
@@ -79,34 +77,51 @@ describe(renderThemeSections, () => {
     const rendered = renderThemeSections(mockThemeManifest, sections);
     render(<div>{rendered}</div>);
 
-    expect(screen.getByText("Flat Heading")).toBeDefined();
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.textContent).toBe("Direct Headline");
   });
 
   it("skips blocks from a different theme prefix", () => {
     const sections: TemplateSectionInstance[] = [
       {
-        blockType: "other_hero",
-        id: "other-1",
+        blockType: "foreign_hero",
+        id: "foreign-1",
+        settings: {
+          headline: "Foreign Theme",
+        },
       },
     ];
 
     const rendered = renderThemeSections(mockThemeManifest, sections);
-    render(<div data-testid="container">{rendered}</div>);
-
-    expect(screen.queryByTestId("mock-hero")).toBeNull();
+    expect(rendered).toHaveLength(0);
   });
 
   it("skips sections not defined in manifest", () => {
     const sections: TemplateSectionInstance[] = [
       {
-        blockType: "mock_unknown",
-        id: "unknown-1",
+        blockType: "mock_nonexistent",
+        id: "nonexistent-1",
       },
     ];
 
     const rendered = renderThemeSections(mockThemeManifest, sections);
-    render(<div data-testid="container">{rendered}</div>);
+    expect(rendered).toHaveLength(0);
+  });
 
-    expect(screen.queryByTestId("mock-hero")).toBeNull();
+  it("honors explicitly empty settings without falling back to document properties", () => {
+    const sections: TemplateSectionInstance[] = [
+      {
+        blockType: "mock_hero",
+        headline: "Leaked Document Headline",
+        id: "hero-empty-settings",
+        settings: {},
+      },
+    ];
+
+    const rendered = renderThemeSections(mockThemeManifest, sections);
+    render(<div>{rendered}</div>);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.textContent).toBe("");
   });
 });

@@ -1,5 +1,5 @@
-import type { SectionProps } from "@repo/payload-plugin-themes/types";
-import { cn } from "@repo/ui/lib/utils";
+import type { SectionProps } from "@repo/theme-core";
+import { cn } from "@repo/theme-core/utils";
 import type { ReactElement } from "react";
 
 import { HeroCtaClient } from "./HeroCtaClient";

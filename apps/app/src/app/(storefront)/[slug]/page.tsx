@@ -1,6 +1,6 @@
 import config from "@payload-config";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { toClientThemeManifest } from "@repo/payload-plugin-themes/utilities";
+import { toClientThemeManifest } from "@repo/theme-core";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -25,6 +25,8 @@ const CustomPage = async ({
   const host = headersList.get("host");
   const query = searchParams ? await searchParams : {};
   const storeSlug = typeof query.store === "string" ? query.store : undefined;
+  const rawTheme = query.theme ?? query.themeSlug;
+  const themeParam = typeof rawTheme === "string" ? rawTheme : undefined;
 
   const payload = await getPayload({ config });
   const context = await resolvePageStorefront({
@@ -33,6 +35,7 @@ const CustomPage = async ({
     payload,
     slug,
     storeSlug,
+    themeParam,
   });
 
   if (!context) {

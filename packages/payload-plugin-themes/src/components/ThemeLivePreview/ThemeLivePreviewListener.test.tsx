@@ -1,8 +1,8 @@
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 // @vitest-environment jsdom
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ThemeManifestDefinition } from "../../types";
 import {
   RefreshRouteOnSave,
   ThemeLivePreviewListener,

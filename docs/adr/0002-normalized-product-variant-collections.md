@@ -15,5 +15,5 @@ This model provides row-level inventory locking in PostgreSQL during checkout so
 ## Consequences
 
 1. Every variant collection (`variantTypes`, `variantOptions`, `variants`) must include a `store` relationship and enforce store scoping via `enforceStoreOnCreate` and read/write access control.
-2. The product gallery array includes an optional relationship to `variantOptions`, allowing storefront themes to reactively focus the carousel on the selected color or style.
-3. Every Variant row must hold a `weight` field in grams alongside `price` and `stock` to support dynamic shipping cost calculation via RajaOngkir.
+2. Each Variant document holds an `image` relationship to `media`, automatically representing the featured visual asset for that variant.
+3. Every Variant row contains a `shipping` group linking to a `packages` document and holding a `weight` measurement (in grams or kilograms) alongside `price` and `stock` to support dynamic shipping calculations. Single-variant products mirror these fields virtually onto the parent `products` document.

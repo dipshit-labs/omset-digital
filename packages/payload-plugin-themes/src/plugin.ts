@@ -116,7 +116,6 @@ export const themesPlugin =
 
       if (options.autoSync !== false) {
         await syncThemes(payload, {
-          defaultStoreData: options.defaultStoreData,
           manifests: options.manifests,
           tenantField: options.tenantField,
           tenantsSlug: options.tenantsSlug,

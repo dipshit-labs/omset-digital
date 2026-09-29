@@ -1,8 +1,6 @@
-import type {
-  ThemeManifestDefinition,
-  ThemeSyncDoc,
-  ThemeSyncPayload,
-} from "../types";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
+
+import type { ThemeSyncDoc, ThemeSyncPayload } from "../types";
 import { extractDefaultSettings } from "./extractDefaultSettings";
 
 export const syncThemeForStore = async (
@@ -29,17 +27,19 @@ export const syncThemeForStore = async (
   }
 
   const defaultSettings = extractDefaultSettings(manifest);
+  const data = {
+    isLive,
+    name: manifest.name,
+    settings: defaultSettings,
+    slug: manifest.slug,
+    [tenantField]: store.id,
+    version: manifest.version,
+  };
+
   const newTheme = await client.create({
     collection: "themes",
+    data,
     draft: false,
-    data: {
-      isLive,
-      name: manifest.name,
-      settings: defaultSettings,
-      slug: manifest.slug,
-      [tenantField]: store.id,
-      version: manifest.version,
-    },
   });
 
   return newTheme.id;

@@ -31,7 +31,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*"
+    "@repo/theme-core": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

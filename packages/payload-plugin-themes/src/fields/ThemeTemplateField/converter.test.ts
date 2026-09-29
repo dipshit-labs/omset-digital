@@ -1,11 +1,11 @@
-import type { ArrayField, BlocksField, Field, GroupField } from "payload";
-import { describe, expect, it } from "vitest";
-
 import type {
   SectionDefinition,
   SettingField,
   ThemeManifestDefinition,
-} from "../../types";
+} from "@repo/theme-core";
+import type { ArrayField, BlocksField, Field, GroupField } from "payload";
+import { describe, expect, it } from "vitest";
+
 import {
   manifestToPayloadBlocks,
   sectionToPayloadBlock,

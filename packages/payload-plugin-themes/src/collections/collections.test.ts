@@ -1,6 +1,6 @@
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 import { describe, expect, it } from "vitest";
 
-import type { ThemeManifestDefinition } from "../types";
 import { createTemplatesCollection } from "./createTemplatesCollection";
 import { createThemesCollection } from "./createThemesCollection";
 
@@ -114,9 +114,31 @@ describe("Theme and Template Collection Versioning", () => {
 });
 
 describe("Collection admin.livePreview Hooks", () => {
-  it("createThemesCollection resolves livePreview URL using store object slug", async () => {
+  it("createThemesCollection resolves livePreview URL without tenant prefix when tenantField is omitted", async () => {
     const config = createThemesCollection({
       manifests: [testManifest],
+    });
+
+    const livePreview = config.admin?.livePreview;
+    expect(livePreview).toBeDefined();
+    expect(livePreview?.url).toBeTypeOf("function");
+
+    // SAFETY: livePreview.url was asserted to be a function above.
+    const urlFn = livePreview?.url as LivePreviewURLFunction;
+    const url = await urlFn(
+      createFakeLivePreviewArgs({
+        slug: "test-theme",
+        store: { slug: "toko-kopi" },
+      })
+    );
+
+    expect(url).toBe("/next/preview?path=%2F");
+  });
+
+  it("createThemesCollection resolves livePreview URL using store object slug when tenantField is provided", async () => {
+    const config = createThemesCollection({
+      manifests: [testManifest],
+      tenantField: "store",
     });
 
     const livePreview = config.admin?.livePreview;
@@ -135,9 +157,10 @@ describe("Collection admin.livePreview Hooks", () => {
     expect(url).toContain("/next/preview?path=%2Ftoko-kopi");
   });
 
-  it("createThemesCollection resolves store from req.payload when store field is an ID", async () => {
+  it("createThemesCollection resolves store from req.payload when store field is an ID and tenantField is provided", async () => {
     const config = createThemesCollection({
       manifests: [testManifest],
+      tenantField: "store",
     });
 
     const livePreview = config.admin?.livePreview;
@@ -158,13 +181,13 @@ describe("Collection admin.livePreview Hooks", () => {
     expect(url).toContain("/next/preview?path=%2Fstore-from-id");
   });
 
-  it("createTemplatesCollection resolves livePreview URL for template routes", async () => {
+  it("createTemplatesCollection resolves livePreview URL for home and product templates when tenantField is provided", async () => {
     const config = createTemplatesCollection({
       manifests: [testManifest],
+      tenantField: "store",
     });
 
     const livePreview = config.admin?.livePreview;
-    expect(livePreview).toBeDefined();
     expect(livePreview?.url).toBeTypeOf("function");
 
     // SAFETY: livePreview.url was asserted to be a function above.
@@ -188,6 +211,73 @@ describe("Collection admin.livePreview Hooks", () => {
     expect(productUrl).toContain(
       "/next/preview?path=%2Ftoko-sepatu%2Fproducts"
     );
+  });
+
+  it("createTemplatesCollection resolves livePreview URL for collection and page templates when tenantField is provided", async () => {
+    const config = createTemplatesCollection({
+      manifests: [testManifest],
+      tenantField: "store",
+    });
+
+    const livePreview = config.admin?.livePreview;
+    expect(livePreview?.url).toBeTypeOf("function");
+
+    // SAFETY: livePreview.url was asserted to be a function above.
+    const urlFn = livePreview?.url as LivePreviewURLFunction;
+    const collectionUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Collection Layout",
+        store: { slug: "toko-sepatu" },
+        type: "collection",
+      })
+    );
+    expect(collectionUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%2Fcollections"
+    );
+
+    const pageUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Page Layout",
+        store: { slug: "toko-sepatu" },
+        type: "page",
+      })
+    );
+    expect(pageUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%3FtemplateType%3Dpage"
+    );
+
+    const pageWithSlugUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Custom Page Layout",
+        slug: "about-us",
+        store: { slug: "toko-sepatu" },
+        type: "page",
+      })
+    );
+    expect(pageWithSlugUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%2Fabout-us"
+    );
+  });
+
+  it("createTemplatesCollection resolves livePreview URL for template routes without tenant prefix when tenantField is omitted", async () => {
+    const config = createTemplatesCollection({
+      manifests: [testManifest],
+    });
+
+    const livePreview = config.admin?.livePreview;
+    expect(livePreview).toBeDefined();
+    expect(livePreview?.url).toBeTypeOf("function");
+
+    // SAFETY: livePreview.url was asserted to be a function above.
+    const urlFn = livePreview?.url as LivePreviewURLFunction;
+    const productUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Product Layout",
+        store: { slug: "toko-sepatu" },
+        type: "product",
+      })
+    );
+    expect(productUrl).toBe("/next/preview?path=%2Fproducts");
   });
 
   it("includes previewSecret in livePreview URL when previewSecret option is provided", async () => {

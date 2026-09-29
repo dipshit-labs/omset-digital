@@ -1,10 +1,8 @@
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Block, CollectionConfig, CollectionSlug, Field } from "payload";
 
 import { manifestToPayloadBlocks } from "../fields/ThemeTemplateField/converter";
-import type {
-  CreateTemplatesCollectionOptions,
-  ThemeManifestDefinition,
-} from "../types";
+import type { CreateTemplatesCollectionOptions } from "../types";
 import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
 import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
@@ -20,7 +18,7 @@ export const createTemplatesCollection = (
     : optionsOrManifests;
 
   const manifests = options.manifests ?? [];
-  const tenantField = options.tenantField ?? "store";
+  const { tenantField } = options;
   const tenantsSlug = options.tenantsSlug ?? "stores";
   const allBlocks: Block[] = manifests.flatMap((m) =>
     manifestToPayloadBlocks(m, { defaultMediaSlug: options.defaultMediaSlug })
@@ -87,12 +85,14 @@ export const createTemplatesCollection = (
       useAsTitle: "name",
       livePreview: {
         url: async ({ data, req }) => {
-          const storeSlug = await resolveTenantStoreSlug({
-            data,
-            req,
-            tenantField,
-            tenantsSlug,
-          });
+          const storeSlug = tenantField
+            ? await resolveTenantStoreSlug({
+                data,
+                req,
+                tenantField,
+                tenantsSlug,
+              })
+            : null;
 
           let templatePath = "/";
           const templateType =
@@ -106,8 +106,8 @@ export const createTemplatesCollection = (
             templatePath = "/collections";
           } else if (templateType === "page") {
             const pageSlug =
-              typeof data?.slug === "string" ? data.slug : "page";
-            templatePath = `/${pageSlug}`;
+              typeof data?.slug === "string" ? data.slug : undefined;
+            templatePath = pageSlug ? `/${pageSlug}` : "/?templateType=page";
           }
 
           return generateThemePreviewPath({
