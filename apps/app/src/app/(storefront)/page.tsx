@@ -38,6 +38,8 @@ const Home = async ({ searchParams }: HomePageProps): Promise<ReactElement> => {
   const params = searchParams ? await searchParams : {};
   const storeSlug = typeof params.store === "string" ? params.store : undefined;
   const templateType = resolveTemplateType(params);
+  const rawTheme = params.theme ?? params.themeSlug;
+  const themeParam = typeof rawTheme === "string" ? rawTheme : undefined;
 
   const payload = await getPayload({ config });
   const context = await resolveStorefront({
@@ -46,6 +48,7 @@ const Home = async ({ searchParams }: HomePageProps): Promise<ReactElement> => {
     payload,
     storeSlug,
     templateType,
+    themeParam,
   });
 
   if (!context) {

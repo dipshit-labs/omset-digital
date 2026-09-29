@@ -26,6 +26,7 @@ export interface ResolveStorefrontOptions {
   payload: StorefrontPayloadClient;
   storeSlug?: string | null;
   templateType?: TemplateType;
+  themeParam?: string;
 }
 
 export interface ResolvePageStorefrontOptions {
@@ -34,6 +35,7 @@ export interface ResolvePageStorefrontOptions {
   payload: StorefrontPayloadClient;
   slug: string;
   storeSlug?: string | null;
+  themeParam?: string;
 }
 
 export interface PageStorefrontContext extends StorefrontContext {
@@ -117,7 +119,16 @@ export const resolveStore = async ({
         limit: 1,
         where: { slug: { equals: "default" } },
       });
-      return byDefault.docs[0] ?? null;
+      if (byDefault.docs.length > 0) {
+        return byDefault.docs[0];
+      }
+
+      const anyStore = await payload.find({
+        collection: "stores",
+        depth: 0,
+        limit: 1,
+      });
+      return anyStore.docs[0] ?? null;
     }
   }
 
@@ -128,6 +139,7 @@ interface ResolveStoreThemeOptions {
   draft: boolean;
   payload: StorefrontPayloadClient;
   storeId: number | string;
+  themeParam?: string;
 }
 
 interface ResolvedStoreTheme {
@@ -140,18 +152,57 @@ const resolveStoreTheme = async ({
   draft,
   payload,
   storeId,
+  themeParam,
 }: ResolveStoreThemeOptions): Promise<ResolvedStoreTheme> => {
-  const liveThemes = await payload.find({
-    collection: "themes",
-    depth: 0,
-    draft,
-    limit: 1,
-    overrideAccess: draft,
-    where: {
-      and: [{ store: { equals: storeId } }, { isLive: { equals: true } }],
-    },
-  });
-  const themeDoc = liveThemes.docs[0] ?? null;
+  let themeDoc: Theme | null = null;
+
+  if (draft && themeParam) {
+    const isId = typeof themeParam === "number" || /^\d+$/u.test(themeParam);
+    const themeRes = await payload.find({
+      collection: "themes",
+      depth: 0,
+      draft,
+      limit: 1,
+      overrideAccess: draft,
+      where: {
+        and: [
+          { store: { equals: storeId } },
+          isId
+            ? { id: { equals: themeParam } }
+            : { slug: { equals: themeParam } },
+        ],
+      },
+    });
+    themeDoc = themeRes.docs[0] ?? null;
+  }
+
+  if (!themeDoc) {
+    const liveThemes = await payload.find({
+      collection: "themes",
+      depth: 0,
+      draft,
+      limit: 1,
+      overrideAccess: draft,
+      where: {
+        and: [{ store: { equals: storeId } }, { isLive: { equals: true } }],
+      },
+    });
+    themeDoc = liveThemes.docs[0] ?? null;
+  }
+
+  if (!themeDoc) {
+    const anyThemes = await payload.find({
+      collection: "themes",
+      depth: 0,
+      draft,
+      limit: 1,
+      overrideAccess: draft,
+      where: {
+        store: { equals: storeId },
+      },
+    });
+    themeDoc = anyThemes.docs[0] ?? null;
+  }
 
   const themeSlug =
     typeof themeDoc?.slug === "string" ? themeDoc.slug : defaultTheme.slug;
@@ -189,6 +240,7 @@ export const resolveStorefront = async ({
   payload,
   storeSlug,
   templateType = "home",
+  themeParam,
 }: ResolveStorefrontOptions): Promise<StorefrontContext | null> => {
   const store = await resolveStore({ host, payload, storeSlug });
   if (!store) {
@@ -199,6 +251,7 @@ export const resolveStorefront = async ({
     draft,
     payload,
     storeId: store.id,
+    themeParam,
   });
 
   let templateDoc: Template | null = null;
@@ -287,6 +340,7 @@ export const resolvePageStorefront = async ({
   payload,
   slug,
   storeSlug,
+  themeParam,
 }: ResolvePageStorefrontOptions): Promise<PageStorefrontContext | null> => {
   const store = await resolveStore({ host, payload, storeSlug });
   if (!store) {
@@ -314,6 +368,7 @@ export const resolvePageStorefront = async ({
     draft,
     payload,
     storeId: store.id,
+    themeParam,
   });
 
   const templateDoc = await resolvePageTemplate({

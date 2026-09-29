@@ -115,6 +115,8 @@ export default buildConfig({
     themesPlugin({
       manifests: [defaultTheme, minimalTheme],
       previewSecret: env.PREVIEW_SECRET,
+      tenantField: "store",
+      tenantsSlug: "stores",
     }),
     multiTenantPlugin<Config>({
       tenantSelectorLabel: "Store",

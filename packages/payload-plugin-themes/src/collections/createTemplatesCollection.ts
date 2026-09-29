@@ -93,6 +93,7 @@ export const createTemplatesCollection = (
                 tenantsSlug,
               })
             : null;
+
           let templatePath = "/";
           const templateType =
             typeof data?.type === "string" ? data.type : "home";
@@ -105,8 +106,8 @@ export const createTemplatesCollection = (
             templatePath = "/collections";
           } else if (templateType === "page") {
             const pageSlug =
-              typeof data?.slug === "string" ? data.slug : "page";
-            templatePath = `/${pageSlug}`;
+              typeof data?.slug === "string" ? data.slug : undefined;
+            templatePath = pageSlug ? `/${pageSlug}` : "/?templateType=page";
           }
 
           return generateThemePreviewPath({

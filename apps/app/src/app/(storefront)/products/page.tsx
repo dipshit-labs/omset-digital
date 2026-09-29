@@ -1,5 +1,4 @@
 import config from "@payload-config";
-import { RichText } from "@payloadcms/richtext-lexical/react";
 import { toClientThemeManifest } from "@repo/theme-core";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -8,33 +7,30 @@ import type { ReactElement } from "react";
 
 import { LivePreviewListener } from "@/components/LivePreviewListener";
 import { StorefrontCanvas } from "@/components/StorefrontCanvas";
-import { resolvePageStorefront } from "@/lib/storefront";
+import { resolveStorefront } from "@/lib/storefront";
 
-export interface CustomPageProps {
-  params: Promise<{ slug: string }>;
+export interface ProductsPageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const CustomPage = async ({
-  params,
+const ProductsPage = async ({
   searchParams,
-}: CustomPageProps): Promise<ReactElement> => {
-  const { slug } = await params;
+}: ProductsPageProps): Promise<ReactElement> => {
   const { isEnabled: draft } = await draftMode();
   const headersList = await headers();
   const host = headersList.get("host");
-  const query = searchParams ? await searchParams : {};
-  const storeSlug = typeof query.store === "string" ? query.store : undefined;
-  const rawTheme = query.theme ?? query.themeSlug;
+  const params = searchParams ? await searchParams : {};
+  const storeSlug = typeof params.store === "string" ? params.store : undefined;
+  const rawTheme = params.theme ?? params.themeSlug;
   const themeParam = typeof rawTheme === "string" ? rawTheme : undefined;
 
   const payload = await getPayload({ config });
-  const context = await resolvePageStorefront({
+  const context = await resolveStorefront({
     draft,
     host,
     payload,
-    slug,
     storeSlug,
+    templateType: "product",
     themeParam,
   });
 
@@ -49,15 +45,9 @@ const CustomPage = async ({
           manifest={toClientThemeManifest(context.manifest)}
         />
       ) : null}
-      <StorefrontCanvas context={context}>
-        {context.page.content ? (
-          <main className="container mx-auto px-4 py-8">
-            <RichText data={context.page.content} />
-          </main>
-        ) : null}
-      </StorefrontCanvas>
+      <StorefrontCanvas context={context} />
     </>
   );
 };
 
-export default CustomPage;
+export default ProductsPage;

@@ -181,14 +181,13 @@ describe("Collection admin.livePreview Hooks", () => {
     expect(url).toContain("/next/preview?path=%2Fstore-from-id");
   });
 
-  it("createTemplatesCollection resolves livePreview URL for template routes when tenantField is provided", async () => {
+  it("createTemplatesCollection resolves livePreview URL for home and product templates when tenantField is provided", async () => {
     const config = createTemplatesCollection({
       manifests: [testManifest],
       tenantField: "store",
     });
 
     const livePreview = config.admin?.livePreview;
-    expect(livePreview).toBeDefined();
     expect(livePreview?.url).toBeTypeOf("function");
 
     // SAFETY: livePreview.url was asserted to be a function above.
@@ -211,6 +210,52 @@ describe("Collection admin.livePreview Hooks", () => {
     );
     expect(productUrl).toContain(
       "/next/preview?path=%2Ftoko-sepatu%2Fproducts"
+    );
+  });
+
+  it("createTemplatesCollection resolves livePreview URL for collection and page templates when tenantField is provided", async () => {
+    const config = createTemplatesCollection({
+      manifests: [testManifest],
+      tenantField: "store",
+    });
+
+    const livePreview = config.admin?.livePreview;
+    expect(livePreview?.url).toBeTypeOf("function");
+
+    // SAFETY: livePreview.url was asserted to be a function above.
+    const urlFn = livePreview?.url as LivePreviewURLFunction;
+    const collectionUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Collection Layout",
+        store: { slug: "toko-sepatu" },
+        type: "collection",
+      })
+    );
+    expect(collectionUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%2Fcollections"
+    );
+
+    const pageUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Page Layout",
+        store: { slug: "toko-sepatu" },
+        type: "page",
+      })
+    );
+    expect(pageUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%3FtemplateType%3Dpage"
+    );
+
+    const pageWithSlugUrl = await urlFn(
+      createFakeLivePreviewArgs({
+        name: "Custom Page Layout",
+        slug: "about-us",
+        store: { slug: "toko-sepatu" },
+        type: "page",
+      })
+    );
+    expect(pageWithSlugUrl).toContain(
+      "/next/preview?path=%2Ftoko-sepatu%2Fabout-us"
     );
   });
 
