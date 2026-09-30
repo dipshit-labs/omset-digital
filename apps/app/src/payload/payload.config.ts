@@ -15,6 +15,7 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
+import { commercePlugin } from "@repo/payload-plugin-commerce";
 import { themesPlugin } from "@repo/payload-plugin-themes";
 import { defaultTheme } from "@repo/theme-default";
 import { minimalTheme } from "@repo/theme-minimal";
@@ -112,6 +113,13 @@ export default buildConfig({
     defaultFromName: "Omset Digital",
   }),
   plugins: [
+    commercePlugin({
+      secret: env.PAYLOAD_SECRET,
+      slugs: {
+        storeCredentials: "storeCredentials",
+        stores: "stores",
+      },
+    }),
     themesPlugin({
       manifests: [defaultTheme, minimalTheme],
       previewSecret: env.PREVIEW_SECRET,
@@ -128,6 +136,7 @@ export default buildConfig({
         packages: { isGlobal: false },
         pages: { isGlobal: false },
         products: { isGlobal: false },
+        storeCredentials: { customTenantField: true, isGlobal: false },
         templates: { isGlobal: false },
         themes: { isGlobal: false },
         variantOptions: { isGlobal: false },

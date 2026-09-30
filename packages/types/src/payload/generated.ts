@@ -77,6 +77,7 @@ export interface Config {
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
+    storeCredentials: StoreCredential;
     themes: Theme;
     templates: Template;
     'payload-kv': PayloadKv;
@@ -104,6 +105,7 @@ export interface Config {
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
+    storeCredentials: StoreCredentialsSelect<false> | StoreCredentialsSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -227,6 +229,55 @@ export interface Store {
     currentPeriodEnd?: string | null;
   };
   /**
+   * Merchant store fulfillment origin address
+   */
+  originAddress?: {
+    /**
+     * Province numeric ID
+     */
+    provinceId?: string | null;
+    /**
+     * Province name
+     */
+    provinceName?: string | null;
+    /**
+     * City/Regency numeric ID
+     */
+    cityId?: string | null;
+    /**
+     * City/Regency name
+     */
+    cityName?: string | null;
+    /**
+     * Subdistrict numeric ID
+     */
+    subdistrictId?: string | null;
+    /**
+     * Subdistrict name
+     */
+    subdistrictName?: string | null;
+    /**
+     * Street address and warehouse details
+     */
+    streetAddress?: string | null;
+    /**
+     * Postal code
+     */
+    postalCode?: string | null;
+  };
+  whatsappConfig?: {
+    enabled?: boolean | null;
+    phoneNumber?: string | null;
+  };
+  /**
+   * Active payment gateway
+   */
+  activePaymentProvider?: ('none' | 'midtrans' | 'xendit') | null;
+  /**
+   * Active shipping provider
+   */
+  activeShippingProvider?: ('none' | 'rajaongkir') | null;
+  /**
    * Active payment gateway. Add one block and fill in your credentials.
    */
   paymentProviders?:
@@ -271,10 +322,6 @@ export interface Store {
        */
       originSubdistrictId?: string | null;
     };
-  };
-  whatsappConfig?: {
-    enabled?: boolean | null;
-    phoneNumber?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -649,6 +696,74 @@ export interface Theme {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeCredentials".
+ */
+export interface StoreCredential {
+  id: number;
+  /**
+   * Associated store document
+   */
+  store: number | Store;
+  /**
+   * Active payment gateway
+   */
+  paymentProvider?: ('none' | 'midtrans' | 'xendit') | null;
+  /**
+   * Midtrans payment gateway credentials
+   */
+  midtrans?: {
+    /**
+     * Midtrans Server Key (encrypted at rest)
+     */
+    serverKey?: string | null;
+    /**
+     * Midtrans Client Key (public)
+     */
+    clientKey?: string | null;
+    /**
+     * Use Midtrans production environment
+     */
+    isProduction?: boolean | null;
+  };
+  /**
+   * Xendit payment gateway credentials
+   */
+  xendit?: {
+    /**
+     * Xendit Secret API Key (encrypted at rest)
+     */
+    secretKey?: string | null;
+    /**
+     * Xendit Webhook Verification Token (encrypted at rest)
+     */
+    webhookToken?: string | null;
+    /**
+     * Use Xendit production environment
+     */
+    isProduction?: boolean | null;
+  };
+  /**
+   * Active shipping provider
+   */
+  shippingProvider?: ('none' | 'rajaongkir') | null;
+  /**
+   * RajaOngkir shipping calculation credentials
+   */
+  rajaongkir?: {
+    /**
+     * RajaOngkir API Key (encrypted at rest)
+     */
+    apiKey?: string | null;
+    /**
+     * RajaOngkir account tier
+     */
+    accountType?: ('starter' | 'basic' | 'pro') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -804,6 +919,10 @@ export interface PayloadLockedDocument {
         value: number | VariantType;
       } | null)
     | ({
+        relationTo: 'storeCredentials';
+        value: number | StoreCredential;
+      } | null)
+    | ({
         relationTo: 'themes';
         value: number | Theme;
       } | null)
@@ -903,6 +1022,26 @@ export interface StoresSelect<T extends boolean = true> {
         trialEndsAt?: T;
         currentPeriodEnd?: T;
       };
+  originAddress?:
+    | T
+    | {
+        provinceId?: T;
+        provinceName?: T;
+        cityId?: T;
+        cityName?: T;
+        subdistrictId?: T;
+        subdistrictName?: T;
+        streetAddress?: T;
+        postalCode?: T;
+      };
+  whatsappConfig?:
+    | T
+    | {
+        enabled?: T;
+        phoneNumber?: T;
+      };
+  activePaymentProvider?: T;
+  activeShippingProvider?: T;
   paymentProviders?:
     | T
     | {
@@ -928,12 +1067,6 @@ export interface StoresSelect<T extends boolean = true> {
               originCityId?: T;
               originSubdistrictId?: T;
             };
-      };
-  whatsappConfig?:
-    | T
-    | {
-        enabled?: T;
-        phoneNumber?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1136,6 +1269,37 @@ export interface VariantTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeCredentials_select".
+ */
+export interface StoreCredentialsSelect<T extends boolean = true> {
+  store?: T;
+  paymentProvider?: T;
+  midtrans?:
+    | T
+    | {
+        serverKey?: T;
+        clientKey?: T;
+        isProduction?: T;
+      };
+  xendit?:
+    | T
+    | {
+        secretKey?: T;
+        webhookToken?: T;
+        isProduction?: T;
+      };
+  shippingProvider?: T;
+  rajaongkir?:
+    | T
+    | {
+        apiKey?: T;
+        accountType?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -21,6 +21,7 @@
     "@payloadcms/plugin-seo": "catalog:payload",
     "@payloadcms/richtext-lexical": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
+    "@repo/payload-plugin-commerce": "workspace:*",
     "@repo/payload-plugin-themes": "workspace:*",
     "@repo/theme-core": "workspace:*",
     "@repo/theme-default": "workspace:*",

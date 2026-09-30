@@ -1,3 +1,4 @@
+import { CredentialsManager as CredentialsManager_e30a10e1baabd917274600ea641c5a72 } from '@repo/payload-plugin-commerce/client'
 import { WatchTenantCollection as WatchTenantCollection_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
 import { TenantField as TenantField_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
 import { SlugComponent as SlugComponent_f5c8b61619c77ae0dd241fe7d67de528 } from '@/payload/fields/slug/Component'
@@ -24,6 +25,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "@repo/payload-plugin-commerce/client#CredentialsManager": CredentialsManager_e30a10e1baabd917274600ea641c5a72,
   "@payloadcms/plugin-multi-tenant/client#WatchTenantCollection": WatchTenantCollection_1d0591e3cf4f332c83a86da13a0de59a,
   "@payloadcms/plugin-multi-tenant/client#TenantField": TenantField_1d0591e3cf4f332c83a86da13a0de59a,
   "@/payload/fields/slug/Component#SlugComponent": SlugComponent_f5c8b61619c77ae0dd241fe7d67de528,
