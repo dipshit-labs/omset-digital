@@ -57,6 +57,16 @@
         "vitest": "catalog:test",
       },
     },
+    "packages/commerce-adapters": {
+      "name": "@repo/commerce-adapters",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/node": "catalog:types",
+        "typescript": "catalog:types",
+        "vitest": "catalog:test",
+      },
+    },
     "packages/payload-plugin-themes": {
       "name": "@repo/payload-plugin-themes",
       "version": "0.0.0",
@@ -795,6 +805,8 @@
     "@pinojs/redact": ["@pinojs/redact@0.4.0", "", {}, "sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg=="],
 
     "@preact/signals-core": ["@preact/signals-core@1.14.4", "", {}, "sha512-HNB6HYeYKhQbJ1aKl+YRjrS4+QWHLKX6qKoUsfS/m0vqzsVaEBiZiaKbG/e+NKk2ch5ALQr/ihWaMHxiCuuWHA=="],
+
+    "@repo/commerce-adapters": ["@repo/commerce-adapters@workspace:packages/commerce-adapters"],
 
     "@repo/payload-plugin-themes": ["@repo/payload-plugin-themes@workspace:packages/payload-plugin-themes"],
 

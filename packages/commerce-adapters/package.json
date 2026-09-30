@@ -1,0 +1,27 @@
+{
+  "name": "@repo/commerce-adapters",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./utils": {
+      "types": "./src/exports/utils.ts",
+      "default": "./src/exports/utils.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:types",
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
+  }
+}
