@@ -44,6 +44,14 @@ _Avoid_: Plan, billing status, account status
 The model where Merchants register directly with third-party providers (payment gateways, shipping APIs) and supply their own API credentials to the platform. Funds and data flow directly between the Merchant's provider account and Buyers — Omset Digital is never the intermediary.
 _Avoid_: API key integration, self-service integration
 
+**Store Credentials**:
+The isolated platform entity holding encrypted sensitive BYOK secrets (API keys, server keys, webhook verification tokens) for a Store. Accessible only to Store owners and Platform Admins.
+_Avoid_: Store secrets, API keys, credentials bag
+
+**Origin Address**:
+The physical fulfillment location of a Store (province, city, subdistrict, and street address) used as the origin point for shipping rate calculations.
+_Avoid_: Store address, warehouse, sender address
+
 ### Storefront
 
 **Storefront**:
@@ -154,3 +162,7 @@ _Avoid_: Shipping rate, delivery option
 **Package**:
 A physical container or shipping box with defined dimensions and tare weight, scoped to a Store and used to calculate total shipment weight and volumetric costs.
 _Avoid_: Box, parcel, container, carton
+
+**Administrative Area**:
+A pre-seeded geographic division in Indonesia (province, city or regency, or subdistrict) mapping to domestic logistics identifiers.
+_Avoid_: Region, location, postal area
