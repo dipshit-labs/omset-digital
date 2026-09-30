@@ -23,6 +23,10 @@
     "./actions": {
       "types": "./src/exports/actions.ts",
       "default": "./src/exports/actions.ts"
+    },
+    "./hooks": {
+      "types": "./src/exports/hooks.ts",
+      "default": "./src/exports/hooks.ts"
     }
   },
   "scripts": {

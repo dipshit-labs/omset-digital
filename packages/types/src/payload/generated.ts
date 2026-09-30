@@ -74,6 +74,7 @@ export interface Config {
     products: Product;
     media: Media;
     pages: Page;
+    orders: Order;
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
@@ -102,6 +103,7 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -696,6 +698,61 @@ export interface Theme {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  store?: (number | null) | Store;
+  /**
+   * Merchant order identifier (e.g. ORDER-1001)
+   */
+  orderNumber: string;
+  /**
+   * Payment status managed by payment gateway webhooks
+   */
+  paymentStatus: 'pending' | 'paid' | 'expired' | 'failed' | 'cancelled';
+  /**
+   * Total order amount in IDR
+   */
+  total: number;
+  /**
+   * Currency code
+   */
+  currency: string;
+  /**
+   * Buyer contact details
+   */
+  customer?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  };
+  /**
+   * Purchased line items
+   */
+  items?:
+    | {
+        title: string;
+        price: number;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Midtrans gateway transaction details
+   */
+  midtrans?: {
+    transactionId?: string | null;
+    paymentType?: string | null;
+    grossAmount?: string | null;
+    settlementTime?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "storeCredentials".
  */
 export interface StoreCredential {
@@ -905,6 +962,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
       } | null)
     | ({
         relationTo: 'variants';
@@ -1200,6 +1261,43 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  store?: T;
+  orderNumber?: T;
+  paymentStatus?: T;
+  total?: T;
+  currency?: T;
+  customer?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        email?: T;
+        phone?: T;
+      };
+  items?:
+    | T
+    | {
+        title?: T;
+        price?: T;
+        quantity?: T;
+        id?: T;
+      };
+  midtrans?:
+    | T
+    | {
+        transactionId?: T;
+        paymentType?: T;
+        grossAmount?: T;
+        settlementTime?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

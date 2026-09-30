@@ -11,6 +11,10 @@
     "./utils": {
       "types": "./src/exports/utils.ts",
       "default": "./src/exports/utils.ts"
+    },
+    "./payments": {
+      "types": "./src/exports/payments.ts",
+      "default": "./src/exports/payments.ts"
     }
   },
   "scripts": {

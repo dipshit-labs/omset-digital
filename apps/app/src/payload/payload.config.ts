@@ -28,6 +28,7 @@ import { env } from "@/env";
 import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
+import { Orders } from "./collections/orders";
 import { Packages } from "./collections/packages";
 import { Pages } from "./collections/pages";
 import { Products } from "./collections/products";
@@ -88,6 +89,7 @@ export default buildConfig({
     Products,
     Media,
     Pages,
+    Orders,
     Variants,
     VariantOptions,
     VariantTypes,
@@ -133,6 +135,7 @@ export default buildConfig({
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
+        orders: { isGlobal: false },
         packages: { isGlobal: false },
         pages: { isGlobal: false },
         products: { isGlobal: false },
