@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestPayload, createTestReq, resetDatabase } from "./helpers";
+import { createTestReq } from "./helpers";
 import { describe as fixtureDescribe, it as fixtureIt } from "./index";
 
 describe("@repo/test-kit fixture exports", () => {
@@ -13,24 +13,22 @@ describe("@repo/test-kit fixture exports", () => {
   });
 });
 
-describe("@repo/test-kit lifecycle helper stubs", () => {
-  it("rejects createTestPayload until implemented", async () => {
-    await expect(createTestPayload()).rejects.toThrow(
-      "createTestPayload is not implemented yet"
-    );
+describe("@repo/test-kit request helpers", () => {
+  it("returns a typed PayloadRequest stub with custom user and headers", () => {
+    const headers = new Headers({ "x-tenant-id": "store-42" });
+    const user = { email: "merchant@example.com", id: 10 };
+    const req = createTestReq({ headers, user });
+
+    expect(req.user).toStrictEqual(user);
+    expect(req.headers).toBe(headers);
+    expect(req.headers.get("x-tenant-id")).toBe("store-42");
   });
 
-  it("rejects resetDatabase until implemented", async () => {
-    // SAFETY: Stub does not inspect payload properties before rejecting
-    const stubPayload = {} as Parameters<typeof resetDatabase>[0];
-    await expect(resetDatabase(stubPayload)).rejects.toThrow(
-      "resetDatabase is not implemented yet"
-    );
-  });
+  it("returns default empty headers and null user when options are omitted", () => {
+    const req = createTestReq();
 
-  it("throws createTestReq until implemented", () => {
-    expect(() => createTestReq()).toThrow(
-      "createTestReq is not implemented yet"
-    );
+    expect(req.user).toBeNull();
+    expect(req.headers).toBeInstanceOf(Headers);
+    expect(req.headers.get("x-tenant-id")).toBeNull();
   });
 });
