@@ -4,4 +4,3 @@ export {
   encryptCredential,
   isCiphertext,
 } from "../utils/encryption";
-export { timingSafeEqualString } from "../utils/timingSafeEqual";

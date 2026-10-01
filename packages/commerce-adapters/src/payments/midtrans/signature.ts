@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
-import { timingSafeEqualString } from "../../utils/timingSafeEqual";
+import tsscmp from "tsscmp";
+
 import type { MidtransSignatureInput } from "./types";
 
 /**
@@ -30,6 +31,7 @@ export const verifyMidtransSignature = (
   serverKey: string
 ): boolean => {
   if (
+    !input ||
     !input.order_id ||
     !input.status_code ||
     !input.gross_amount ||
@@ -41,7 +43,7 @@ export const verifyMidtransSignature = (
 
   const expectedSignature = generateMidtransSignature(input, serverKey);
 
-  return timingSafeEqualString(
+  return tsscmp(
     input.signature_key.toLowerCase(),
     expectedSignature.toLowerCase()
   );

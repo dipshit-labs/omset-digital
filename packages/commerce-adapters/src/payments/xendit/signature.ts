@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import { timingSafeEqualString } from "../../utils/timingSafeEqual";
+import tsscmp from "tsscmp";
 
 /**
  * Computes an HMAC-SHA256 hex digest for an incoming Xendit webhook raw body text.
@@ -22,7 +22,7 @@ export const verifyXenditCallbackToken = (
     return false;
   }
 
-  return timingSafeEqualString(tokenHeader, configuredToken);
+  return tsscmp(tokenHeader, configuredToken);
 };
 
 /**
@@ -40,8 +40,5 @@ export const verifyXenditHmacSignature = (
 
   const expectedSignature = generateXenditHmacSignature(rawBody, secret);
 
-  return timingSafeEqualString(
-    signatureHeader.toLowerCase(),
-    expectedSignature.toLowerCase()
-  );
+  return tsscmp(signatureHeader.toLowerCase(), expectedSignature.toLowerCase());
 };

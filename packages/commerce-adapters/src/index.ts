@@ -3,7 +3,6 @@ export {
   decryptCredential,
   encryptCredential,
   isCiphertext,
-  timingSafeEqualString,
 } from "./exports/utils";
 
 export * from "./exports/payments";

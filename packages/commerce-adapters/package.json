@@ -26,9 +26,13 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "tsscmp": "catalog:core"
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:types",
+    "@types/tsscmp": "catalog:types",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   }
