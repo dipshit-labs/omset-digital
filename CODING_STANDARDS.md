@@ -99,8 +99,10 @@ Tests verify behavior through public interfaces, not implementation details. Cod
 
 Mock at system boundaries only: external APIs, system time, randomness, and storage when a live instance is impractical. Everything inside the boundary goes in real. Never mock your own classes, utilities, or internal collaborators. When a unit is hard to test without mocking an internal file, redesign the interface.
 
-- **Co-locate tests with implementation.** Place `<name>.test.ts` or `<name>.test.tsx` directly adjacent to the file being tested.
+- **Two-tier test classification.** Pure calculations, standalone hook functions, and access control predicates live in `.test.ts` (unit tier, no database). Tests verifying collection hooks, field validation, relational queries, or round-trip persistence live in `.integration.test.ts` (integration tier, real Payload + ephemeral SQLite).
+- **Co-locate tests with implementation.** Place `<name>.test.ts`, `<name>.test.tsx`, or `<name>.integration.test.ts` directly adjacent to the file being tested. Fishery document factories live in `test/factories/` at the package root.
 - **Match the environment.** UI components run in `jsdom`. Payload logic and sync routines run in `node`.
-- **Favor in-memory fakes over global mocking.** Do not monkey-patch internal methods with `vi.mock`. When testing routines that interact with Payload, construct lightweight in-memory fake objects that satisfy the target interface, such as `createMockPayload` satisfying `ThemeSyncPayload`.
+- **Shared test infrastructure via `@repo/test-kit`.** Integration test setup, SQLite teardown, and request stubs import from `@repo/test-kit`. Never duplicate Payload boot or database reset logic across packages.
+- **Payload operations are never mocked.** Never build hand-rolled Payload clients (`createMockPayload`, `createTestOrderPayloadClient`) or manual hook runners. When testing collection hooks or access control, run against the real Payload Local API backed by ephemeral SQLite via `@repo/test-kit`. Mock only external network boundaries (payment gateways, shipping APIs), system time, and randomness.
 
 For worked good and bad examples, red flags, and vertical slice TDD, read `docs/TESTING_STANDARDS.md`.
