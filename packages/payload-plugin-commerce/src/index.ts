@@ -6,6 +6,7 @@ export {
   originAddressField,
 } from "./plugin";
 export { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
+export { createPackagesCollection } from "./collections/packages";
 export {
   getAdministrativeAreasSeedData,
   type AdministrativeAreaSeedRecord,

@@ -86,6 +86,11 @@ export interface CreateAdministrativeAreasCollectionOptions {
   overrides?: Partial<CollectionConfig>;
   slug?: string;
 }
+export interface CreatePackagesCollectionOptions {
+  overrides?: Partial<CollectionConfig>;
+  slug?: string;
+  storesSlug?: string;
+}
 
 export interface CreateStoreCredentialsCollectionOptions {
   overrides?: Partial<CollectionConfig>;
@@ -93,12 +98,12 @@ export interface CreateStoreCredentialsCollectionOptions {
   slug?: string;
   storesSlug?: string;
 }
-
 export interface CommercePluginOptions {
   enabled?: boolean;
   secret?: string | ((req: PayloadRequest) => string);
   slugs?: {
     administrativeAreas?: string;
+    packages?: string;
     storeCredentials?: string;
     stores?: string;
   };

@@ -29,7 +29,6 @@ import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
 import { Orders } from "./collections/orders";
-import { Packages } from "./collections/packages";
 import { Pages } from "./collections/pages";
 import { Products } from "./collections/products";
 import {
@@ -85,7 +84,6 @@ export default buildConfig({
     Users,
     Stores,
     Categories,
-    Packages,
     Products,
     Media,
     Pages,
@@ -118,6 +116,7 @@ export default buildConfig({
     commercePlugin({
       secret: env.PAYLOAD_SECRET,
       slugs: {
+        packages: "packages",
         storeCredentials: "storeCredentials",
         stores: "stores",
       },
@@ -136,7 +135,7 @@ export default buildConfig({
         categories: { isGlobal: false },
         media: { isGlobal: false },
         orders: { isGlobal: false },
-        packages: { isGlobal: false },
+        packages: { customTenantField: true, isGlobal: false },
         pages: { isGlobal: false },
         products: { isGlobal: false },
         storeCredentials: { customTenantField: true, isGlobal: false },

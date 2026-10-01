@@ -8,6 +8,7 @@ import type {
 } from "payload";
 
 import { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
+import { createPackagesCollection } from "./collections/packages";
 import { createStoreCredentialsCollection } from "./collections/storeCredentials";
 import type { CommercePluginOptions } from "./types";
 
@@ -250,7 +251,24 @@ export const commercePlugin =
       config.collections[existingAreasIndex] = administrativeAreasCollection;
     }
 
-    // 2. Transform stores collection to include Integrations tab and flags
+    // 3. Add packages collection if not present
+    const packagesSlug = options.slugs?.packages ?? "packages";
+    const existingPackagesIndex = config.collections.findIndex(
+      (c) => c.slug === packagesSlug
+    );
+
+    const packagesCollection = createPackagesCollection({
+      slug: packagesSlug,
+      storesSlug,
+    });
+
+    if (existingPackagesIndex === -1) {
+      config.collections.push(packagesCollection);
+    } else {
+      config.collections[existingPackagesIndex] = packagesCollection;
+    }
+
+    // 4. Transform stores collection to include Integrations tab and flags
     const storesIndex = config.collections.findIndex(
       (c) => c.slug === storesSlug
     );

@@ -65,6 +65,38 @@ describe(commercePlugin, () => {
     expect(administrativeAreas?.admin?.hidden).toBeTruthy();
   });
 
+  it("registers packages collection with default package management and store enforcement", async () => {
+    const plugin = commercePlugin();
+    const config = createMockConfig([mockStoresCollection]);
+
+    const transformedConfig = await plugin(config);
+
+    const packages = transformedConfig.collections?.find(
+      (c: CollectionConfig) => c.slug === "packages"
+    );
+    expect(packages).toBeDefined();
+    expect(packages?.admin?.useAsTitle).toBe("title");
+    expect(packages?.hooks?.beforeChange).toHaveLength(2);
+    expect(packages?.hooks?.afterChange).toHaveLength(1);
+  });
+
+  it("respects custom packages slug in options", async () => {
+    const plugin = commercePlugin({
+      slugs: {
+        packages: "customPackages",
+      },
+    });
+    const config = createMockConfig([mockStoresCollection]);
+
+    const transformedConfig = await plugin(config);
+
+    const packages = transformedConfig.collections?.find(
+      (c: CollectionConfig) => c.slug === "customPackages"
+    );
+    expect(packages).toBeDefined();
+    expect(packages?.slug).toBe("customPackages");
+  });
+
   it("respects custom administrativeAreas slug in options", async () => {
     const plugin = commercePlugin({
       slugs: {

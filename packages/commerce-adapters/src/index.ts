@@ -5,3 +5,6 @@ export {
   isCiphertext,
   timingSafeEqualString,
 } from "./exports/utils";
+
+export * from "./exports/payments";
+export * from "./exports/shipping";

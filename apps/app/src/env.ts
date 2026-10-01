@@ -12,6 +12,7 @@ export const env = createEnv({
     DATABASE_URL: z.url(),
     PAYLOAD_SECRET: z.string().min(1),
     PREVIEW_SECRET: z.string().min(1),
+    REDIS_URL: z.string().optional(),
     RESEND_API_KEY: z.string().min(1),
     PAYLOAD_SEED: z
       .string()

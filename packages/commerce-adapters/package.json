@@ -15,6 +15,10 @@
     "./payments": {
       "types": "./src/exports/payments.ts",
       "default": "./src/exports/payments.ts"
+    },
+    "./shipping": {
+      "types": "./src/exports/shipping.ts",
+      "default": "./src/exports/shipping.ts"
     }
   },
   "scripts": {

@@ -70,7 +70,6 @@ export interface Config {
     users: User;
     stores: Store;
     categories: Category;
-    packages: Package;
     products: Product;
     media: Media;
     pages: Page;
@@ -80,6 +79,7 @@ export interface Config {
     variantTypes: VariantType;
     storeCredentials: StoreCredential;
     administrativeAreas: AdministrativeArea;
+    packages: Package;
     themes: Theme;
     templates: Template;
     'payload-kv': PayloadKv;
@@ -100,7 +100,6 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     stores: StoresSelect<false> | StoresSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -110,6 +109,7 @@ export interface Config {
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
     storeCredentials: StoreCredentialsSelect<false> | StoreCredentialsSelect<true>;
     administrativeAreas: AdministrativeAreasSelect<false> | AdministrativeAreasSelect<true>;
+    packages: PackagesSelect<false> | PackagesSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -350,30 +350,6 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages".
- */
-export interface Package {
-  id: number;
-  store?: (number | null) | Store;
-  title: string;
-  dimensions: {
-    length: number;
-    width: number;
-    height: number;
-  };
-  tareWeight: {
-    value: number;
-    unit: 'g' | 'kg';
-  };
-  /**
-   * Used to calculate rates at checkout and pre-selected when buying labels
-   */
-  isDefault?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -471,6 +447,33 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: number;
+  /**
+   * Associated store document
+   */
+  store: number | Store;
+  title: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  tareWeight: {
+    value: number;
+    unit: 'g' | 'kg';
+  };
+  /**
+   * Used to calculate rates at checkout and pre-selected when buying labels
+   */
+  isDefault?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1007,10 +1010,6 @@ export interface PayloadLockedDocument {
         value: number | Category;
       } | null)
     | ({
-        relationTo: 'packages';
-        value: number | Package;
-      } | null)
-    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -1045,6 +1044,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'administrativeAreas';
         value: number | AdministrativeArea;
+      } | null)
+    | ({
+        relationTo: 'packages';
+        value: number | Package;
       } | null)
     | ({
         relationTo: 'themes';
@@ -1206,30 +1209,6 @@ export interface CategoriesSelect<T extends boolean = true> {
   slug?: T;
   slugLock?: T;
   description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages_select".
- */
-export interface PackagesSelect<T extends boolean = true> {
-  store?: T;
-  title?: T;
-  dimensions?:
-    | T
-    | {
-        length?: T;
-        width?: T;
-        height?: T;
-      };
-  tareWeight?:
-    | T
-    | {
-        value?: T;
-        unit?: T;
-      };
-  isDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1487,6 +1466,30 @@ export interface AdministrativeAreasSelect<T extends boolean = true> {
   province_id?: T;
   province_name?: T;
   postal_code?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages_select".
+ */
+export interface PackagesSelect<T extends boolean = true> {
+  store?: T;
+  title?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  tareWeight?:
+    | T
+    | {
+        value?: T;
+        unit?: T;
+      };
+  isDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
