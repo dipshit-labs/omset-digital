@@ -43,3 +43,9 @@ export {
   type RedisClientLike,
   type ShippingRateCache,
 } from "../actions/shippingRateCache";
+
+export {
+  backfillOrdersPaymentMetadata,
+  populatePaymentMetadataAfterRead,
+  resolveLegacyPaymentMetadata,
+} from "../migrations/backfillPaymentMetadata";

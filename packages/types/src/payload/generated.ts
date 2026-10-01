@@ -703,6 +703,18 @@ export interface Order {
       }[]
     | null;
   /**
+   * Polymorphic payment provider transaction metadata and audit logs
+   */
+  paymentMetadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Midtrans gateway transaction details
    */
   midtrans?: {
@@ -1259,6 +1271,7 @@ export interface OrdersSelect<T extends boolean = true> {
         quantity?: T;
         id?: T;
       };
+  paymentMetadata?: T;
   midtrans?:
     | T
     | {

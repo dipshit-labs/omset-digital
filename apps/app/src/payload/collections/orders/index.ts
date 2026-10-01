@@ -1,3 +1,4 @@
+import { paymentMetadataField } from "@repo/payload-plugin-commerce/fields";
 import {
   CANONICAL_PAYMENT_STATUSES,
   preventPaymentStatusReversion,
@@ -110,6 +111,7 @@ export const Orders: CollectionConfig = {
         },
       ],
     },
+    paymentMetadataField,
     {
       name: "midtrans",
       type: "group",

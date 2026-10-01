@@ -10,6 +10,7 @@ import type {
 import { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
 import { createPackagesCollection } from "./collections/packages";
 import { createStoreCredentialsCollection } from "./collections/storeCredentials";
+import { paymentMetadataField } from "./fields/paymentMetadata";
 import type { CommercePluginOptions } from "./types";
 
 export const originAddressField: Field = {
@@ -195,6 +196,24 @@ const transformStoresCollection = (
   };
 };
 
+const transformOrdersCollection = (
+  ordersCollection: CollectionConfig
+): CollectionConfig => {
+  const fields = [...ordersCollection.fields];
+  const hasPaymentMetadata = fields.some(
+    (f) => "name" in f && f.name === "paymentMetadata"
+  );
+
+  if (!hasPaymentMetadata) {
+    fields.push(paymentMetadataField);
+  }
+
+  return {
+    ...ordersCollection,
+    fields,
+  };
+};
+
 export const commercePlugin =
   (options: CommercePluginOptions = {}): Plugin =>
   (incomingConfig: Config): Config => {
@@ -265,6 +284,20 @@ export const commercePlugin =
       if (existingStores) {
         config.collections[storesIndex] =
           transformStoresCollection(existingStores);
+      }
+    }
+
+    // 5. Transform orders collection to include polymorphic paymentMetadata if present
+    const ordersSlug = options.slugs?.orders ?? "orders";
+    const ordersIndex = config.collections.findIndex(
+      (c) => c.slug === ordersSlug
+    );
+
+    if (ordersIndex !== -1) {
+      const existingOrders = config.collections[ordersIndex];
+      if (existingOrders) {
+        config.collections[ordersIndex] =
+          transformOrdersCollection(existingOrders);
       }
     }
 

@@ -1,4 +1,13 @@
 export type {
+  BackfillPaymentMetadataOptions,
+  LegacyOrderRecord,
+  PaymentMetadataPrimitive,
+  PaymentMetadataValue,
+  BackfillPaymentMetadataResult,
+  GenericPaymentMetadata,
+  MidtransPaymentMetadata,
+  PaymentMetadata,
+  XenditPaymentMetadata,
   AdministrativeArea,
   CityItem,
   CommercePluginOptions,

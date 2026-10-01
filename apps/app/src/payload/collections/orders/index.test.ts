@@ -1,12 +1,18 @@
 // @vitest-environment node
 import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
-import type { Field, SelectField } from "payload";
+import type { Field, JSONField, PayloadRequest, SelectField } from "payload";
 import { describe, expect, it } from "vitest";
 
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 import { Orders } from "./index";
+
+const createMockReq = (user: PayloadRequest["user"]): PayloadRequest => {
+  const req = { user };
+  // SAFETY: Minimal mock request satisfies PayloadRequest interface for access testing.
+  return req as PayloadRequest;
+};
 
 describe("Orders collection", () => {
   it("defines standard order collection configuration", () => {
@@ -71,5 +77,57 @@ describe("Orders collection", () => {
 
     expect(midtransGroup).toBeDefined();
     expect(xenditGroup).toBeDefined();
+  });
+
+  it("contains paymentMetadata json field", () => {
+    const { fields } = Orders;
+    const paymentMetadata = fields.find(
+      (f: Field) =>
+        "name" in f && f.name === "paymentMetadata" && f.type === "json"
+    );
+
+    expect(paymentMetadata).toBeDefined();
+  });
+
+  it("configures paymentMetadata admin read and update permissions", () => {
+    const { fields } = Orders;
+    const paymentMetadata = fields.find(
+      (f: Field) =>
+        "name" in f && f.name === "paymentMetadata" && f.type === "json"
+    ) as JSONField | undefined;
+
+    const readAccess = paymentMetadata?.access?.read;
+    const updateAccess = paymentMetadata?.access?.update;
+
+    const adminReq = createMockReq({
+      collection: "users",
+      createdAt: "2026-10-01T00:00:00Z",
+      email: "admin@example.com",
+      id: 1,
+      updatedAt: "2026-10-01T00:00:00Z",
+    });
+    const anonReq = createMockReq(null);
+
+    const canReadAdmin =
+      typeof readAccess === "function"
+        ? readAccess({ req: adminReq } as never)
+        : false;
+    const canReadAnon =
+      typeof readAccess === "function"
+        ? readAccess({ req: anonReq } as never)
+        : true;
+    const canUpdateAdmin =
+      typeof updateAccess === "function"
+        ? updateAccess({ req: adminReq } as never)
+        : false;
+    const canUpdateAnon =
+      typeof updateAccess === "function"
+        ? updateAccess({ req: anonReq } as never)
+        : true;
+
+    expect(canReadAdmin).toBeTruthy();
+    expect(canReadAnon).toBeFalsy();
+    expect(canUpdateAdmin).toBeTruthy();
+    expect(canUpdateAnon).toBeFalsy();
   });
 });

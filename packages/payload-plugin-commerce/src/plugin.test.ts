@@ -172,4 +172,27 @@ describe(commercePlugin, () => {
     );
     expect(activeShipping).toBeDefined();
   });
+
+  it("transforms orders collection to include paymentMetadata field when present", async () => {
+    const mockOrdersCollection: CollectionConfig = {
+      slug: "orders",
+      fields: [
+        {
+          name: "orderNumber",
+          type: "text",
+        },
+      ],
+    };
+    const plugin = commercePlugin();
+    const result = await plugin(
+      createMockConfig([mockStoresCollection, mockOrdersCollection])
+    );
+    const orders = result.collections?.find((c) => c.slug === "orders");
+
+    expect(orders).toBeDefined();
+    const paymentMetadata = orders?.fields.find(
+      (f: Field) => "name" in f && f.name === "paymentMetadata"
+    );
+    expect(paymentMetadata).toBeDefined();
+  });
 });

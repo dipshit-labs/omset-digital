@@ -98,12 +98,90 @@ export interface CreateStoreCredentialsCollectionOptions {
   slug?: string;
   storesSlug?: string;
 }
+
+export type PaymentMetadataPrimitive = boolean | number | string | null;
+
+export type PaymentMetadataValue =
+  | PaymentMetadataPrimitive
+  | { [key: string]: PaymentMetadataValue }
+  | PaymentMetadataValue[];
+
+export interface MidtransPaymentMetadata {
+  grossAmount?: string;
+  paymentType?: string;
+  provider?: "midtrans";
+  settlementTime?: string;
+  transactionId?: string;
+}
+
+export interface XenditPaymentMetadata {
+  amount?: number;
+  externalId?: string;
+  invoiceId?: string;
+  paidAt?: string;
+  paymentChannel?: string;
+  paymentMethod?: string;
+  provider?: "xendit";
+  status?: string;
+}
+
+export interface GenericPaymentMetadata {
+  auditEvents?: Record<string, PaymentMetadataValue>[];
+  feeAmount?: number;
+  gatewayReference?: string;
+  paidAt?: string;
+  paymentChannel?: string;
+  paymentMethod?: string;
+  provider?: string;
+  providerEventId?: string;
+  settlementTime?: string;
+  transactionId?: string;
+}
+
+export type PaymentMetadata =
+  | GenericPaymentMetadata
+  | MidtransPaymentMetadata
+  | XenditPaymentMetadata
+  | { [key: string]: PaymentMetadataValue };
+
+export interface LegacyOrderRecord {
+  id?: number | string;
+  midtrans?: {
+    grossAmount?: string | null;
+    paymentType?: string | null;
+    settlementTime?: string | null;
+    transactionId?: string | null;
+  } | null;
+  orderNumber?: string;
+  paymentMetadata?: PaymentMetadata | null;
+  xendit?: {
+    amount?: number | null;
+    externalId?: string | null;
+    invoiceId?: string | null;
+    paidAt?: string | null;
+    paymentChannel?: string | null;
+    paymentMethod?: string | null;
+    status?: string | null;
+  } | null;
+}
+export interface BackfillPaymentMetadataOptions {
+  batchSize?: number;
+  collectionSlug?: string;
+  overwrite?: boolean;
+}
+
+export interface BackfillPaymentMetadataResult {
+  skipped: number;
+  total: number;
+  updated: number;
+}
 export interface CommercePluginOptions {
   enabled?: boolean;
   secret?: string | ((req: PayloadRequest) => string);
   slugs?: {
     administrativeAreas?: string;
     packages?: string;
+    orders?: string;
     storeCredentials?: string;
     stores?: string;
   };
