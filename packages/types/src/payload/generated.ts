@@ -285,52 +285,6 @@ export interface Store {
    * Active shipping provider
    */
   activeShippingProvider?: ('none' | 'rajaongkir') | null;
-  /**
-   * Active payment gateway. Add one block and fill in your credentials.
-   */
-  paymentProviders?:
-    | {
-        /**
-         * Xendit Secret API Key (starts with xnd_development_ or xnd_production_)
-         */
-        secretKey: string;
-        /**
-         * Verification token set in the Xendit dashboard webhook settings
-         */
-        webhookToken: string;
-        /**
-         * Enable for live transactions. Keep disabled during testing.
-         */
-        isProduction: boolean;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'xendit';
-      }[]
-    | null;
-  /**
-   * Shipping provider credentials and origin configuration
-   */
-  shippingConfig?: {
-    /**
-     * Active shipping provider
-     */
-    shippingProvider?: ('none' | 'rajaongkir') | null;
-    rajaongkirConfig?: {
-      /**
-       * Restricted to store owner and super-admin
-       */
-      apiKey?: string | null;
-      accountType?: ('starter' | 'basic' | 'pro') | null;
-      /**
-       * Origin city for shipping cost calculation
-       */
-      originCityId?: string | null;
-      /**
-       * Only applicable for Pro account type
-       */
-      originSubdistrictId?: string | null;
-    };
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1170,32 +1124,6 @@ export interface StoresSelect<T extends boolean = true> {
       };
   activePaymentProvider?: T;
   activeShippingProvider?: T;
-  paymentProviders?:
-    | T
-    | {
-        xendit?:
-          | T
-          | {
-              secretKey?: T;
-              webhookToken?: T;
-              isProduction?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  shippingConfig?:
-    | T
-    | {
-        shippingProvider?: T;
-        rajaongkirConfig?:
-          | T
-          | {
-              apiKey?: T;
-              accountType?: T;
-              originCityId?: T;
-              originSubdistrictId?: T;
-            };
-      };
   updatedAt?: T;
   createdAt?: T;
 }

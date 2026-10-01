@@ -4,51 +4,11 @@ import {
   credentialsManagerField,
   originAddressField,
 } from "@repo/payload-plugin-commerce/fields";
-import type { Block, CollectionConfig, TextField } from "payload";
+import type { CollectionConfig } from "payload";
 
 import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
-import { encryptedField } from "@/payload/fields/encrypted";
 
-import { canReadRestrictedField } from "./access/canReadRestrictedField";
 import { updateAndDeleteStoreAccess } from "./access/updateAndDelete";
-
-const restrictedTextField = (name: string): TextField => ({
-  access: { read: canReadRestrictedField },
-  admin: { description: "Restricted to store owner and super-admin" },
-  name,
-  type: "text",
-});
-
-const XenditBlock: Block = {
-  labels: { plural: "Xendit", singular: "Xendit" },
-  slug: "xendit",
-  fields: [
-    encryptedField("secretKey", {
-      required: true,
-      admin: {
-        description:
-          "Xendit Secret API Key (starts with xnd_development_ or xnd_production_)",
-      },
-    }),
-    encryptedField("webhookToken", {
-      required: true,
-      admin: {
-        description:
-          "Verification token set in the Xendit dashboard webhook settings",
-      },
-    }),
-    {
-      defaultValue: false,
-      name: "isProduction",
-      required: true,
-      type: "checkbox",
-      admin: {
-        description:
-          "Enable for live transactions. Keep disabled during testing.",
-      },
-    },
-  ],
-};
 
 export const Stores: CollectionConfig = {
   slug: "stores",
@@ -171,78 +131,6 @@ export const Stores: CollectionConfig = {
             credentialsManagerField,
             activePaymentProviderField,
             activeShippingProviderField,
-            // Legacy payment providers — polymorphic blocks (ADR-0001, to be retired in #66)
-            {
-              blocks: [XenditBlock],
-              maxRows: 1,
-              name: "paymentProviders",
-              type: "blocks",
-              admin: {
-                description:
-                  "Active payment gateway. Add one block and fill in your credentials.",
-              },
-            },
-            // Legacy shipping config (ADR-0001, to be retired in #66)
-            {
-              name: "shippingConfig",
-              type: "group",
-              admin: {
-                description:
-                  "Shipping provider credentials and origin configuration",
-              },
-              fields: [
-                {
-                  defaultValue: "none",
-                  name: "shippingProvider",
-                  type: "select",
-                  admin: {
-                    description: "Active shipping provider",
-                  },
-                  options: [
-                    { label: "None", value: "none" },
-                    { label: "RajaOngkir", value: "rajaongkir" },
-                  ],
-                },
-                {
-                  name: "rajaongkirConfig",
-                  type: "group",
-                  admin: {
-                    condition: (_, siblingData) =>
-                      siblingData?.shippingProvider === "rajaongkir",
-                  },
-                  fields: [
-                    restrictedTextField("apiKey"),
-                    {
-                      defaultValue: "starter",
-                      name: "accountType",
-                      type: "select",
-                      options: [
-                        { label: "Starter", value: "starter" },
-                        { label: "Basic", value: "basic" },
-                        { label: "Pro", value: "pro" },
-                      ],
-                    },
-                    {
-                      name: "originCityId",
-                      type: "text",
-                      admin: {
-                        description:
-                          "Origin city for shipping cost calculation",
-                      },
-                    },
-                    {
-                      name: "originSubdistrictId",
-                      type: "text",
-                      admin: {
-                        description: "Only applicable for Pro account type",
-                        condition: (_, siblingData) =>
-                          siblingData?.accountType === "pro",
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
           ],
         },
       ],

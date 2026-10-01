@@ -107,9 +107,6 @@ export const credentialsManagerField: UIField = {
   },
 };
 
-const isLegacyField = (name: string): boolean =>
-  name === "paymentProviders" || name === "shippingConfig";
-
 const transformStoresCollection = (
   storesCollection: CollectionConfig
 ): CollectionConfig => {
@@ -120,7 +117,6 @@ const transformStoresCollection = (
     // SAFETY: Field with type === "tabs" conforms to TabsField.
     const existingTabsField = fields[existingTabsIndex] as TabsField;
     const tabs = [...existingTabsField.tabs];
-
     // Ensure originAddress in General / first tab
     const [firstTab] = tabs;
     if (
@@ -175,19 +171,11 @@ const transformStoresCollection = (
     };
   }
 
-  // Wrap collection fields in tabs: General & Integrations
-  const generalFields = fields.filter(
-    (f) => !("name" in f && isLegacyField(f.name))
-  );
-  const legacyFields = fields.filter(
-    (f) => "name" in f && isLegacyField(f.name)
-  );
-
   const tabsField: TabsField = {
     type: "tabs",
     tabs: [
       {
-        fields: [...generalFields, originAddressField],
+        fields: [...fields, originAddressField],
         label: "General",
       },
       {
@@ -196,7 +184,6 @@ const transformStoresCollection = (
           credentialsManagerField,
           activePaymentProviderField,
           activeShippingProviderField,
-          ...legacyFields,
         ],
       },
     ],
