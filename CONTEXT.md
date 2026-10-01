@@ -149,6 +149,10 @@ _Avoid_: Invoice, payment link, checkout session (overloaded with platform check
 The normalised output of `PaymentProvider.parseWebhook()`: platform Order ID, canonical Payment Status, provider event ID (for idempotency), and optional metadata. Signature verification is performed inside `parseWebhook` before this is returned.
 _Avoid_: Webhook payload, callback event
 
+**Payment Metadata**:
+The provider-assigned transaction record (transaction IDs, timestamps, settlement details) stored polymorphically on an Order for auditability without coupling the Order schema to specific payment gateways.
+_Avoid_: Provider payload, gateway details, payment info
+
 ### Shipping
 
 **ShippingProvider**:
