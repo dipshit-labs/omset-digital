@@ -12,6 +12,7 @@ export default defineConfig({
   ignorePatterns: [
     ...(core.ignorePatterns ?? []),
     "apps/app/src/app/(payload)/**/*",
+    "apps/app/src/migrations/**/*",
     "packages/types/src/payload/generated.ts",
   ],
 

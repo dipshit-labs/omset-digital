@@ -52,6 +52,36 @@ describe(commercePlugin, () => {
     expect(storeCredentials?.admin?.hidden).toBeTruthy();
   });
 
+  it("registers administrativeAreas collection hidden from admin navigation", async () => {
+    const plugin = commercePlugin();
+    const config = createMockConfig([mockStoresCollection]);
+
+    const transformedConfig = await plugin(config);
+
+    const administrativeAreas = transformedConfig.collections?.find(
+      (c: CollectionConfig) => c.slug === "administrativeAreas"
+    );
+    expect(administrativeAreas).toBeDefined();
+    expect(administrativeAreas?.admin?.hidden).toBeTruthy();
+  });
+
+  it("respects custom administrativeAreas slug in options", async () => {
+    const plugin = commercePlugin({
+      slugs: {
+        administrativeAreas: "customRegions",
+      },
+    });
+    const config = createMockConfig([mockStoresCollection]);
+
+    const transformedConfig = await plugin(config);
+
+    const customCollection = transformedConfig.collections?.find(
+      (c: CollectionConfig) => c.slug === "customRegions"
+    );
+    expect(customCollection).toBeDefined();
+    expect(customCollection?.admin?.hidden).toBeTruthy();
+  });
+
   it("injects tabs with General and Integrations into stores collection", async () => {
     const plugin = commercePlugin();
     const config = createMockConfig([

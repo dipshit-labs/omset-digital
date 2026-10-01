@@ -79,6 +79,7 @@ export interface Config {
     variantOptions: VariantOption;
     variantTypes: VariantType;
     storeCredentials: StoreCredential;
+    administrativeAreas: AdministrativeArea;
     themes: Theme;
     templates: Template;
     'payload-kv': PayloadKv;
@@ -108,6 +109,7 @@ export interface Config {
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
     storeCredentials: StoreCredentialsSelect<false> | StoreCredentialsSelect<true>;
+    administrativeAreas: AdministrativeAreasSelect<false> | AdministrativeAreasSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -251,6 +253,10 @@ export interface Store {
      */
     cityName?: string | null;
     /**
+     * City or regency type (Kota or Kabupaten)
+     */
+    cityType?: string | null;
+    /**
      * Subdistrict numeric ID
      */
     subdistrictId?: string | null;
@@ -259,7 +265,7 @@ export interface Store {
      */
     subdistrictName?: string | null;
     /**
-     * Street address and warehouse details
+     * Street address and fulfillment location details
      */
     streetAddress?: string | null;
     /**
@@ -833,6 +839,47 @@ export interface StoreCredential {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "administrativeAreas".
+ */
+export interface AdministrativeArea {
+  id: number;
+  /**
+   * Unique subdistrict numeric identifier from RajaOngkir
+   */
+  subdistrict_id: number;
+  /**
+   * Subdistrict (kecamatan) name
+   */
+  subdistrict_name: string;
+  /**
+   * City or regency numeric identifier from RajaOngkir
+   */
+  city_id: number;
+  /**
+   * City or regency name
+   */
+  city_name: string;
+  /**
+   * Geographic unit type (Kota or Kabupaten)
+   */
+  city_type: string;
+  /**
+   * Province numeric identifier from RajaOngkir
+   */
+  province_id: number;
+  /**
+   * Province name
+   */
+  province_name: string;
+  /**
+   * Indonesian 5-digit postal code
+   */
+  postal_code?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -996,6 +1043,10 @@ export interface PayloadLockedDocument {
         value: number | StoreCredential;
       } | null)
     | ({
+        relationTo: 'administrativeAreas';
+        value: number | AdministrativeArea;
+      } | null)
+    | ({
         relationTo: 'themes';
         value: number | Theme;
       } | null)
@@ -1102,6 +1153,7 @@ export interface StoresSelect<T extends boolean = true> {
         provinceName?: T;
         cityId?: T;
         cityName?: T;
+        cityType?: T;
         subdistrictId?: T;
         subdistrictName?: T;
         streetAddress?: T;
@@ -1419,6 +1471,22 @@ export interface StoreCredentialsSelect<T extends boolean = true> {
         apiKey?: T;
         accountType?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "administrativeAreas_select".
+ */
+export interface AdministrativeAreasSelect<T extends boolean = true> {
+  subdistrict_id?: T;
+  subdistrict_name?: T;
+  city_id?: T;
+  city_name?: T;
+  city_type?: T;
+  province_id?: T;
+  province_name?: T;
+  postal_code?: T;
   updatedAt?: T;
   createdAt?: T;
 }

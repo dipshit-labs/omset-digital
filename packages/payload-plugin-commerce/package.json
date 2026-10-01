@@ -38,6 +38,7 @@
     "@repo/commerce-adapters": "workspace:*"
   },
   "devDependencies": {
+    "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/dom": "catalog:test",
@@ -53,11 +54,15 @@
     "vitest": "catalog:test"
   },
   "peerDependencies": {
+    "@payloadcms/db-postgres": "^3.90.0",
     "@payloadcms/ui": "^3.90.0",
     "payload": "^3.90.0",
     "react": "^19.0.0"
   },
   "peerDependenciesMeta": {
+    "@payloadcms/db-postgres": {
+      "optional": true
+    },
     "@payloadcms/ui": {
       "optional": true
     },

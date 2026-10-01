@@ -24,8 +24,14 @@ export default defineProject(() => {
       },
     },
     test: {
+      css: true,
       environment: "jsdom",
       name: "app",
+      server: {
+        deps: {
+          inline: [/@payloadcms\/ui/u, /react-image-crop/u],
+        },
+      },
     },
   };
 });

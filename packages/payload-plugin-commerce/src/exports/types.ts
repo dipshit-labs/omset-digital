@@ -1,12 +1,17 @@
 export type {
+  AdministrativeArea,
+  CityItem,
   CommercePluginOptions,
+  CreateAdministrativeAreasCollectionOptions,
   CreateStoreCredentialsCollectionOptions,
   MidtransCredentials,
   OriginAddress,
   PaymentProvider,
+  ProvinceItem,
   RajaOngkirAccountType,
   RajaOngkirCredentials,
   ShippingProvider,
   StoreCredentials,
+  SubdistrictItem,
   XenditCredentials,
 } from "../types";

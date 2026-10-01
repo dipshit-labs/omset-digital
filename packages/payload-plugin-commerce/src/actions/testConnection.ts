@@ -267,7 +267,8 @@ export const testRajaOngkirConnection = async ({
   }
 };
 
-export const testConnection = (
+// oxlint-disable-next-line require-await
+export const testConnection = async (
   input: TestConnectionInput
 ): Promise<TestConnectionResult> => {
   switch (input.provider) {
@@ -282,11 +283,11 @@ export const testConnection = (
     }
     default: {
       const exhaustiveCheck: never = input;
-      return Promise.resolve({
+      return {
         error: "UNSUPPORTED_PROVIDER",
         message: `Unsupported provider: ${String(exhaustiveCheck)}`,
         success: false,
-      });
+      };
     }
   }
 };

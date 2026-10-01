@@ -7,6 +7,7 @@ import type {
   UIField,
 } from "payload";
 
+import { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
 import { createStoreCredentialsCollection } from "./collections/storeCredentials";
 import type { CommercePluginOptions } from "./types";
 
@@ -15,6 +16,9 @@ export const originAddressField: Field = {
   type: "group",
   admin: {
     description: "Merchant store fulfillment origin address",
+    components: {
+      Field: "@repo/payload-plugin-commerce/client#OriginAddressField",
+    },
   },
   fields: [
     {
@@ -38,6 +42,11 @@ export const originAddressField: Field = {
       type: "text",
     },
     {
+      admin: { description: "City or regency type (Kota or Kabupaten)" },
+      name: "cityType",
+      type: "text",
+    },
+    {
       admin: { description: "Subdistrict numeric ID" },
       name: "subdistrictId",
       type: "text",
@@ -48,7 +57,7 @@ export const originAddressField: Field = {
       type: "text",
     },
     {
-      admin: { description: "Street address and warehouse details" },
+      admin: { description: "Street address and fulfillment location details" },
       name: "streetAddress",
       type: "textarea",
     },
@@ -204,6 +213,8 @@ export const commercePlugin =
     const storesSlug = options.slugs?.stores ?? "stores";
     const storeCredentialsSlug =
       options.slugs?.storeCredentials ?? "storeCredentials";
+    const administrativeAreasSlug =
+      options.slugs?.administrativeAreas ?? "administrativeAreas";
 
     const config: Config = { ...incomingConfig };
     config.collections = config.collections ? [...config.collections] : [];
@@ -223,6 +234,20 @@ export const commercePlugin =
       config.collections.push(storeCredentialsCollection);
     } else {
       config.collections[existingCredentialsIndex] = storeCredentialsCollection;
+    }
+    // 2. Add administrativeAreas collection if not present
+    const existingAreasIndex = config.collections.findIndex(
+      (c) => c.slug === administrativeAreasSlug
+    );
+
+    const administrativeAreasCollection = createAdministrativeAreasCollection({
+      slug: administrativeAreasSlug,
+    });
+
+    if (existingAreasIndex === -1) {
+      config.collections.push(administrativeAreasCollection);
+    } else {
+      config.collections[existingAreasIndex] = administrativeAreasCollection;
     }
 
     // 2. Transform stores collection to include Integrations tab and flags

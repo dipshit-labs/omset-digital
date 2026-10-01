@@ -10,3 +10,11 @@ export {
   type TestRajaOngkirInput,
   type TestXenditInput,
 } from "../actions/testConnection";
+
+export {
+  getCities,
+  getProvinces,
+  getSubdistricts,
+  getAdministrativeAreasDb,
+  setAdministrativeAreasDb,
+} from "../actions/administrativeAreas";
