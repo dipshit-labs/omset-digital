@@ -1,9 +1,12 @@
+import type { LegacyOrderRecord } from "@repo/payload-plugin-commerce/types";
 import type { Order } from "@repo/types";
 // @vitest-environment node
 import type { JSONField, PayloadRequest } from "payload";
 import { describe, expect, it } from "vitest";
 
 import { Orders } from "./index";
+
+type LegacyTestOrder = Order & LegacyOrderRecord;
 
 const createMockUserReq = (user: PayloadRequest["user"]): PayloadRequest => {
   const req = { user };
@@ -12,7 +15,7 @@ const createMockUserReq = (user: PayloadRequest["user"]): PayloadRequest => {
 };
 
 const runOrderAfterReadHooks = (
-  orderDoc: Order,
+  orderDoc: LegacyTestOrder,
   req: PayloadRequest
 ): Order => {
   const serialized = JSON.stringify(orderDoc);
@@ -44,7 +47,8 @@ const runOrderAfterReadHooks = (
   }
 
   return {
-    ...orderDoc,
+    // SAFETY: Legacy test record satisfies Order shape for afterRead evaluation.
+    ...(orderDoc as Order),
     ...result,
   };
 };
@@ -259,7 +263,7 @@ describe("Orders Collection paymentMetadata Integration", () => {
   });
 
   it("automatically backfills legacy midtrans data on read through afterRead hook", () => {
-    const legacyOrder: Order = {
+    const legacyOrder: LegacyTestOrder = {
       createdAt: "2026-10-01T08:00:00Z",
       currency: "IDR",
       id: 5,
@@ -296,7 +300,7 @@ describe("Orders Collection paymentMetadata Integration", () => {
   });
 
   it("automatically backfills legacy xendit data on read through afterRead hook", () => {
-    const legacyOrder: Order = {
+    const legacyOrder: LegacyTestOrder = {
       createdAt: "2026-10-01T09:00:00Z",
       currency: "IDR",
       id: 6,

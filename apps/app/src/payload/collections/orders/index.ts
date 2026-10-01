@@ -112,68 +112,6 @@ export const Orders: CollectionConfig = {
       ],
     },
     paymentMetadataField,
-    {
-      name: "midtrans",
-      type: "group",
-      admin: {
-        description: "Midtrans gateway transaction details",
-      },
-      fields: [
-        {
-          name: "transactionId",
-          type: "text",
-        },
-        {
-          name: "paymentType",
-          type: "text",
-        },
-        {
-          name: "grossAmount",
-          type: "text",
-        },
-        {
-          name: "settlementTime",
-          type: "text",
-        },
-      ],
-    },
-    {
-      name: "xendit",
-      type: "group",
-      admin: {
-        description: "Xendit gateway invoice details",
-      },
-      fields: [
-        {
-          name: "invoiceId",
-          type: "text",
-        },
-        {
-          name: "externalId",
-          type: "text",
-        },
-        {
-          name: "status",
-          type: "text",
-        },
-        {
-          name: "amount",
-          type: "number",
-        },
-        {
-          name: "paymentMethod",
-          type: "text",
-        },
-        {
-          name: "paymentChannel",
-          type: "text",
-        },
-        {
-          name: "paidAt",
-          type: "text",
-        },
-      ],
-    },
   ],
   hooks: {
     beforeChange: [enforceStoreOnCreate],

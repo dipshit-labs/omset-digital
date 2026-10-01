@@ -2,6 +2,7 @@
 import { generateXenditHmacSignature } from "@repo/commerce-adapters/payments";
 import { encryptCredential } from "@repo/commerce-adapters/utils";
 import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
+import type { WebhookPayloadClient } from "@repo/payload-plugin-commerce/webhooks";
 import type { Order, Store, StoreCredential } from "@repo/types";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -9,11 +10,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { env } from "@/env";
 
 import { createXenditWebhookHandler } from "./route";
-import type {
-  WebhookOrderUpdateData,
-  WebhookPayloadClient,
-  XenditWebhookRouteHandler,
-} from "./route";
 
 const TEST_SECRET = env.PAYLOAD_SECRET;
 const SECRET_KEY = "xnd_development_secret_12345";
@@ -174,32 +170,27 @@ const createMockPayloadClient = (
       // SAFETY: Minimal mock request satisfies hook signature for testing.
       const mockReq = {} as never;
 
+      // SAFETY: Cast mock update data for preventPaymentStatusReversion hook.
       const hookData = preventPaymentStatusReversion({
         collection: mockCollection,
         context: {},
-        data,
+        data: data as never,
         operation: "update",
         originalDoc,
         req: mockReq,
       });
-      // SAFETY: Hook returns sanitized WebhookOrderUpdateData.
-      const validData = hookData as WebhookOrderUpdateData;
+      const validData = hookData as Record<string, unknown>;
 
       const updated: Order = {
         ...originalDoc,
         ...validData,
         updatedAt: new Date().toISOString(),
-        xendit: validData.xendit
-          ? {
-              amount: validData.xendit.amount ?? null,
-              externalId: validData.xendit.externalId ?? null,
-              invoiceId: validData.xendit.invoiceId ?? null,
-              paidAt: validData.xendit.paidAt ?? null,
-              paymentChannel: validData.xendit.paymentChannel ?? null,
-              paymentMethod: validData.xendit.paymentMethod ?? null,
-              status: validData.xendit.status ?? null,
-            }
-          : originalDoc.xendit,
+        paymentMetadata:
+          (validData.paymentMetadata as Order["paymentMetadata"]) ??
+          originalDoc.paymentMetadata,
+        paymentStatus:
+          (validData.paymentStatus as Order["paymentStatus"]) ??
+          originalDoc.paymentStatus,
       };
       db.orders[index] = updated;
       return Promise.resolve(updated);
@@ -237,7 +228,7 @@ const createValidXenditInvoicePayload = (
 describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () => {
   let db: FakePayloadDatabase;
   let findCalls: { collection: string; overrideAccess?: boolean }[];
-  let handler: XenditWebhookRouteHandler;
+  let handler: ReturnType<typeof createXenditWebhookHandler>;
 
   beforeEach(() => {
     db = createMockDatabase();
@@ -280,7 +271,11 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     const updatedOrder = db.orders.find((o) => o.orderNumber === "ORDER-2001");
     expect(updatedOrder?.paymentStatus).toBe("paid");
-    expect(updatedOrder?.xendit?.invoiceId).toBe("inv_651234567890abcdef");
+    expect(updatedOrder?.paymentMetadata).toMatchObject({
+      id: "inv_651234567890abcdef",
+      provider: "xendit",
+      providerEventId: "inv_651234567890abcdef",
+    });
   });
 
   it("awaits params asynchronously and processes valid modern x-callback-signature HMAC to paid", async () => {
@@ -388,7 +383,7 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     expect(response.status).toBe(400);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Xendit is not active for this store");
+    expect(json.error).toMatch(/xendit is not active/iu);
   });
 
   it("rejects webhook when verification headers are missing", async () => {
@@ -409,7 +404,7 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Missing Xendit verification headers");
+    expect(json.error).toMatch(/missing.*verification headers/iu);
   });
 
   it("rejects webhook when legacy callback token is tampered/mismatched", async () => {
@@ -433,7 +428,9 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Invalid Xendit callback token");
+    expect(json.error).toMatch(
+      /invalid.*callback token|invalid webhook token/iu
+    );
   });
 
   it("rejects webhook when HMAC signature is tampered", async () => {
@@ -458,7 +455,7 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Invalid Xendit HMAC signature");
+    expect(json.error).toMatch(/invalid.*signature/iu);
   });
 
   it("rejects webhook when raw body is tampered after HMAC generation", async () => {
@@ -493,7 +490,7 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
 
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Invalid Xendit HMAC signature");
+    expect(json.error).toMatch(/invalid.*signature/iu);
   });
 
   it("returns 400 when raw body is empty or invalid JSON", async () => {
@@ -630,7 +627,7 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
     ).toBe("cancelled");
   });
 
-  it("rejects transition attempting to reverse terminal status via collection hook", async () => {
+  it("short-circuits with 200 OK without mutation when order is already in terminal state", async () => {
     // 1. Order is already in terminal state 'paid'
     const order = db.orders.find((o) => o.orderNumber === "ORDER-2001");
     if (order) {
@@ -656,9 +653,14 @@ describe("Xendit Webhook Route Handler (/api/webhooks/xendit/[storeSlug])", () =
       params: Promise.resolve({ storeSlug: "toko-kopi" }),
     });
 
-    expect(response.status).toBe(400);
-    const json = (await response.json()) as { error: string };
-    expect(json.error).toContain("terminal state 'paid'");
+    expect(response.status).toBe(200);
+    const json = (await response.json()) as {
+      orderId: string;
+      paymentStatus: string;
+      status: string;
+    };
+    expect(json.status).toBe("OK");
+    expect(json.paymentStatus).toBe("paid");
     expect(
       db.orders.find((o) => o.orderNumber === "ORDER-2001")?.paymentStatus
     ).toBe("paid");

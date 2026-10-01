@@ -2,6 +2,7 @@
 import { generateMidtransSignature } from "@repo/commerce-adapters/payments";
 import { encryptCredential } from "@repo/commerce-adapters/utils";
 import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
+import type { WebhookPayloadClient } from "@repo/payload-plugin-commerce/webhooks";
 import type { Order, Store, StoreCredential } from "@repo/types";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -9,11 +10,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { env } from "@/env";
 
 import { createMidtransWebhookHandler } from "./route";
-import type {
-  MidtransWebhookRouteHandler,
-  WebhookOrderUpdateData,
-  WebhookPayloadClient,
-} from "./route";
 
 const TEST_SECRET = env.PAYLOAD_SECRET;
 const SERVER_KEY = "SB-Mid-server-TEST12345";
@@ -189,20 +185,6 @@ const createMockPayloadClient = (
       totalPages: 0,
     });
   },
-  findByID: ({ collection, id }) => {
-    if (collection === "orders") {
-      const doc = db.orders.find(
-        (o) => String(o.id) === String(id) || o.orderNumber === String(id)
-      );
-      if (!doc) {
-        return Promise.reject(new Error("Order not found"));
-      }
-      return Promise.resolve(doc);
-    }
-    return Promise.reject(
-      new Error(`Collection ${collection} findByID not mocked`)
-    );
-  },
   update: ({ collection, data, id }) => {
     if (collection === "orders") {
       const index = db.orders.findIndex(
@@ -221,21 +203,27 @@ const createMockPayloadClient = (
       // SAFETY: Minimal mock request satisfies hook signature for testing.
       const mockReq = {} as never;
 
+      // SAFETY: Cast mock update data for preventPaymentStatusReversion hook.
       const hookData = preventPaymentStatusReversion({
         collection: mockCollection,
         context: {},
-        data,
+        data: data as never,
         operation: "update",
         originalDoc,
         req: mockReq,
       });
-      // SAFETY: Hook returns sanitized WebhookOrderUpdateData.
-      const validData = hookData as WebhookOrderUpdateData;
+      const validData = hookData as Record<string, unknown>;
 
       const updated: Order = {
         ...originalDoc,
         ...validData,
         updatedAt: new Date().toISOString(),
+        paymentMetadata:
+          (validData.paymentMetadata as Order["paymentMetadata"]) ??
+          originalDoc.paymentMetadata,
+        paymentStatus:
+          (validData.paymentStatus as Order["paymentStatus"]) ??
+          originalDoc.paymentStatus,
       };
       db.orders[index] = updated;
       return Promise.resolve(updated);
@@ -278,7 +266,7 @@ const createValidMidtransPayload = (
 describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", () => {
   let db: FakePayloadDatabase;
   let findCalls: { collection: string; overrideAccess?: boolean }[];
-  let handler: MidtransWebhookRouteHandler;
+  let handler: ReturnType<typeof createMidtransWebhookHandler>;
 
   beforeEach(() => {
     db = createMockDatabase();
@@ -310,12 +298,18 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
       paymentStatus: string;
       status: string;
     };
-    expect(json.status).toBe("OK");
-    expect(json.orderId).toBe("ORDER-1001");
-    expect(json.paymentStatus).toBe("paid");
+    expect(json).toMatchObject({
+      orderId: "ORDER-1001",
+      paymentStatus: "paid",
+      status: "OK",
+    });
 
     const updatedOrder = db.orders.find((o) => o.orderNumber === "ORDER-1001");
     expect(updatedOrder?.paymentStatus).toBe("paid");
+    expect(updatedOrder?.paymentMetadata).toMatchObject({
+      provider: "midtrans",
+      transactionId: "tx-midtrans-uuid-999",
+    });
   });
 
   it("queries tenant store and storeCredentials with overrideAccess: true", async () => {
@@ -375,7 +369,7 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
     expect(response.status).toBe(200);
   });
 
-  it("rejects webhook when signature is invalid using timingSafeEqualString", async () => {
+  it("rejects webhook when signature is invalid", async () => {
     const payload = createValidMidtransPayload({
       signature_key:
         "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
@@ -396,7 +390,7 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
 
     expect(response.status).toBe(401);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Invalid Midtrans signature");
+    expect(json.error).toBe("Invalid webhook signature");
   });
 
   it("rejects request if store does not exist", async () => {
@@ -443,7 +437,7 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
 
     expect(response.status).toBe(400);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toContain("Midtrans is not active");
+    expect(json.error).toMatch(/midtrans is not active/iu);
   });
 
   it("handles canonical transitions for expire and failure", async () => {
@@ -490,7 +484,7 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
     expect(updatedOrder?.paymentStatus).toBe("expired");
   });
 
-  it("rejects illegal state reversion from paid to expired or failed", async () => {
+  it("short-circuits with 200 OK without mutation when order is already in terminal state", async () => {
     const [order] = db.orders;
     if (order) {
       order.paymentStatus = "paid";
@@ -527,9 +521,14 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
       params: Promise.resolve({ storeSlug: "toko-kopi" }),
     });
 
-    expect(response.status).toBe(400);
-    const json = (await response.json()) as { error: string };
-    expect(json.error).toContain("terminal state 'paid'");
+    expect(response.status).toBe(200);
+    const json = (await response.json()) as {
+      orderId: string;
+      paymentStatus: string;
+      status: string;
+    };
+    expect(json.status).toBe("OK");
+    expect(json.paymentStatus).toBe("paid");
     expect(db.orders[0]?.paymentStatus).toBe("paid");
   });
 
@@ -582,6 +581,6 @@ describe("Midtrans Webhook Route Handler (/api/webhooks/midtrans/[storeSlug])", 
 
     expect(response.status).toBe(400);
     const json = (await response.json()) as { error: string };
-    expect(json.error).toBe("Invalid JSON body");
+    expect(json.error).toMatch(/invalid json/iu);
   });
 });

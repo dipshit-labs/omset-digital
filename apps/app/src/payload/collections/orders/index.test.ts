@@ -66,17 +66,17 @@ describe("Orders collection", () => {
     expect(optionValues).toContain("pending");
   });
 
-  it("contains midtrans and xendit gateway integration groups", () => {
+  it("does not contain legacy midtrans and xendit gateway integration groups", () => {
     const { fields } = Orders;
     const midtransGroup = fields.find(
-      (f: Field) => "name" in f && f.name === "midtrans" && f.type === "group"
+      (f: Field) => "name" in f && f.name === "midtrans"
     );
     const xenditGroup = fields.find(
-      (f: Field) => "name" in f && f.name === "xendit" && f.type === "group"
+      (f: Field) => "name" in f && f.name === "xendit"
     );
 
-    expect(midtransGroup).toBeDefined();
-    expect(xenditGroup).toBeDefined();
+    expect(midtransGroup).toBeUndefined();
+    expect(xenditGroup).toBeUndefined();
   });
 
   it("contains paymentMetadata json field", () => {

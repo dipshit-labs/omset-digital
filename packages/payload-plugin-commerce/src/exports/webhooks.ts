@@ -2,7 +2,6 @@ export {
   processIncomingWebhook,
   resolveCredential,
 } from "../webhooks/pipeline";
-
 export type {
   ProcessIncomingWebhookArgs,
   SupportedPaymentProvider,
