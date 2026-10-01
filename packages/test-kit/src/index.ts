@@ -1,4 +1,4 @@
-export { describe, it, test } from "./fixture";
+export { describe, it, setTestPayloadConfig, test } from "./fixture";
 export type { TestKitFixtures } from "./fixture";
 export { createTestPayload, createTestReq, resetDatabase } from "./helpers";
 export type {

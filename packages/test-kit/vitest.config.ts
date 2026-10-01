@@ -10,6 +10,8 @@ export default defineProject({
   },
   test: {
     environment: "node",
+    hookTimeout: 30_000,
     name: "test-kit",
+    testTimeout: 30_000,
   },
 });

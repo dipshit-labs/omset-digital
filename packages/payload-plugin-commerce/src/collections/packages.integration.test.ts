@@ -1,252 +1,220 @@
-import type {
-  CollectionAfterChangeHook,
-  CollectionBeforeChangeHook,
-  SanitizedCollectionConfig,
-  Where,
-} from "payload";
-import { describe, expect, it, vi } from "vitest";
+import {
+  createTestReq,
+  describe,
+  it,
+  setTestPayloadConfig,
+} from "@repo/test-kit";
+import type { CollectionConfig, Payload } from "payload";
+import { expect } from "vitest";
 
+import { packageFactory } from "../../test/factories/packageFactory";
 import { createPackagesCollection } from "./packages";
 
-interface MockPackageDoc {
-  dimensions: {
-    height: number;
-    length: number;
-    width: number;
-  };
-  id: number;
-  isDefault: boolean;
-  store: number;
-  tareWeight: {
-    unit: "g" | "kg";
-    value: number;
-  };
-  title: string;
-}
-
-const mockCollectionConfig = {} as SanitizedCollectionConfig;
-
-interface MockIntegrationBeforeChangeArgs {
-  collection?: SanitizedCollectionConfig;
-  context?: Record<string, unknown>;
-  data?: unknown;
-  operation?: "create" | "update";
-  originalDoc?: unknown;
-  req?: unknown;
-}
-
-interface MockIntegrationAfterChangeArgs {
-  collection?: SanitizedCollectionConfig;
-  context?: Record<string, unknown>;
-  data?: unknown;
-  doc: unknown;
-  operation?: "create" | "update";
-  previousDoc?: unknown;
-  req?: unknown;
-}
-
-const runBeforeHook = (
-  hook: CollectionBeforeChangeHook,
-  args: MockIntegrationBeforeChangeArgs
-): Promise<MockPackageDoc> => {
-  // SAFETY: Invoking hook function with test mock arguments matching payload hook signature.
-  const fn = hook as (
-    input: MockIntegrationBeforeChangeArgs
-  ) => Promise<MockPackageDoc>;
-  return fn(args);
+const storesCollection: CollectionConfig = {
+  slug: "stores",
+  fields: [
+    {
+      name: "name",
+      required: true,
+      type: "text",
+    },
+    {
+      name: "slug",
+      required: true,
+      type: "text",
+    },
+    {
+      name: "theme",
+      type: "text",
+    },
+    {
+      name: "subscription",
+      type: "group",
+      fields: [
+        {
+          name: "status",
+          type: "text",
+        },
+      ],
+    },
+  ],
 };
 
-const runAfterHook = (
-  hook: CollectionAfterChangeHook,
-  args: MockIntegrationAfterChangeArgs
-): Promise<MockPackageDoc> => {
-  // SAFETY: Invoking hook function with test mock arguments matching payload hook signature.
-  const fn = hook as (
-    input: MockIntegrationAfterChangeArgs
-  ) => Promise<MockPackageDoc>;
-  return fn(args);
-};
+const packagesCollection = createPackagesCollection();
 
-const isWhereField = (
-  val: unknown
-): val is { equals?: unknown; not_equals?: unknown } =>
-  typeof val === "object" && val !== null && !Array.isArray(val);
+setTestPayloadConfig({
+  collections: [storesCollection, packagesCollection],
+});
 
-describe("packages collection integration", () => {
-  it("assigns store ID and marks first package as default while keeping subsequent packages non-default", async () => {
-    const collection = createPackagesCollection();
-    // SAFETY: Collection configuration hooks are typed CollectionBeforeChangeHook.
-    const [enforceStore, handleDefault] = (collection.hooks?.beforeChange ??
-      []) as [CollectionBeforeChangeHook, CollectionBeforeChangeHook];
-
-    const packageDatabase: MockPackageDoc[] = [];
-
-    const countFn = (where?: Where): number => {
-      let docs = packageDatabase;
-      const storeCond = where?.store;
-      if (isWhereField(storeCond)) {
-        docs = docs.filter((p) => p.store === storeCond.equals);
-      }
-      return docs.length;
-    };
-
-    const mockCount = vi
-      .fn<({ where }: { where?: Where }) => Promise<{ totalDocs: number }>>()
-      .mockImplementation(({ where }) =>
-        Promise.resolve({ totalDocs: countFn(where) })
-      );
-
-    const headers = new Headers();
-    headers.set("cookie", "payload-tenant=1");
-    const mockReq = { headers, payload: { count: mockCount } };
-
-    // 1. Create first package for Store 1 without explicit store -> gets store 1 and isDefault = true
-    const input1 = {
-      dimensions: { height: 10, length: 20, width: 15 },
-      isDefault: false,
-      tareWeight: { unit: "g" as const, value: 100 },
-      title: "Store 1 - Box 1",
-    };
-
-    const afterEnforce1 = await runBeforeHook(enforceStore, {
-      collection: mockCollectionConfig,
-      context: {},
-      data: input1,
-      operation: "create",
-      req: mockReq,
-    });
-
-    const final1 = await runBeforeHook(handleDefault, {
-      collection: mockCollectionConfig,
-      context: {},
-      data: afterEnforce1,
-      operation: "create",
-      req: mockReq,
-    });
-
-    expect(final1.store).toBe(1);
-    expect(final1.isDefault).toBeTruthy();
-
-    const doc1: MockPackageDoc = { ...final1, id: 1 };
-    packageDatabase.push(doc1);
-
-    // 2. Create second package for Store 1 -> gets store 1 and isDefault = false
-    const input2 = {
-      dimensions: { height: 5, length: 10, width: 10 },
-      isDefault: false,
-      tareWeight: { unit: "g" as const, value: 50 },
-      title: "Store 1 - Box 2",
-    };
-
-    const afterEnforce2 = await runBeforeHook(enforceStore, {
-      collection: mockCollectionConfig,
-      context: {},
-      data: input2,
-      operation: "create",
-      req: mockReq,
-    });
-
-    const final2 = await runBeforeHook(handleDefault, {
-      collection: mockCollectionConfig,
-      context: {},
-      data: afterEnforce2,
-      operation: "create",
-      req: mockReq,
-    });
-
-    expect(final2.store).toBe(1);
-    expect(final2.isDefault).toBeFalsy();
+const createTestStore = (payload: Payload, name: string, slug: string) =>
+  payload.create({
+    collection: "stores",
+    data: {
+      name,
+      slug,
+      subscription: { status: "trial" },
+      theme: "default",
+    },
   });
 
-  it("deconflicts multiple packages ensuring single default package per store while maintaining tenant isolation", async () => {
-    const collection = createPackagesCollection();
-    // SAFETY: Collection configuration hooks are typed CollectionAfterChangeHook.
-    const [afterChange] = (collection.hooks?.afterChange ?? []) as [
-      CollectionAfterChangeHook,
-    ];
+describe("packages collection integration", () => {
+  it("assigns tenant store identifier when creating package with tenant header", async ({
+    payload,
+  }) => {
+    const store = await createTestStore(payload, "Store Alpha", "store-alpha");
 
-    const packageDatabase: MockPackageDoc[] = [
-      {
+    const headers = new Headers();
+    headers.set("cookie", `payload-tenant=${store.id}`);
+    headers.set("payload-tenant", String(store.id));
+    const req = createTestReq({ headers });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      depth: 0,
+      req,
+      // SAFETY: store relationship is omitted from input data to test tenant header auto-assignment.
+      data: {
         dimensions: { height: 10, length: 20, width: 15 },
-        id: 1,
-        isDefault: true,
-        store: 1,
-        tareWeight: { unit: "g", value: 100 },
-        title: "Store 1 - Box 1",
-      },
-      {
-        dimensions: { height: 5, length: 10, width: 10 },
-        id: 2,
         isDefault: false,
-        store: 1,
-        tareWeight: { unit: "g", value: 50 },
-        title: "Store 1 - Box 2",
-      },
-      {
-        dimensions: { height: 15, length: 30, width: 20 },
-        id: 3,
-        isDefault: true,
-        store: 2,
-        tareWeight: { unit: "kg", value: 0.5 },
-        title: "Store 2 - Box 1",
-      },
-    ];
-
-    const mockUpdate = vi
-      .fn<
-        (args: {
-          data: Partial<MockPackageDoc>;
-          where: Where;
-        }) => Promise<{ docs: unknown[] }>
-      >()
-      .mockImplementation(({ data, where }) => {
-        if (where?.and) {
-          let matched = packageDatabase;
-          for (const cond of where.and) {
-            const storeCond = "store" in cond ? cond.store : undefined;
-            if (isWhereField(storeCond)) {
-              matched = matched.filter((p) => p.store === storeCond.equals);
-            }
-            const idCond = "id" in cond ? cond.id : undefined;
-            if (isWhereField(idCond)) {
-              matched = matched.filter((p) => p.id !== idCond.not_equals);
-            }
-          }
-          for (const doc of matched) {
-            Object.assign(doc, data);
-          }
-        }
-        return Promise.resolve({ docs: [] });
-      });
-
-    const mockReq = { payload: { update: mockUpdate } };
-
-    // Update Store 1 Box 2 to isDefault = true
-    const [, targetDoc] = packageDatabase;
-    if (!targetDoc) {
-      throw new Error("Target document not found");
-    }
-    targetDoc.isDefault = true;
-    const updatedDoc2: MockPackageDoc = {
-      ...targetDoc,
-    };
-    await runAfterHook(afterChange, {
-      collection: mockCollectionConfig,
-      context: {},
-      data: { isDefault: true },
-      doc: updatedDoc2,
-      operation: "update",
-      previousDoc: targetDoc,
-      req: mockReq,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Store Alpha - Box 1",
+      } as never,
     });
 
-    // Verify Store 1 Box 2 became default, Box 1 was unset, and Store 2 was untouched
-    const box1 = packageDatabase.find((p) => p.id === 1);
-    const box2 = packageDatabase.find((p) => p.id === 2);
-    const store2Box = packageDatabase.find((p) => p.id === 3);
+    expect(pkg.store).toBe(store.id);
 
-    expect(box1?.isDefault).toBeFalsy();
-    expect(box2?.isDefault).toBeTruthy();
-    expect(store2Box?.isDefault).toBeTruthy();
+    const found = await payload.find({
+      collection: "packages",
+      where: {
+        store: {
+          equals: store.id,
+        },
+      },
+    });
+
+    expect(found.totalDocs).toBe(1);
+    expect(found.docs[0]?.id).toBe(pkg.id);
+  });
+
+  it("promotes initial package for a store to default even when input specifies non-default", async ({
+    payload,
+  }) => {
+    const store = await createTestStore(payload, "Store Beta", "store-beta");
+
+    const pkg = await packageFactory.transient({ payload }).create({
+      isDefault: false,
+      store: store.id,
+      title: "Initial Box",
+    });
+
+    expect(pkg.isDefault).toBeTruthy();
+
+    const found = await payload.find({
+      collection: "packages",
+      where: {
+        and: [{ store: { equals: store.id } }, { isDefault: { equals: true } }],
+      },
+    });
+
+    expect(found.totalDocs).toBe(1);
+    expect(found.docs[0]?.id).toBe(pkg.id);
+  });
+
+  it("preserves non-default status on subsequent package when store already has a default package", async ({
+    payload,
+  }) => {
+    const store = await createTestStore(payload, "Store Gamma", "store-gamma");
+
+    const firstPkg = await packageFactory.transient({ payload }).create({
+      isDefault: false,
+      store: store.id,
+      title: "First Box",
+    });
+
+    const secondPkg = await packageFactory.transient({ payload }).create({
+      isDefault: false,
+      store: store.id,
+      title: "Second Box",
+    });
+
+    expect(firstPkg.isDefault).toBeTruthy();
+    expect(secondPkg.isDefault).toBeFalsy();
+
+    const found = await payload.find({
+      collection: "packages",
+      where: {
+        store: {
+          equals: store.id,
+        },
+      },
+    });
+
+    expect(found.totalDocs).toBe(2);
+
+    const defaultPackages = await payload.find({
+      collection: "packages",
+      where: {
+        and: [{ store: { equals: store.id } }, { isDefault: { equals: true } }],
+      },
+    });
+
+    expect(defaultPackages.totalDocs).toBe(1);
+    expect(defaultPackages.docs[0]?.id).toBe(firstPkg.id);
+  });
+
+  it("demotes prior default package when setting a new default package while leaving other stores unaffected", async ({
+    payload,
+  }) => {
+    const storeA = await createTestStore(payload, "Store A", "store-a");
+    const storeB = await createTestStore(payload, "Store B", "store-b");
+
+    const storeAPkg1 = await packageFactory.transient({ payload }).create({
+      isDefault: true,
+      store: storeA.id,
+      title: "Store A - Box 1",
+    });
+    const storeAPkg2 = await packageFactory.transient({ payload }).create({
+      isDefault: false,
+      store: storeA.id,
+      title: "Store A - Box 2",
+    });
+    const storeBPkg1 = await packageFactory.transient({ payload }).create({
+      isDefault: true,
+      store: storeB.id,
+      title: "Store B - Box 1",
+    });
+
+    expect([
+      storeAPkg1.isDefault,
+      storeAPkg2.isDefault,
+      storeBPkg1.isDefault,
+    ]).toStrictEqual([true, false, true]);
+
+    await payload.update({
+      collection: "packages",
+      id: storeAPkg2.id,
+      data: {
+        isDefault: true,
+      },
+    });
+
+    const refetchedAPkg1 = await payload.findByID({
+      collection: "packages",
+      id: storeAPkg1.id,
+    });
+    const refetchedAPkg2 = await payload.findByID({
+      collection: "packages",
+      id: storeAPkg2.id,
+    });
+    const refetchedBPkg1 = await payload.findByID({
+      collection: "packages",
+      id: storeBPkg1.id,
+    });
+
+    expect([
+      refetchedAPkg1.isDefault,
+      refetchedAPkg2.isDefault,
+      refetchedBPkg1.isDefault,
+    ]).toStrictEqual([false, true, true]);
   });
 });

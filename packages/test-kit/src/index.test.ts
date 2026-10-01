@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createTestReq } from "./helpers";
-import { describe as fixtureDescribe, it as fixtureIt } from "./index";
+import {
+  describe as fixtureDescribe,
+  it as fixtureIt,
+  setTestPayloadConfig,
+} from "./index";
 
 describe("@repo/test-kit fixture exports", () => {
   it("provides describe test suite runner", () => {
@@ -10,6 +14,10 @@ describe("@repo/test-kit fixture exports", () => {
 
   it("provides it test case runner", () => {
     expect(fixtureIt).toBeTypeOf("function");
+  });
+
+  it("provides setTestPayloadConfig helper", () => {
+    expect(setTestPayloadConfig).toBeTypeOf("function");
   });
 });
 

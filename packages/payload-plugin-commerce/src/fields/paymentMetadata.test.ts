@@ -1,13 +1,7 @@
-import type { PayloadRequest } from "payload";
+import { createTestReq } from "@repo/test-kit";
 import { describe, expect, it } from "vitest";
 
 import { paymentMetadataField } from "./paymentMetadata";
-
-const createMockReq = (user: PayloadRequest["user"]): PayloadRequest => {
-  const req = { user };
-  // SAFETY: Test mock satisfies PayloadRequest interface needed by access checks.
-  return req as PayloadRequest;
-};
 
 describe("paymentMetadata field definition", () => {
   it("defines json field named paymentMetadata", () => {
@@ -17,12 +11,14 @@ describe("paymentMetadata field definition", () => {
 
   it("configures admin read permissions requiring authenticated user", () => {
     const readAccess = paymentMetadataField.access?.read;
-    const mockAdminReq = createMockReq({
-      collection: "users",
-      email: "admin@example.com",
-      id: "user-1",
+    const mockAdminReq = createTestReq({
+      user: {
+        collection: "users",
+        email: "admin@example.com",
+        id: 1,
+      },
     });
-    const mockAnonReq = createMockReq(null);
+    const mockAnonReq = createTestReq();
 
     const canReadAdmin =
       typeof readAccess === "function"
@@ -39,12 +35,14 @@ describe("paymentMetadata field definition", () => {
 
   it("configures admin update permissions requiring authenticated user", () => {
     const updateAccess = paymentMetadataField.access?.update;
-    const mockAdminReq = createMockReq({
-      collection: "users",
-      email: "admin@example.com",
-      id: "user-1",
+    const mockAdminReq = createTestReq({
+      user: {
+        collection: "users",
+        email: "admin@example.com",
+        id: 1,
+      },
     });
-    const mockAnonReq = createMockReq(null);
+    const mockAnonReq = createTestReq();
 
     const canUpdateAdmin =
       typeof updateAccess === "function"
