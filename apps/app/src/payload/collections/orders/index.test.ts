@@ -59,4 +59,17 @@ describe("Orders collection", () => {
 
     expect(optionValues).toContain("pending");
   });
+
+  it("contains midtrans and xendit gateway integration groups", () => {
+    const { fields } = Orders;
+    const midtransGroup = fields.find(
+      (f: Field) => "name" in f && f.name === "midtrans" && f.type === "group"
+    );
+    const xenditGroup = fields.find(
+      (f: Field) => "name" in f && f.name === "xendit" && f.type === "group"
+    );
+
+    expect(midtransGroup).toBeDefined();
+    expect(xenditGroup).toBeDefined();
+  });
 });

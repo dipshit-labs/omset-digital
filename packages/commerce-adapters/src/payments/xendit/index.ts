@@ -1,11 +1,10 @@
-export * from "./midtrans";
+export { XenditClient } from "./client";
 
 export {
-  XenditClient,
   generateXenditHmacSignature,
   verifyXenditCallbackToken,
   verifyXenditHmacSignature,
-} from "./xendit";
+} from "./signature";
 
 export type {
   CreateXenditInvoiceInput,
@@ -14,4 +13,4 @@ export type {
   XenditInvoiceResponse,
   XenditItemDetails,
   XenditWebhookPayload,
-} from "./xendit";
+} from "./types";

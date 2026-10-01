@@ -748,6 +748,18 @@ export interface Order {
     grossAmount?: string | null;
     settlementTime?: string | null;
   };
+  /**
+   * Xendit gateway invoice details
+   */
+  xendit?: {
+    invoiceId?: string | null;
+    externalId?: string | null;
+    status?: string | null;
+    amount?: number | null;
+    paymentMethod?: string | null;
+    paymentChannel?: string | null;
+    paidAt?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1295,6 +1307,17 @@ export interface OrdersSelect<T extends boolean = true> {
         paymentType?: T;
         grossAmount?: T;
         settlementTime?: T;
+      };
+  xendit?:
+    | T
+    | {
+        invoiceId?: T;
+        externalId?: T;
+        status?: T;
+        amount?: T;
+        paymentMethod?: T;
+        paymentChannel?: T;
+        paidAt?: T;
       };
   updatedAt?: T;
   createdAt?: T;
