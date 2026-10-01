@@ -27,6 +27,10 @@
     "./hooks": {
       "types": "./src/exports/hooks.ts",
       "default": "./src/exports/hooks.ts"
+    },
+    "./webhooks": {
+      "types": "./src/exports/webhooks.ts",
+      "default": "./src/exports/webhooks.ts"
     }
   },
   "scripts": {
@@ -47,6 +51,7 @@
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "jsdom": "catalog:test",
+    "next": "catalog:react",
     "payload": "catalog:payload",
     "react": "catalog:react",
     "react-dom": "catalog:react",
@@ -56,6 +61,7 @@
   "peerDependencies": {
     "@payloadcms/db-postgres": "^3.90.0",
     "@payloadcms/ui": "^3.90.0",
+    "next": "^15.0.0 || ^16.0.0",
     "payload": "^3.90.0",
     "react": "^19.0.0"
   },
@@ -64,6 +70,9 @@
       "optional": true
     },
     "@payloadcms/ui": {
+      "optional": true
+    },
+    "next": {
       "optional": true
     },
     "react": {
