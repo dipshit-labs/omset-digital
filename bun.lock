@@ -65,6 +65,7 @@
       "version": "0.0.0",
       "dependencies": {
         "tsscmp": "catalog:core",
+        "zod": "catalog:core",
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",

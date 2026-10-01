@@ -4,10 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
     "./utils": {
       "types": "./src/exports/utils.ts",
       "default": "./src/exports/utils.ts"
@@ -27,7 +23,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "tsscmp": "catalog:core"
+    "tsscmp": "catalog:core",
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
