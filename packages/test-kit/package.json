@@ -1,0 +1,29 @@
+{
+  "name": "@repo/test-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./helpers": {
+      "types": "./src/helpers.ts",
+      "default": "./src/helpers.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@payloadcms/db-sqlite": "catalog:payload",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:types",
+    "payload": "catalog:payload",
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
+  }
+}
