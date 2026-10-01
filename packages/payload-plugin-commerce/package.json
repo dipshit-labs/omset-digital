@@ -1,0 +1,82 @@
+{
+  "name": "@repo/payload-plugin-commerce",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./fields": {
+      "types": "./src/exports/fields.ts",
+      "default": "./src/exports/fields.ts"
+    },
+    "./client": {
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./actions": {
+      "types": "./src/exports/actions.ts",
+      "default": "./src/exports/actions.ts"
+    },
+    "./hooks": {
+      "types": "./src/exports/hooks.ts",
+      "default": "./src/exports/hooks.ts"
+    },
+    "./webhooks": {
+      "types": "./src/exports/webhooks.ts",
+      "default": "./src/exports/webhooks.ts"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .next .turbo dist node_modules",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/commerce-adapters": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/db-postgres": "catalog:payload",
+    "@payloadcms/ui": "catalog:payload",
+    "@repo/typescript-config": "workspace:*",
+    "@testing-library/dom": "catalog:test",
+    "@testing-library/react": "catalog:test",
+    "@types/node": "catalog:types",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "jsdom": "catalog:test",
+    "next": "catalog:react",
+    "payload": "catalog:payload",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "typescript": "catalog:types",
+    "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "@payloadcms/db-postgres": "^3.90.0",
+    "@payloadcms/ui": "^3.90.0",
+    "next": "^15.0.0 || ^16.0.0",
+    "payload": "^3.90.0",
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@payloadcms/db-postgres": {
+      "optional": true
+    },
+    "@payloadcms/ui": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}

@@ -15,6 +15,7 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
+import { commercePlugin } from "@repo/payload-plugin-commerce";
 import { themesPlugin } from "@repo/payload-plugin-themes";
 import { defaultTheme } from "@repo/theme-default";
 import { minimalTheme } from "@repo/theme-minimal";
@@ -27,7 +28,7 @@ import { env } from "@/env";
 import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
-import { Packages } from "./collections/packages";
+import { Orders } from "./collections/orders";
 import { Pages } from "./collections/pages";
 import { Products } from "./collections/products";
 import {
@@ -83,10 +84,10 @@ export default buildConfig({
     Users,
     Stores,
     Categories,
-    Packages,
     Products,
     Media,
     Pages,
+    Orders,
     Variants,
     VariantOptions,
     VariantTypes,
@@ -112,6 +113,14 @@ export default buildConfig({
     defaultFromName: "Omset Digital",
   }),
   plugins: [
+    commercePlugin({
+      secret: env.PAYLOAD_SECRET,
+      slugs: {
+        packages: "packages",
+        storeCredentials: "storeCredentials",
+        stores: "stores",
+      },
+    }),
     themesPlugin({
       manifests: [defaultTheme, minimalTheme],
       previewSecret: env.PREVIEW_SECRET,
@@ -125,9 +134,11 @@ export default buildConfig({
       collections: {
         categories: { isGlobal: false },
         media: { isGlobal: false },
-        packages: { isGlobal: false },
+        orders: { isGlobal: false },
+        packages: { customTenantField: true, isGlobal: false },
         pages: { isGlobal: false },
         products: { isGlobal: false },
+        storeCredentials: { customTenantField: true, isGlobal: false },
         templates: { isGlobal: false },
         themes: { isGlobal: false },
         variantOptions: { isGlobal: false },

@@ -12,6 +12,27 @@ export const seed = async (payload: SeedParameters): Promise<void> => {
       slug: "trial",
       subscription: { status: "trial" },
       theme: "default",
+      originAddress: {
+        cityId: "501",
+        cityName: "Yogyakarta",
+        cityType: "Kota",
+        postalCode: "55171",
+        provinceId: "5",
+        provinceName: "DI Yogyakarta",
+        streetAddress: "Jl. Malioboro No. 12",
+        subdistrictId: "574",
+        subdistrictName: "Kotagede",
+      },
+    },
+  });
+
+  await payload.create({
+    collection: "storeCredentials",
+    draft: false,
+    data: {
+      paymentProvider: "none",
+      shippingProvider: "none",
+      store: store1.id,
     },
   });
 

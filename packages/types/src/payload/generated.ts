@@ -70,13 +70,16 @@ export interface Config {
     users: User;
     stores: Store;
     categories: Category;
-    packages: Package;
     products: Product;
     media: Media;
     pages: Page;
+    orders: Order;
     variants: Variant;
     variantOptions: VariantOption;
     variantTypes: VariantType;
+    storeCredentials: StoreCredential;
+    administrativeAreas: AdministrativeArea;
+    packages: Package;
     themes: Theme;
     templates: Template;
     'payload-kv': PayloadKv;
@@ -97,13 +100,16 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     stores: StoresSelect<false> | StoresSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    packages: PackagesSelect<false> | PackagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
+    storeCredentials: StoreCredentialsSelect<false> | StoreCredentialsSelect<true>;
+    administrativeAreas: AdministrativeAreasSelect<false> | AdministrativeAreasSelect<true>;
+    packages: PackagesSelect<false> | PackagesSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
     templates: TemplatesSelect<false> | TemplatesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -227,55 +233,58 @@ export interface Store {
     currentPeriodEnd?: string | null;
   };
   /**
-   * Active payment gateway. Add one block and fill in your credentials.
+   * Merchant store fulfillment origin address
    */
-  paymentProviders?:
-    | {
-        /**
-         * Xendit Secret API Key (starts with xnd_development_ or xnd_production_)
-         */
-        secretKey: string;
-        /**
-         * Verification token set in the Xendit dashboard webhook settings
-         */
-        webhookToken: string;
-        /**
-         * Enable for live transactions. Keep disabled during testing.
-         */
-        isProduction: boolean;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'xendit';
-      }[]
-    | null;
-  /**
-   * Shipping provider credentials and origin configuration
-   */
-  shippingConfig?: {
+  originAddress?: {
     /**
-     * Active shipping provider
+     * Province numeric ID
      */
-    shippingProvider?: ('none' | 'rajaongkir') | null;
-    rajaongkirConfig?: {
-      /**
-       * Restricted to store owner and super-admin
-       */
-      apiKey?: string | null;
-      accountType?: ('starter' | 'basic' | 'pro') | null;
-      /**
-       * Origin city for shipping cost calculation
-       */
-      originCityId?: string | null;
-      /**
-       * Only applicable for Pro account type
-       */
-      originSubdistrictId?: string | null;
-    };
+    provinceId?: string | null;
+    /**
+     * Province name
+     */
+    provinceName?: string | null;
+    /**
+     * City/Regency numeric ID
+     */
+    cityId?: string | null;
+    /**
+     * City/Regency name
+     */
+    cityName?: string | null;
+    /**
+     * City or regency type (Kota or Kabupaten)
+     */
+    cityType?: string | null;
+    /**
+     * Subdistrict numeric ID
+     */
+    subdistrictId?: string | null;
+    /**
+     * Subdistrict name
+     */
+    subdistrictName?: string | null;
+    /**
+     * Street address and fulfillment location details
+     */
+    streetAddress?: string | null;
+    /**
+     * Postal code
+     */
+    postalCode?: string | null;
   };
   whatsappConfig?: {
     enabled?: boolean | null;
     phoneNumber?: string | null;
   };
+  /**
+   * Active payment gateway
+   */
+  activePaymentProvider?: ('none' | 'midtrans' | 'xendit') | null;
+  /**
+   * Active shipping provider
+   */
+  activeShippingProvider?: ('none' | 'rajaongkir') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -290,30 +299,6 @@ export interface Category {
   slug?: string | null;
   slugLock?: boolean | null;
   description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages".
- */
-export interface Package {
-  id: number;
-  store?: (number | null) | Store;
-  title: string;
-  dimensions: {
-    length: number;
-    width: number;
-    height: number;
-  };
-  tareWeight: {
-    value: number;
-    unit: 'g' | 'kg';
-  };
-  /**
-   * Used to calculate rates at checkout and pre-selected when buying labels
-   */
-  isDefault?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -416,6 +401,33 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: number;
+  /**
+   * Associated store document
+   */
+  store: number | Store;
+  title: string;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  tareWeight: {
+    value: number;
+    unit: 'g' | 'kg';
+  };
+  /**
+   * Used to calculate rates at checkout and pre-selected when buying labels
+   */
+  isDefault?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -649,6 +661,173 @@ export interface Theme {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  store?: (number | null) | Store;
+  /**
+   * Merchant order identifier (e.g. ORDER-1001)
+   */
+  orderNumber: string;
+  /**
+   * Payment status managed by payment gateway webhooks
+   */
+  paymentStatus: 'pending' | 'paid' | 'expired' | 'failed' | 'cancelled';
+  /**
+   * Total order amount in IDR
+   */
+  total: number;
+  /**
+   * Currency code
+   */
+  currency: string;
+  /**
+   * Buyer contact details
+   */
+  customer?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  };
+  /**
+   * Purchased line items
+   */
+  items?:
+    | {
+        title: string;
+        price: number;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Polymorphic payment provider transaction metadata and audit logs
+   */
+  paymentMetadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeCredentials".
+ */
+export interface StoreCredential {
+  id: number;
+  /**
+   * Associated store document
+   */
+  store: number | Store;
+  /**
+   * Active payment gateway
+   */
+  paymentProvider?: ('none' | 'midtrans' | 'xendit') | null;
+  /**
+   * Midtrans payment gateway credentials
+   */
+  midtrans?: {
+    /**
+     * Midtrans Server Key (encrypted at rest)
+     */
+    serverKey?: string | null;
+    /**
+     * Midtrans Client Key (public)
+     */
+    clientKey?: string | null;
+    /**
+     * Use Midtrans production environment
+     */
+    isProduction?: boolean | null;
+  };
+  /**
+   * Xendit payment gateway credentials
+   */
+  xendit?: {
+    /**
+     * Xendit Secret API Key (encrypted at rest)
+     */
+    secretKey?: string | null;
+    /**
+     * Xendit Webhook Verification Token (encrypted at rest)
+     */
+    webhookToken?: string | null;
+    /**
+     * Use Xendit production environment
+     */
+    isProduction?: boolean | null;
+  };
+  /**
+   * Active shipping provider
+   */
+  shippingProvider?: ('none' | 'rajaongkir') | null;
+  /**
+   * RajaOngkir shipping calculation credentials
+   */
+  rajaongkir?: {
+    /**
+     * RajaOngkir API Key (encrypted at rest)
+     */
+    apiKey?: string | null;
+    /**
+     * RajaOngkir account tier
+     */
+    accountType?: ('starter' | 'basic' | 'pro') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "administrativeAreas".
+ */
+export interface AdministrativeArea {
+  id: number;
+  /**
+   * Unique subdistrict numeric identifier from RajaOngkir
+   */
+  subdistrict_id: number;
+  /**
+   * Subdistrict (kecamatan) name
+   */
+  subdistrict_name: string;
+  /**
+   * City or regency numeric identifier from RajaOngkir
+   */
+  city_id: number;
+  /**
+   * City or regency name
+   */
+  city_name: string;
+  /**
+   * Geographic unit type (Kota or Kabupaten)
+   */
+  city_type: string;
+  /**
+   * Province numeric identifier from RajaOngkir
+   */
+  province_id: number;
+  /**
+   * Province name
+   */
+  province_name: string;
+  /**
+   * Indonesian 5-digit postal code
+   */
+  postal_code?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -776,10 +955,6 @@ export interface PayloadLockedDocument {
         value: number | Category;
       } | null)
     | ({
-        relationTo: 'packages';
-        value: number | Package;
-      } | null)
-    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -792,6 +967,10 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
         relationTo: 'variants';
         value: number | Variant;
       } | null)
@@ -802,6 +981,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'variantTypes';
         value: number | VariantType;
+      } | null)
+    | ({
+        relationTo: 'storeCredentials';
+        value: number | StoreCredential;
+      } | null)
+    | ({
+        relationTo: 'administrativeAreas';
+        value: number | AdministrativeArea;
+      } | null)
+    | ({
+        relationTo: 'packages';
+        value: number | Package;
       } | null)
     | ({
         relationTo: 'themes';
@@ -903,31 +1094,18 @@ export interface StoresSelect<T extends boolean = true> {
         trialEndsAt?: T;
         currentPeriodEnd?: T;
       };
-  paymentProviders?:
+  originAddress?:
     | T
     | {
-        xendit?:
-          | T
-          | {
-              secretKey?: T;
-              webhookToken?: T;
-              isProduction?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  shippingConfig?:
-    | T
-    | {
-        shippingProvider?: T;
-        rajaongkirConfig?:
-          | T
-          | {
-              apiKey?: T;
-              accountType?: T;
-              originCityId?: T;
-              originSubdistrictId?: T;
-            };
+        provinceId?: T;
+        provinceName?: T;
+        cityId?: T;
+        cityName?: T;
+        cityType?: T;
+        subdistrictId?: T;
+        subdistrictName?: T;
+        streetAddress?: T;
+        postalCode?: T;
       };
   whatsappConfig?:
     | T
@@ -935,6 +1113,8 @@ export interface StoresSelect<T extends boolean = true> {
         enabled?: T;
         phoneNumber?: T;
       };
+  activePaymentProvider?: T;
+  activeShippingProvider?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -948,30 +1128,6 @@ export interface CategoriesSelect<T extends boolean = true> {
   slug?: T;
   slugLock?: T;
   description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages_select".
- */
-export interface PackagesSelect<T extends boolean = true> {
-  store?: T;
-  title?: T;
-  dimensions?:
-    | T
-    | {
-        length?: T;
-        width?: T;
-        height?: T;
-      };
-  tareWeight?:
-    | T
-    | {
-        value?: T;
-        unit?: T;
-      };
-  isDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1070,6 +1226,36 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  store?: T;
+  orderNumber?: T;
+  paymentStatus?: T;
+  total?: T;
+  currency?: T;
+  customer?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        email?: T;
+        phone?: T;
+      };
+  items?:
+    | T
+    | {
+        title?: T;
+        price?: T;
+        quantity?: T;
+        id?: T;
+      };
+  paymentMetadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants_select".
  */
 export interface VariantsSelect<T extends boolean = true> {
@@ -1136,6 +1322,77 @@ export interface VariantTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storeCredentials_select".
+ */
+export interface StoreCredentialsSelect<T extends boolean = true> {
+  store?: T;
+  paymentProvider?: T;
+  midtrans?:
+    | T
+    | {
+        serverKey?: T;
+        clientKey?: T;
+        isProduction?: T;
+      };
+  xendit?:
+    | T
+    | {
+        secretKey?: T;
+        webhookToken?: T;
+        isProduction?: T;
+      };
+  shippingProvider?: T;
+  rajaongkir?:
+    | T
+    | {
+        apiKey?: T;
+        accountType?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "administrativeAreas_select".
+ */
+export interface AdministrativeAreasSelect<T extends boolean = true> {
+  subdistrict_id?: T;
+  subdistrict_name?: T;
+  city_id?: T;
+  city_name?: T;
+  city_type?: T;
+  province_id?: T;
+  province_name?: T;
+  postal_code?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages_select".
+ */
+export interface PackagesSelect<T extends boolean = true> {
+  store?: T;
+  title?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  tareWeight?:
+    | T
+    | {
+        value?: T;
+        unit?: T;
+      };
+  isDefault?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
