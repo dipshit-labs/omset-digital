@@ -6,14 +6,12 @@ import { seoField } from "@/payload/fields/seo";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 import { readProductAccess } from "./access/read";
-import { inventoryFields } from "./fields/inventory";
-import { pricingFields } from "./fields/pricing";
-import { shippingFields } from "./fields/shipping";
 import {
   defaultVariantAfterChange,
   defaultVariantAfterRead,
-  defaultVariantBeforeChange,
 } from "./hooks/defaultVariantSync";
+import { productLifecycleBeforeChange } from "./lifecycle";
+import { virtualCatalogFields } from "./lifecycle/fields";
 
 export const Products: CollectionConfig = {
   slug: "products",
@@ -55,46 +53,7 @@ export const Products: CollectionConfig = {
       ],
     },
 
-    {
-      label: "Price",
-      name: "pricing",
-      type: "group",
-      virtual: true,
-      admin: {
-        condition: (data) =>
-          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
-      },
-      fields: [
-        ...pricingFields({
-          overrides: { priceOverrides: { label: false } },
-          virtual: true,
-        }),
-      ],
-    },
-
-    {
-      fields: [...inventoryFields({ virtual: true })],
-      label: "Inventory",
-      name: "inventory",
-      type: "group",
-      virtual: true,
-      admin: {
-        condition: (data) =>
-          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
-      },
-    },
-
-    {
-      fields: [...shippingFields({ virtual: true })],
-      label: "Shipping",
-      name: "shipping",
-      type: "group",
-      virtual: true,
-      admin: {
-        condition: (data) =>
-          !Array.isArray(data?.variantTypes) || data.variantTypes.length === 0,
-      },
-    },
+    ...virtualCatalogFields,
 
     {
       label: "Variants",
@@ -169,7 +128,7 @@ export const Products: CollectionConfig = {
   hooks: {
     afterChange: [defaultVariantAfterChange],
     afterRead: [defaultVariantAfterRead],
-    beforeChange: [enforceStoreOnCreate, defaultVariantBeforeChange],
+    beforeChange: [enforceStoreOnCreate, productLifecycleBeforeChange],
   },
   versions: {
     drafts: {

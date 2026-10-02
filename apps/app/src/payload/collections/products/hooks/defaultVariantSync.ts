@@ -2,21 +2,13 @@ import type { Product } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
-  CollectionBeforeChangeHook,
   PayloadRequest,
 } from "payload";
 import { extractID } from "payload/shared";
 
 import { normalizeShipping } from "../lib/normalizeShipping";
 import type { RawShipping } from "../lib/types";
-
-const VIRTUAL_DATA_KEY = "products:defaultVariant:virtualData";
-
-interface VirtualData {
-  inventory?: Product["inventory"];
-  pricing?: Product["pricing"];
-  shipping?: Product["shipping"];
-}
+import { getStashedVirtualData } from "../lifecycle";
 
 const extractPricing = (raw: Product["pricing"]) => {
   if (!raw) {
@@ -45,8 +37,7 @@ const extractVariantData = (doc: Product, req: PayloadRequest) => {
   // Virtual fields are stripped from `doc` by afterChange time; the beforeChange
   // hook stashes them in req.context under VIRTUAL_DATA_KEY so they survive.
   // SAFETY: Stashed context data was saved in beforeChange adhering to VirtualData.
-  const stashed = req.context?.[VIRTUAL_DATA_KEY] as VirtualData | undefined;
-
+  const stashed = getStashedVirtualData(req);
   const rawPricing = stashed?.pricing ?? doc.pricing;
   const rawInventory = stashed?.inventory ?? doc.inventory;
   const rawShipping = stashed?.shipping ?? doc.shipping;
@@ -166,18 +157,6 @@ const upsertDefaultVariant = async (
   doc.inventory = variantData.inventory;
   // SAFETY: Normalized shipping is compatible with the Product shipping group field.
   doc.shipping = variantData.shipping as Product["shipping"];
-};
-
-export const defaultVariantBeforeChange: CollectionBeforeChangeHook = ({
-  data,
-  req,
-}) => {
-  req.context[VIRTUAL_DATA_KEY] = {
-    inventory: data.inventory,
-    pricing: data.pricing,
-    shipping: data.shipping,
-  } satisfies VirtualData;
-  return data;
 };
 
 export const defaultVariantAfterChange: CollectionAfterChangeHook<
