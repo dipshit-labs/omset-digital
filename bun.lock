@@ -45,6 +45,8 @@
         "zod": "catalog:core",
       },
       "devDependencies": {
+        "@payloadcms/db-sqlite": "catalog:payload",
+        "@repo/test-kit": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "catalog:ui",
         "@testing-library/dom": "catalog:test",
@@ -54,6 +56,7 @@
         "@types/react-dom": "catalog:react",
         "@vitejs/plugin-react": "catalog:test",
         "babel-plugin-react-compiler": "catalog:react",
+        "fishery": "catalog:test",
         "jsdom": "catalog:test",
         "tailwindcss": "catalog:ui",
         "typescript": "catalog:types",
