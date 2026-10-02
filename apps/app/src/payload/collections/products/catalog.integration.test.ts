@@ -592,4 +592,427 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
         : variant?.shipping?.package;
     expect(resolvedPackageId).toBe(customPkg.id);
   });
+
+  it("updates existing default variant when updating product virtual fields without creating duplicates", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "No Dup Store",
+        slug: "no-dup-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Standard Package",
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Creation payload with initial virtual fields for single-variant product.
+      data: {
+        _status: "published",
+        slug: "single-variant-updates",
+        store: store.id,
+        title: "Original Single Product",
+        inventory: {
+          sku: "ORIG-SKU-99",
+          stock: 10,
+          tracked: true,
+        },
+        pricing: {
+          compareAtPrice: 120_000,
+          price: 100_000,
+        },
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 200 },
+        },
+      } as never,
+    });
+
+    const initialVariants = await payload.find({
+      collection: "variants",
+      where: { product: { equals: product.id } },
+    });
+    expect(initialVariants.docs).toHaveLength(1);
+    const initialVariantId = initialVariants.docs[0]?.id;
+
+    // Update virtual pricing and inventory on the parent product
+    await payload.update({
+      collection: "products",
+      draft: false,
+      id: product.id,
+      data: {
+        title: "Updated Single Product",
+        inventory: {
+          stock: 25,
+        },
+        pricing: {
+          compareAtPrice: 180_000,
+          price: 150_000,
+        },
+      } as never,
+    });
+
+    const afterUpdateVariants = await payload.find({
+      collection: "variants",
+      where: { product: { equals: product.id } },
+    });
+
+    // Crucial check: exactly one variant must exist (no duplicate created)
+    expect(afterUpdateVariants.docs).toHaveLength(1);
+    const [updatedVariant] = afterUpdateVariants.docs;
+    expect(updatedVariant?.id).toBe(initialVariantId);
+    expect(updatedVariant?.title).toBe("Updated Single Product");
+    expect(updatedVariant).toMatchObject({
+      inventory: {
+        sku: "ORIG-SKU-99",
+        stock: 25,
+      },
+      pricing: {
+        compareAtPrice: 180_000,
+        price: 150_000,
+      },
+      shipping: {
+        weight: { value: 200 },
+      },
+    });
+  });
+
+  it("provisions default variant in draft mode for draft products", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Draft Mirror Store",
+        slug: "draft-mirror-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Draft Mirror Box",
+      },
+    });
+
+    const draftProduct = await payload.create({
+      collection: "products",
+      draft: true,
+      // SAFETY: Draft creation payload containing virtual catalog fields.
+      data: {
+        pricing: { price: 80_000 },
+        slug: "draft-hoodie",
+        store: store.id,
+        title: "Draft Hoodie",
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 300 },
+        },
+      } as never,
+    });
+
+    expect(draftProduct._status).toBe("draft");
+
+    const draftVariants = await payload.find({
+      collection: "variants",
+      draft: true,
+      where: { product: { equals: draftProduct.id } },
+    });
+    expect(draftVariants.docs).toHaveLength(1);
+    const [draftVariant] = draftVariants.docs;
+    expect(draftVariant?._status).toBe("draft");
+
+    const publishedVariantsBefore = await payload.find({
+      collection: "variants",
+      where: {
+        _status: { equals: "published" },
+        product: { equals: draftProduct.id },
+      },
+    });
+    expect(publishedVariantsBefore.docs).toHaveLength(0);
+  });
+
+  it("synchronizes default variant to published when publishing draft product", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Publish Mirror Store",
+        slug: "publish-mirror-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Publish Mirror Box",
+      },
+    });
+
+    const draftProduct = await payload.create({
+      collection: "products",
+      draft: true,
+      // SAFETY: Draft creation payload containing virtual catalog fields.
+      data: {
+        pricing: { price: 80_000 },
+        slug: "draft-tshirt",
+        store: store.id,
+        title: "Draft T-Shirt",
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 300 },
+        },
+      } as never,
+    });
+
+    const publishedProduct = await payload.update({
+      collection: "products",
+      draft: false,
+      id: draftProduct.id,
+      data: {
+        _status: "published",
+      },
+    });
+
+    expect(publishedProduct._status).toBe("published");
+
+    const publishedVariantsAfter = await payload.find({
+      collection: "variants",
+      draft: false,
+      where: { product: { equals: draftProduct.id } },
+    });
+    expect(publishedVariantsAfter.docs).toHaveLength(1);
+    const [publishedVariant] = publishedVariantsAfter.docs;
+    expect(publishedVariant?._status).toBe("published");
+    expect(publishedVariant?.pricing.price).toBe(80_000);
+  });
+
+  it("hydrates virtual pricing, inventory, and shipping fields on product read operations", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Hydration Store",
+        slug: "hydration-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Hydration Package",
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Creation payload containing virtual fields to be hydrated on subsequent reads.
+      data: {
+        slug: "hydrated-product",
+        store: store.id,
+        title: "Hydrated Product",
+        inventory: {
+          allowBackorder: false,
+          barcode: "1234567890",
+          sku: "HYDRATE-SKU-1",
+          stock: 42,
+          tracked: true,
+        },
+        pricing: {
+          compareAtPrice: 110_000,
+          price: 95_000,
+        },
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 450 },
+        },
+      } as never,
+    });
+
+    // Retrieve via findByID
+    const retrieved = await payload.findByID({
+      collection: "products",
+      id: product.id,
+    });
+
+    expect(retrieved.pricing).toMatchObject({
+      compareAtPrice: 110_000,
+      price: 95_000,
+    });
+    expect(retrieved.inventory).toMatchObject({
+      allowBackorder: false,
+      barcode: "1234567890",
+      sku: "HYDRATE-SKU-1",
+      stock: 42,
+      tracked: true,
+    });
+    expect(retrieved.shipping).toMatchObject({
+      required: true,
+      weight: { unit: "g", value: 450 },
+    });
+
+    // Retrieve via find
+    const findResult = await payload.find({
+      collection: "products",
+      where: { id: { equals: product.id } },
+    });
+    expect(findResult.docs).toHaveLength(1);
+    const [foundProduct] = findResult.docs;
+    expect(foundProduct).toMatchObject({
+      inventory: { stock: 42 },
+      pricing: { price: 95_000 },
+    });
+  });
+
+  it("executes a complete lifecycle round-trip for create, update, publish, and read", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Round Trip Store",
+        slug: "round-trip-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 12, length: 24, width: 18 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 150 },
+        title: "Round Trip Package",
+      },
+    });
+
+    // 1. Create single-variant Product as draft
+    const createdProduct = await payload.create({
+      collection: "products",
+      draft: true,
+      // SAFETY: Draft creation payload containing initial virtual fields.
+      data: {
+        slug: "round-trip-product",
+        store: store.id,
+        title: "Round Trip Product",
+        inventory: {
+          allowBackorder: false,
+          barcode: "ROUND-1234",
+          sku: "ROUND-TRIP-SKU",
+          stock: 50,
+          tracked: true,
+        },
+        pricing: {
+          compareAtPrice: 200_000,
+          price: 150_000,
+        },
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 500 },
+        },
+      } as never,
+    });
+
+    expect(createdProduct._status).toBe("draft");
+
+    // 2. Read draft product and verify virtual field hydration
+    const draftRead = await payload.findByID({
+      collection: "products",
+      draft: true,
+      id: createdProduct.id,
+    });
+    expect(draftRead).toMatchObject({
+      inventory: { sku: "ROUND-TRIP-SKU", stock: 50 },
+      pricing: { compareAtPrice: 200_000, price: 150_000 },
+      shipping: { required: true, weight: { value: 500 } },
+    });
+
+    // 3. Update virtual fields on the draft product
+    await payload.update({
+      collection: "products",
+      draft: true,
+      id: createdProduct.id,
+      // SAFETY: Partial update modifying virtual price and stock on draft product.
+      data: {
+        inventory: {
+          stock: 60,
+        },
+        pricing: {
+          compareAtPrice: 220_000,
+          price: 175_000,
+        },
+      } as never,
+    });
+
+    // 4. Publish the product
+    const publishedProduct = await payload.update({
+      collection: "products",
+      draft: false,
+      id: createdProduct.id,
+      data: {
+        _status: "published",
+      },
+    });
+    expect(publishedProduct._status).toBe("published");
+
+    // 5. Read published product and verify updated virtual field hydration
+    const publishedRead = await payload.findByID({
+      collection: "products",
+      draft: false,
+      id: createdProduct.id,
+    });
+    expect(publishedRead).toMatchObject({
+      inventory: { sku: "ROUND-TRIP-SKU", stock: 60 },
+      pricing: { compareAtPrice: 220_000, price: 175_000 },
+      shipping: { required: true, weight: { value: 500 } },
+    });
+
+    // Verify exactly one variant exists and is published
+    const finalVariants = await payload.find({
+      collection: "variants",
+      draft: false,
+      where: { product: { equals: createdProduct.id } },
+    });
+    expect(finalVariants.docs).toHaveLength(1);
+  });
 });

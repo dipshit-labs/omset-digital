@@ -16,9 +16,8 @@ export const productLifecycleBeforeChange: CollectionBeforeChangeHook = async ({
 }) => {
   // SAFETY: Collection hook receives incoming document mutation data conforming to Product fields.
   const productData = data as Partial<Product>;
-  // SAFETY: Original document on update operations matches the Product document structure.
+  // SAFETY: Original document matches Product document structure.
   const originalProduct = originalDoc as Partial<Product> | undefined;
-
   await validatePhysicalPackaging({
     data: productData,
     originalDoc: originalProduct,

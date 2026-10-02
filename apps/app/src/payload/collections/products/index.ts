@@ -6,11 +6,7 @@ import { seoField } from "@/payload/fields/seo";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 import { readProductAccess } from "./access/read";
-import {
-  defaultVariantAfterChange,
-  defaultVariantAfterRead,
-} from "./hooks/defaultVariantSync";
-import { productLifecycleBeforeChange } from "./lifecycle";
+import { productLifecycleHooks } from "./lifecycle";
 import { virtualCatalogFields } from "./lifecycle/fields";
 
 export const Products: CollectionConfig = {
@@ -126,9 +122,8 @@ export const Products: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [defaultVariantAfterChange],
-    afterRead: [defaultVariantAfterRead],
-    beforeChange: [enforceStoreOnCreate, productLifecycleBeforeChange],
+    ...productLifecycleHooks,
+    beforeChange: [enforceStoreOnCreate, ...productLifecycleHooks.beforeChange],
   },
   versions: {
     drafts: {

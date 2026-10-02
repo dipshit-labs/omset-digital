@@ -7,7 +7,13 @@ export type { VirtualCatalogData } from "./context";
 
 export { virtualCatalogFields } from "./fields";
 
-export { productLifecycleBeforeChange } from "./hooks/beforeChange";
+export {
+  productLifecycleAfterChange,
+  productLifecycleAfterRead,
+  productLifecycleBeforeChange,
+  productLifecycleHooks,
+} from "./hooks";
+export type { ProductLifecycleHooks } from "./hooks";
 
 export { validatePhysicalPackaging } from "./packaging";
 export type { ValidatePhysicalPackagingArgs } from "./packaging";

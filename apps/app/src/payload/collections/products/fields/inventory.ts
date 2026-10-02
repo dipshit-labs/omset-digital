@@ -29,7 +29,7 @@ export const inventoryFields = ({
   return [
     // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
-      defaultValue: true,
+      defaultValue: virtual ? undefined : true,
       label: "Inventory tracked",
       name: "tracked",
       type: "checkbox",
@@ -41,7 +41,7 @@ export const inventoryFields = ({
       },
     },
     {
-      defaultValue: 0,
+      defaultValue: virtual ? undefined : 0,
       min: 0,
       name: "stock",
       type: "number",
@@ -90,7 +90,7 @@ export const inventoryFields = ({
           ],
         },
         {
-          defaultValue: false,
+          defaultValue: virtual ? undefined : false,
           label: "Continue selling when out of stock",
           name: "allowBackorder",
           type: "checkbox",
