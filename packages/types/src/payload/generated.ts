@@ -350,7 +350,7 @@ export interface Product {
   };
   shipping?: {
     required?: boolean | null;
-    package: number | Package;
+    package?: (number | null) | Package;
     weight: {
       value: number;
       unit: 'g' | 'kg';

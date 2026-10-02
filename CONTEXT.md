@@ -107,6 +107,10 @@ _Avoid_: Item, listing, goods
 A specific purchasable variation of a Product, representing the leaf node of the variant tree. Carries its own price, stock, weight, and barcode. Linked to a Product and its selected Variant Options. Every Product has at least one Variant (Shopify model).
 _Avoid_: Item, sub-product
 
+**Default Variant**:
+The implicit, single Variant created automatically for a Product that does not define Variant Types. Carries the Product's pricing, inventory, and physical shipping attributes.
+_Avoid_: Base variant, root variant, master variant, standard variant
+
 **Variant Type**:
 A named dimension of Product variation (e.g. Color, Size), scoped to a Store and reusable across Products.
 _Avoid_: Attribute, option group, dimension, variant axis

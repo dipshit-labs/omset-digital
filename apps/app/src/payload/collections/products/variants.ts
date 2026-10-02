@@ -8,8 +8,7 @@ import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
 import { shippingFields } from "./fields/shipping";
 import { variantOptionsSelectorField } from "./fields/variant-options-selector";
-import { generateVariantTitle } from "./hooks/generateVariantTitle";
-import { handleVariantShipping } from "./hooks/handleVariantShipping";
+import { variantLifecycleHooks } from "./lifecycle";
 
 export const VariantTypes: CollectionConfig = {
   slug: "variantTypes",
@@ -160,11 +159,8 @@ export const Variants: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-      enforceStoreOnCreate,
-      generateVariantTitle,
-      handleVariantShipping,
-    ],
+    ...variantLifecycleHooks,
+    beforeChange: [enforceStoreOnCreate, ...variantLifecycleHooks.beforeChange],
   },
   versions: {
     drafts: {
