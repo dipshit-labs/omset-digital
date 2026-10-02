@@ -1,9 +1,98 @@
-import type { Product } from "@repo/types";
+import type { Package, Product } from "@repo/types";
 import type { PayloadRequest } from "payload";
 import { APIError } from "payload";
+import { extractID } from "payload/shared";
 
-import { resolveDefaultPackage } from "../lib/resolveDefaultPackage";
 import { resolveDocumentStoreId } from "./store";
+
+export interface RawShipping {
+  package?: Package | Package["id"] | null;
+  required?: boolean | null;
+  weight?: {
+    unit?: "g" | "kg" | null;
+    value?: number | null;
+  } | null;
+}
+
+export interface NormalizedShipping {
+  package: Package["id"] | null;
+  required: boolean;
+  weight: {
+    unit: "g" | "kg";
+    value: number;
+  };
+}
+
+/**
+ * Normalizes shipping configuration into a canonical structure.
+ */
+export const normalizeShipping = (
+  raw: RawShipping,
+  fallback?: Partial<RawShipping>
+): NormalizedShipping => {
+  const required = raw.required ?? fallback?.required ?? true;
+  const unit = raw.weight?.unit ?? fallback?.weight?.unit ?? "g";
+
+  let packageId: Package["id"] | null = null;
+  if (raw.package) {
+    packageId = extractID(raw.package);
+  } else if (fallback?.package) {
+    packageId = extractID(fallback.package);
+  }
+
+  if (!required) {
+    return {
+      package: null,
+      required: false,
+      weight: { unit, value: 0 },
+    };
+  }
+
+  let value = 0;
+  if (typeof raw.weight?.value === "number") {
+    ({ value } = raw.weight);
+  } else if (typeof fallback?.weight?.value === "number") {
+    // SAFETY: Guard confirms fallback.weight is defined with a numeric value.
+    ({ value } = fallback.weight as { value: number });
+  }
+
+  return {
+    package: packageId ?? null,
+    required: true,
+    weight: { unit, value },
+  };
+};
+
+/**
+ * Resolves the default Package document ID for a given Store.
+ */
+export const resolveDefaultPackage = async (
+  req: PayloadRequest,
+  storeIdentifier?: unknown
+): Promise<Package["id"] | null> => {
+  const storeId =
+    typeof storeIdentifier === "number" || typeof storeIdentifier === "string"
+      ? storeIdentifier
+      : resolveDocumentStoreId({ store: storeIdentifier });
+
+  if (!storeId) {
+    return null;
+  }
+
+  const result = await req.payload.find({
+    collection: "packages",
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    req,
+    select: { isDefault: true },
+    where: {
+      and: [{ store: { equals: storeId } }, { isDefault: { equals: true } }],
+    },
+  });
+
+  return result.docs[0]?.id ?? null;
+};
 
 export type ProductInputData = Partial<Omit<Product, "shipping">> & {
   shipping?: Partial<Product["shipping"]>;

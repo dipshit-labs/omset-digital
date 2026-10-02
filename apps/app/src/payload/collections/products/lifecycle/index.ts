@@ -12,10 +12,28 @@ export {
   productLifecycleAfterRead,
   productLifecycleBeforeChange,
   productLifecycleHooks,
+  variantLifecycleAfterChange,
+  variantLifecycleBeforeChange,
+  variantLifecycleHooks,
 } from "./hooks";
-export type { ProductLifecycleHooks } from "./hooks";
+export type { ProductLifecycleHooks, VariantLifecycleHooks } from "./hooks";
 
-export { validatePhysicalPackaging } from "./packaging";
-export type { ValidatePhysicalPackagingArgs } from "./packaging";
+export {
+  normalizeShipping,
+  resolveDefaultPackage,
+  validatePhysicalPackaging,
+} from "./packaging";
+export type {
+  NormalizedShipping,
+  RawShipping,
+  ValidatePhysicalPackagingArgs,
+} from "./packaging";
 
 export { resolveDocumentStoreId } from "./store";
+
+export {
+  cleanupDefaultVariant,
+  deriveVariantTitle,
+  findDefaultVariant,
+} from "./variant";
+export type { VariantOptionInput } from "./variant";

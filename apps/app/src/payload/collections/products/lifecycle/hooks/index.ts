@@ -1,4 +1,4 @@
-import type { Product } from "@repo/types";
+import type { Product, Variant } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
@@ -8,6 +8,18 @@ import type {
 import { productLifecycleAfterChange } from "./afterChange";
 import { productLifecycleAfterRead } from "./afterRead";
 import { productLifecycleBeforeChange } from "./beforeChange";
+import { variantLifecycleAfterChange } from "./variantAfterChange";
+import { variantLifecycleBeforeChange } from "./variantBeforeChange";
+
+export interface VariantLifecycleHooks {
+  afterChange: CollectionAfterChangeHook<Variant>[];
+  beforeChange: CollectionBeforeChangeHook<Variant>[];
+}
+
+export const variantLifecycleHooks: VariantLifecycleHooks = {
+  afterChange: [variantLifecycleAfterChange],
+  beforeChange: [variantLifecycleBeforeChange],
+};
 
 export interface ProductLifecycleHooks {
   afterChange: CollectionAfterChangeHook<Product>[];
@@ -24,3 +36,5 @@ export const productLifecycleHooks: ProductLifecycleHooks = {
 export { productLifecycleAfterChange } from "./afterChange";
 export { productLifecycleAfterRead } from "./afterRead";
 export { productLifecycleBeforeChange } from "./beforeChange";
+export { variantLifecycleAfterChange } from "./variantAfterChange";
+export { variantLifecycleBeforeChange } from "./variantBeforeChange";

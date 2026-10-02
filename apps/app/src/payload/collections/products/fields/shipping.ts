@@ -3,7 +3,7 @@ import type { CheckboxField, Field, RelationshipField } from "payload";
 import { measurementField } from "@/payload/fields/measurement";
 import type { MeasurementFieldOverrides } from "@/payload/fields/measurement";
 
-import { resolveDefaultPackage } from "../lib/resolveDefaultPackage";
+import { resolveDefaultPackage } from "../lifecycle/packaging";
 
 interface ShippingFieldsOverrides {
   measurementOverrides?: MeasurementFieldOverrides;

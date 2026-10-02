@@ -1015,4 +1015,500 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     });
     expect(finalVariants.docs).toHaveLength(1);
   });
+  it("retains the optionless Default Variant when adding variantTypes to single-variant product", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Transition Store",
+        slug: "transition-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Transition Package",
+      },
+    });
+
+    const sizeType = await payload.create({
+      collection: "variantTypes",
+      data: {
+        label: "Size",
+        name: "size",
+        store: store.id,
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Initial single-variant product creation with virtual fields.
+      data: {
+        inventory: { stock: 10 },
+        pricing: { price: 100_000 },
+        slug: "transition-t-shirt",
+        store: store.id,
+        title: "Transition T-Shirt",
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 200 },
+        },
+      } as never,
+    });
+
+    const initialVariants = await payload.find({
+      collection: "variants",
+      where: { product: { equals: product.id } },
+    });
+    expect(initialVariants.docs).toHaveLength(1);
+    const [defaultVariant] = initialVariants.docs;
+    expect(defaultVariant?.options).toStrictEqual([]);
+
+    // Transition to multi-variant by adding variantTypes
+    const updatedProduct = await payload.update({
+      collection: "products",
+      id: product.id,
+      data: {
+        variantTypes: [sizeType.id],
+      },
+    });
+    expect(updatedProduct.variantTypes).toHaveLength(1);
+
+    // Crucial invariant: Default Variant is retained because no option-bearing variants exist yet
+    const midTransitionVariants = await payload.find({
+      collection: "variants",
+      where: { product: { equals: product.id } },
+    });
+    expect(midTransitionVariants.docs).toHaveLength(1);
+    expect(midTransitionVariants.docs[0]?.id).toBe(defaultVariant?.id);
+  });
+
+  it("cleans up optionless Default Variant once an option-bearing variant is confirmed", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Cleanup Store",
+        slug: "cleanup-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Cleanup Package",
+      },
+    });
+
+    const sizeType = await payload.create({
+      collection: "variantTypes",
+      data: {
+        label: "Size",
+        name: "size",
+        store: store.id,
+      },
+    });
+
+    const smallOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Small",
+        store: store.id,
+        value: "small",
+        variantType: sizeType.id,
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Single-variant product setup before adding variantTypes.
+      data: {
+        inventory: { stock: 10 },
+        pricing: { price: 100_000 },
+        slug: "cleanup-t-shirt",
+        store: store.id,
+        title: "Cleanup T-Shirt",
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 200 },
+        },
+      } as never,
+    });
+
+    await payload.update({
+      collection: "products",
+      id: product.id,
+      data: {
+        variantTypes: [sizeType.id],
+      },
+    });
+
+    // Confirm first option-bearing variant
+    const optionVariant = await payload.create({
+      collection: "variants",
+      // SAFETY: Creating confirmed option-bearing variant.
+      data: {
+        inventory: { stock: 5 },
+        options: [smallOption.id],
+        pricing: { price: 120_000 },
+        product: product.id,
+        store: store.id,
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 250 },
+        },
+      } as never,
+    });
+
+    // Optionless Default Variant must be cleaned up now that an option-bearing variant is confirmed
+    const finalVariants = await payload.find({
+      collection: "variants",
+      where: { product: { equals: product.id } },
+    });
+    expect(finalVariants.docs).toHaveLength(1);
+    expect(finalVariants.docs[0]?.id).toBe(optionVariant.id);
+    expect(finalVariants.docs[0]?.options).toHaveLength(1);
+  });
+
+  it("automatically derives and persists readable administrative titles for option-bearing variants", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Title Store",
+        slug: "title-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Title Package",
+      },
+    });
+
+    const sizeType = await payload.create({
+      collection: "variantTypes",
+      data: { label: "Size", name: "size", store: store.id },
+    });
+    const colorType = await payload.create({
+      collection: "variantTypes",
+      data: { label: "Color", name: "color", store: store.id },
+    });
+
+    const smallOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Small",
+        store: store.id,
+        value: "small",
+        variantType: sizeType.id,
+      },
+    });
+    const redOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Red",
+        store: store.id,
+        value: "red",
+        variantType: colorType.id,
+      },
+    });
+
+    const multiProduct = await payload.create({
+      collection: "products",
+      // SAFETY: Creating product with two variant types.
+      data: {
+        slug: "multi-axis-hoodie",
+        store: store.id,
+        title: "Multi-Axis Hoodie",
+        variantTypes: [sizeType.id, colorType.id],
+      } as never,
+    });
+
+    // Create variant with two options (Small and Red)
+    const twoOptionVariant = await payload.create({
+      collection: "variants",
+      // SAFETY: Creating multi-option variant.
+      data: {
+        inventory: { stock: 15 },
+        options: [String(smallOption.id), redOption.id],
+        pricing: { price: 250_000 },
+        product: multiProduct.id,
+        store: store.id,
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 400 },
+        },
+      } as never,
+    });
+
+    expect(twoOptionVariant.title).toBe("Small / Red");
+
+    // Single-option variant test on single-axis product
+    const singleAxisProduct = await payload.create({
+      collection: "products",
+      // SAFETY: Creating product with single variant type.
+      data: {
+        slug: "single-axis-cap",
+        store: store.id,
+        title: "Single Axis Cap",
+        variantTypes: [colorType.id],
+      } as never,
+    });
+
+    const singleOptionVariant = await payload.create({
+      collection: "variants",
+      // SAFETY: Creating single-option variant.
+      data: {
+        inventory: { stock: 20 },
+        options: [redOption.id],
+        pricing: { price: 90_000 },
+        product: singleAxisProduct.id,
+        store: store.id,
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 150 },
+        },
+      } as never,
+    });
+
+    expect(singleOptionVariant.title).toBe("Red");
+  });
+
+  it("enforces variant option constraints when creating multi-variant combinations", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Constraint Store",
+        slug: "constraint-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const pkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 20, width: 15 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 100 },
+        title: "Constraint Package",
+      },
+    });
+
+    const sizeType = await payload.create({
+      collection: "variantTypes",
+      data: { label: "Size", name: "size", store: store.id },
+    });
+    const colorType = await payload.create({
+      collection: "variantTypes",
+      data: { label: "Color", name: "color", store: store.id },
+    });
+
+    const smallOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Small",
+        store: store.id,
+        value: "small",
+        variantType: sizeType.id,
+      },
+    });
+    const redOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Red",
+        store: store.id,
+        value: "red",
+        variantType: colorType.id,
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Creating product with two variant types to test option constraints.
+      data: {
+        slug: "constraint-test-polo",
+        store: store.id,
+        title: "Constraint Test Polo",
+        variantTypes: [sizeType.id, colorType.id],
+      } as never,
+    });
+
+    // Incomplete combination: only 1 option provided when 2 variantTypes are configured
+    await expect(
+      payload.create({
+        collection: "variants",
+        // SAFETY: Incomplete variant options to test validation rejection.
+        data: {
+          options: [smallOption.id],
+          pricing: { price: 150_000 },
+          product: product.id,
+          store: store.id,
+        } as never,
+      })
+    ).rejects.toThrow("The following field is invalid: Variant Options");
+
+    // Valid combination succeeds
+    await payload.create({
+      collection: "variants",
+      // SAFETY: Valid variant options combination.
+      data: {
+        options: [smallOption.id, redOption.id],
+        pricing: { price: 150_000 },
+        product: product.id,
+        store: store.id,
+        shipping: {
+          package: pkg.id,
+          required: true,
+          weight: { unit: "g", value: 300 },
+        },
+      } as never,
+    });
+
+    // Duplicate combination on the same product is rejected
+    await expect(
+      payload.create({
+        collection: "variants",
+        // SAFETY: Duplicate variant options combination to test uniqueness rejection.
+        data: {
+          options: [smallOption.id, redOption.id],
+          pricing: { price: 150_000 },
+          product: product.id,
+          store: store.id,
+          shipping: {
+            package: pkg.id,
+            required: true,
+            weight: { unit: "g", value: 300 },
+          },
+        } as never,
+      })
+    ).rejects.toThrow("The following field is invalid: Variant Options");
+  });
+  it("normalizes variant shipping and resolves default package when package is omitted", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: {
+        name: "Shipping Store",
+        slug: "shipping-store",
+        subscription: { status: "trial" },
+        theme: "default",
+      },
+    });
+
+    const defaultPkg = await payload.create({
+      collection: "packages",
+      data: {
+        dimensions: { height: 10, length: 15, width: 10 },
+        isDefault: true,
+        store: store.id,
+        tareWeight: { unit: "g", value: 50 },
+        title: "Store Default Package",
+      },
+    });
+
+    const sizeType = await payload.create({
+      collection: "variantTypes",
+      data: { label: "Size", name: "size", store: store.id },
+    });
+    const medOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Medium",
+        store: store.id,
+        value: "medium",
+        variantType: sizeType.id,
+      },
+    });
+    const largeOption = await payload.create({
+      collection: "variantOptions",
+      data: {
+        label: "Large",
+        store: store.id,
+        value: "large",
+        variantType: sizeType.id,
+      },
+    });
+
+    const product = await payload.create({
+      collection: "products",
+      // SAFETY: Creating product with single variant type for variant shipping testing.
+      data: {
+        slug: "auto-package-product",
+        store: store.id,
+        title: "Auto Package Product",
+        variantTypes: [sizeType.id],
+      } as never,
+    });
+
+    // Physical variant without package specified: resolves store default package
+    const physicalVariant = await payload.create({
+      collection: "variants",
+      // SAFETY: Physical variant with omitted package.
+      data: {
+        options: [medOption.id],
+        pricing: { price: 130_000 },
+        product: product.id,
+        shipping: { required: true, weight: { unit: "g", value: 350 } },
+        store: store.id,
+      } as never,
+    });
+
+    const resolvedPkgId =
+      typeof physicalVariant.shipping?.package === "object"
+        ? physicalVariant.shipping.package?.id
+        : physicalVariant.shipping?.package;
+    expect(resolvedPkgId).toBe(defaultPkg.id);
+    expect(physicalVariant.shipping?.weight.value).toBe(350);
+
+    // Non-physical digital variant: normalizes weight to 0 and package to null
+    const digitalVariant = await payload.create({
+      collection: "variants",
+      // SAFETY: Digital variant with shipping required=false.
+      data: {
+        options: [largeOption.id],
+        pricing: { price: 50_000 },
+        product: product.id,
+        shipping: { required: false },
+        store: store.id,
+      } as never,
+    });
+
+    expect(digitalVariant.shipping?.required).toBeFalsy();
+    expect(digitalVariant.shipping?.package).toBeNull();
+    expect(digitalVariant.shipping?.weight.value).toBe(0);
+  });
 });

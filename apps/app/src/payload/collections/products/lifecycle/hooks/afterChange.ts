@@ -6,11 +6,11 @@ import type {
 } from "payload";
 import { extractID } from "payload/shared";
 
-import { normalizeShipping } from "../../lib/normalizeShipping";
-import type { RawShipping } from "../../lib/types";
 import { getStashedVirtualData } from "../context";
+import { normalizeShipping } from "../packaging";
+import type { RawShipping } from "../packaging";
 import { resolveDocumentStoreId } from "../store";
-import { findDefaultVariant } from "../variant";
+import { cleanupDefaultVariant, findDefaultVariant } from "../variant";
 
 const resolveCompareAtPrice = (
   raw?: Product["pricing"],
@@ -90,38 +90,6 @@ const extractShipping = (
     required: normalized.required,
     weight: normalized.weight,
   };
-};
-
-const cleanupDefaultVariant = async (
-  productId: Product["id"],
-  req: PayloadRequest
-): Promise<void> => {
-  const defaultVariant = await findDefaultVariant(req, productId, {
-    draft: true,
-  });
-  if (!defaultVariant) {
-    return;
-  }
-
-  const existing = await req.payload.find({
-    collection: "variants",
-    depth: 0,
-    draft: true,
-    limit: 2,
-    overrideAccess: true,
-    req,
-    where: { product: { equals: productId } },
-  });
-
-  if (existing.docs.length > 1) {
-    await req.payload.delete({
-      collection: "variants",
-      context: { ...req.context, "products:skipDefaultVariantSync": true },
-      id: defaultVariant.id,
-      overrideAccess: true,
-      req,
-    });
-  }
 };
 
 type VariantMutationPayload = Partial<
