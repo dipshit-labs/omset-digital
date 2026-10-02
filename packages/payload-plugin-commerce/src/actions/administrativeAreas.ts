@@ -20,16 +20,52 @@ export interface DrizzleDatabaseLike {
   query?: (sql: string, params?: unknown[]) => Promise<unknown>;
 }
 
+export interface CompiledSqlQuery {
+  params: unknown[];
+  sql: string;
+}
+
+export interface DrizzleSqlQueryLike {
+  toQuery?: (config: {
+    escapeName: (s: string) => string;
+    escapeParam: () => string;
+    escapeString: (s: string) => string;
+  }) => { params?: unknown[]; sql: string };
+}
+
+export interface LibSqlClientLike {
+  batch?: (stmts: unknown[], mode?: string) => Promise<unknown>;
+  execute?: (stmt: unknown) => Promise<unknown>;
+}
+
 let defaultAdministrativeAreasDb: DrizzleDatabaseLike | null = null;
 
-export const setAdministrativeAreasDb = (
-  db: DrizzleDatabaseLike | null
-): void => {
-  defaultAdministrativeAreasDb = db;
+export const setAdministrativeAreasDb = (db: unknown): void => {
+  // SAFETY: Setter receives unknown target and stores it for resolution by resolveDrizzleExecutor.
+  defaultAdministrativeAreasDb = (db ?? null) as DrizzleDatabaseLike | null;
 };
 
 export const getAdministrativeAreasDb = (): DrizzleDatabaseLike | null =>
   defaultAdministrativeAreasDb;
+
+const compileDrizzleQuery = (query: unknown): CompiledSqlQuery | null => {
+  if (query && typeof query === "object" && "toQuery" in query) {
+    // SAFETY: Drizzle SQL query interface exposes toQuery method for parameterized query compilation.
+    const candidate = query as DrizzleSqlQueryLike;
+    if (typeof candidate.toQuery === "function") {
+      const compiled = candidate.toQuery({
+        escapeName: (s: string) => `"${s}"`,
+        escapeParam: () => "?",
+        escapeString: (s: string) => `'${s}'`,
+      });
+      return {
+        params: compiled.params ?? [],
+        sql: compiled.sql,
+      };
+    }
+  }
+  return null;
+};
 
 const resolveDrizzleExecutor = (
   dbOrPayload?: unknown
@@ -43,6 +79,33 @@ const resolveDrizzleExecutor = (
     throw new Error(
       "No database instance provided or configured for administrative areas query. Pass db to the helper or configure it via setAdministrativeAreasDb."
     );
+  }
+
+  // Detect LibSQL in-process client passed directly as db
+  // SAFETY: Target is checked for LibSQL Client properties batch and execute without drizzle property.
+  const libSqlClient = target as LibSqlClientLike;
+  const executeFn = libSqlClient.execute;
+  if (
+    typeof libSqlClient.batch === "function" &&
+    typeof executeFn === "function" &&
+    !("drizzle" in target)
+  ) {
+    return async (query: unknown) => {
+      const compiled = compileDrizzleQuery(query);
+      // SAFETY: LibSQL client execute method accepts statement object with sql and args.
+      const res = compiled
+        ? await executeFn.call(libSqlClient, {
+            args: compiled.params,
+            sql: compiled.sql,
+          })
+        : await executeFn.call(libSqlClient, query);
+
+      // SAFETY: LibSQL query execution returns array of rows or result object with rows.
+      const rows = Array.isArray(res)
+        ? (res as RawAdministrativeAreaRow[])
+        : ((res as { rows?: RawAdministrativeAreaRow[] })?.rows ?? []);
+      return { rows };
+    };
   }
 
   const drizzleExecute =
@@ -63,12 +126,9 @@ const resolveDrizzleExecutor = (
   const queryFn = target.query;
   if (typeof queryFn === "function") {
     return async (query: unknown) => {
-      if (query && typeof query === "object" && "toSQL" in query) {
-        // SAFETY: Drizzle SQL query provides toSQL method returning parameterized sql and params.
-        const { params, sql: sqlStr } = (
-          query as { toSQL: () => { params: unknown[]; sql: string } }
-        ).toSQL();
-        const res = await queryFn.call(target, sqlStr, params);
+      const compiled = compileDrizzleQuery(query);
+      if (compiled) {
+        const res = await queryFn.call(target, compiled.sql, compiled.params);
         // SAFETY: Query execution returns array of rows or result object with rows.
         const rows = Array.isArray(res)
           ? (res as RawAdministrativeAreaRow[])

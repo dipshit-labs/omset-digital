@@ -36,11 +36,17 @@ export default defineConfig({
       },
     },
     {
-      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      plugins: ["vitest"],
+      files: [
+        "**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}",
+        "**/__tests__/**/*.{ts,tsx,js,jsx}",
+      ],
       rules: {
         "anti-slop/no-unknown-parameters": "off",
         "anti-slop/no-unsafe-dictionary-type": "off",
         "anti-slop/require-safety-comment-for-type-assertion": "off",
+        "vitest/no-standalone-expect": "off",
+        "vitest/prefer-importing-vitest-globals": "off",
       },
     },
     {
