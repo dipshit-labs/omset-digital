@@ -20,6 +20,8 @@
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.thresholds.statements=80 --coverage.thresholds.branches=80",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,6 +32,7 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:types",
     "@types/tsscmp": "catalog:types",
+    "@vitest/coverage-v8": "catalog:test",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   }

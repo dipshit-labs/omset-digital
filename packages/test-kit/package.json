@@ -28,6 +28,9 @@
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.integration.test.*'",
+    "test:integration": "vitest run --passWithNoTests integration",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -42,6 +45,7 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:types",
     "@types/pg": "^8.20.0",
+    "@vitest/coverage-v8": "catalog:test",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   }

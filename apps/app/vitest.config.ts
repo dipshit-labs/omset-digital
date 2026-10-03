@@ -19,8 +19,24 @@ export default defineProject(() => {
     },
     test: {
       css: true,
-      environment: "jsdom",
+      environment: "node",
       name: "app",
+      projects: [
+        {
+          test: {
+            environment: "node",
+            include: ["**/*.test.ts"],
+            name: "node",
+          },
+        },
+        {
+          test: {
+            environment: "jsdom",
+            include: ["**/*.test.tsx"],
+            name: "jsdom",
+          },
+        },
+      ],
       server: {
         deps: {
           inline: [/@payloadcms\/ui/u, /react-image-crop/u],

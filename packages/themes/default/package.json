@@ -12,6 +12,8 @@
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "@types/node": "catalog:types",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
+    "@vitest/coverage-v8": "catalog:test",
     "jsdom": "catalog:test",
     "react": "catalog:react",
     "react-dom": "catalog:react",

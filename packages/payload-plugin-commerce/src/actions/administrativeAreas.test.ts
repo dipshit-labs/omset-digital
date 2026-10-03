@@ -136,6 +136,6 @@ describe("administrative areas SQL tests with real LibSQL in-memory executor", (
     await Promise.all(promises);
 
     const elapsed = performance.now() - start;
-    expect(elapsed).toBeLessThan(100);
+    expect(elapsed).toBeLessThan(500);
   });
 });

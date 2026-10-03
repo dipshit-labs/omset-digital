@@ -29,6 +29,23 @@
       "dependsOn": ["transit"],
       "outputs": []
     },
+    "test:unit": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test", "!test/integrations/**"],
+      "outputs": []
+    },
+    "test:integration": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "outputs": [],
+      "env": ["DATABASE_URL"]
+    },
+    "test:coverage": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "outputs": ["coverage/**"],
+      "env": ["DATABASE_URL"]
+    },
     "test": {
       "dependsOn": ["transit"],
       "inputs": ["$TURBO_DEFAULT$", ".env.test"],

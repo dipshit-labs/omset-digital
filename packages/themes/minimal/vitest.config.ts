@@ -5,7 +5,22 @@ export default defineProject({
     tsconfigPaths: true,
   },
   test: {
-    environment: "jsdom",
     name: "theme-minimal",
+    projects: [
+      {
+        test: {
+          environment: "node",
+          include: ["**/*.test.ts"],
+          name: "node",
+        },
+      },
+      {
+        test: {
+          environment: "jsdom",
+          include: ["**/*.test.tsx"],
+          name: "jsdom",
+        },
+      },
+    ],
   },
 });
