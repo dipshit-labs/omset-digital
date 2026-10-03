@@ -101,5 +101,3 @@ export const syncThemes = async (
     })
   );
 };
-
-export const onInit = syncThemes;

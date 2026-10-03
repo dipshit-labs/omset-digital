@@ -44,7 +44,6 @@
   "devDependencies": {
     "@libsql/client": "catalog:payload",
     "@payloadcms/db-postgres": "catalog:payload",
-    "@payloadcms/db-sqlite": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
     "@repo/test-kit": "workspace:*",
     "@repo/typescript-config": "workspace:*",

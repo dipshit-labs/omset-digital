@@ -28,7 +28,6 @@
     "@repo/theme-default": "workspace:*",
     "@repo/theme-minimal": "workspace:*",
     "@repo/types": "workspace:*",
-    "@repo/ui": "workspace:*",
     "@t3-oss/env-nextjs": "catalog:core",
     "ioredis": "^6.0.0",
     "next": "catalog:react",
@@ -39,7 +38,6 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@payloadcms/db-sqlite": "catalog:payload",
     "@repo/test-kit": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:ui",

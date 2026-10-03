@@ -3,7 +3,7 @@ import type {
   ThemesPluginOptions,
 } from "./types";
 
-export const defaultPluginOptions = {
+const defaultPluginOptions = {
   autoSync: true,
   defaultMediaSlug: "media",
   enabled: true,

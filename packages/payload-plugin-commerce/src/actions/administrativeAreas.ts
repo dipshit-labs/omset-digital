@@ -2,7 +2,7 @@ import { sql } from "@payloadcms/db-postgres";
 
 import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
 
-export interface RawAdministrativeAreaRow {
+interface RawAdministrativeAreaRow {
   city_id?: number | string;
   city_name?: string;
   city_type?: string;
@@ -13,19 +13,19 @@ export interface RawAdministrativeAreaRow {
   subdistrict_name?: string;
 }
 
-export interface DrizzleDatabaseLike {
+interface DrizzleDatabaseLike {
   db?: { drizzle?: { execute?: (q: unknown) => Promise<unknown> } };
   drizzle?: { execute?: (q: unknown) => Promise<unknown> };
   execute?: (q: unknown) => Promise<unknown>;
   query?: (sql: string, params?: unknown[]) => Promise<unknown>;
 }
 
-export interface CompiledSqlQuery {
+interface CompiledSqlQuery {
   params: unknown[];
   sql: string;
 }
 
-export interface DrizzleSqlQueryLike {
+interface DrizzleSqlQueryLike {
   toQuery?: (config: {
     escapeName: (s: string) => string;
     escapeParam: () => string;
@@ -33,7 +33,7 @@ export interface DrizzleSqlQueryLike {
   }) => { params?: unknown[]; sql: string };
 }
 
-export interface LibSqlClientLike {
+interface LibSqlClientLike {
   batch?: (stmts: unknown[], mode?: string) => Promise<unknown>;
   execute?: (stmt: unknown) => Promise<unknown>;
 }

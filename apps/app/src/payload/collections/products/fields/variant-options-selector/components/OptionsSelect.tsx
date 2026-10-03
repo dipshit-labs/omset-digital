@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import styles from "./OptionsSelect.module.css";
 
-export interface VariantTypeConfig {
+interface VariantTypeConfig {
   id: number | string;
   label: string;
   options: ReactSelectOption[];

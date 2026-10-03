@@ -1,13 +1,13 @@
 import type { CollectionSlug, PayloadRequest } from "payload";
 
-export type TenantFieldValue =
+type TenantFieldValue =
   | { id?: number | string; slug?: string }
   | number
   | string
   | null
   | undefined;
 
-export interface TenantDataRecord {
+interface TenantDataRecord {
   [key: string]: TenantFieldValue;
 }
 

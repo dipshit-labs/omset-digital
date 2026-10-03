@@ -63,7 +63,3 @@ const defaultActions = createAdministrativeAreasActions(async () => {
 export const { getProvinces } = defaultActions;
 export const { getCities } = defaultActions;
 export const { getSubdistricts } = defaultActions;
-
-export const fetchProvinces = getProvinces;
-export const fetchCities = getCities;
-export const fetchSubdistricts = getSubdistricts;

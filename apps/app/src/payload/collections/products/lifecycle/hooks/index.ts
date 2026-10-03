@@ -32,9 +32,3 @@ export const productLifecycleHooks: ProductLifecycleHooks = {
   afterRead: [productLifecycleAfterRead],
   beforeChange: [productLifecycleBeforeChange],
 };
-
-export { productLifecycleAfterChange } from "./afterChange";
-export { productLifecycleAfterRead } from "./afterRead";
-export { productLifecycleBeforeChange } from "./beforeChange";
-export { variantLifecycleAfterChange } from "./variantAfterChange";
-export { variantLifecycleBeforeChange } from "./variantBeforeChange";

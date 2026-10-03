@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 
 export type { FormattedShippingRateOption } from "@repo/payload-plugin-commerce/actions";
-export { formatEstimatedDays } from "@repo/payload-plugin-commerce/actions";
 
 export interface CheckoutShippingSectionProps {
   className?: string;

@@ -45,7 +45,7 @@ export const SheetOverlay = ({
   />
 );
 
-export type SheetSide = "top" | "right" | "bottom" | "left";
+type SheetSide = "top" | "right" | "bottom" | "left";
 
 export interface SheetContentProps extends BaseUISheet.Popup.Props {
   side?: SheetSide;

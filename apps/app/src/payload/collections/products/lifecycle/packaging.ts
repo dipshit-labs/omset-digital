@@ -94,7 +94,7 @@ export const resolveDefaultPackage = async (
   return result.docs[0]?.id ?? null;
 };
 
-export type ProductInputData = Partial<Omit<Product, "shipping">> & {
+type ProductInputData = Partial<Omit<Product, "shipping">> & {
   shipping?: Partial<Product["shipping"]>;
 };
 

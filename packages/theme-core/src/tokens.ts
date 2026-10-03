@@ -25,12 +25,10 @@ export const FIXED_THEME_VARIABLES = {
   warningForeground: "--theme-warning-foreground",
 } as const;
 
-export const THEME_VARIABLES = {
+export const THEME_CSS_VARIABLES = {
   ...MERCHANT_THEME_VARIABLES,
   ...FIXED_THEME_VARIABLES,
 } as const;
-
-export const THEME_CSS_VARIABLES = THEME_VARIABLES;
 
 export type MerchantThemeVariable =
   (typeof MERCHANT_THEME_VARIABLES)[keyof typeof MERCHANT_THEME_VARIABLES];

@@ -24,7 +24,6 @@
     "@types/node": "catalog:types",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
-    "@vitejs/plugin-react": "catalog:test",
     "jsdom": "catalog:test",
     "react": "catalog:react",
     "react-dom": "catalog:react",

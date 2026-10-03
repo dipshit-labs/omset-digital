@@ -16,7 +16,6 @@ export {
   MERCHANT_THEME_VARIABLES,
   type MerchantThemeVariable,
   THEME_CSS_VARIABLES,
-  THEME_VARIABLES,
   type ThemeCssVars,
   type ThemeCssVariable,
   type ThemeTokens,

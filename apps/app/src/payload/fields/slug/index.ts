@@ -54,5 +54,3 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
 
   return [slugFieldConfig, checkBoxField];
 };
-
-export const SlugField = slugField;

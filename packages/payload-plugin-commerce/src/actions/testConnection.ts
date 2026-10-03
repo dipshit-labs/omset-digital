@@ -25,7 +25,7 @@ export type TestConnectionInput =
   | ({ provider: "xendit" } & TestXenditInput)
   | ({ provider: "rajaongkir" } & TestRajaOngkirInput);
 
-export interface TestConnectionData {
+interface TestConnectionData {
   [key: string]: boolean | number | string | undefined;
 }
 
