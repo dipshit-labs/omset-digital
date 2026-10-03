@@ -5,7 +5,7 @@ Issues and specs for this repo live as GitHub issues on `dipshit-labs/omset-digi
 ## Conventions
 
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
-- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
+- **Read an issue**: `gh issue view <n> && gh issue view <n> --comments`, in one call, plain view first. Off a TTY `--comments` prints the comments *only*, never the body, so one call is never enough. Drop the second half only when the plain view shows `comments: 0`.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
@@ -19,7 +19,7 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 When set to `yes`, PRs run through the same labels and states as issues, using the `gh pr` equivalents:
 
-- **Read a PR**: `gh pr view <number> --comments` and `gh pr diff <number>` for the diff.
+- **Read a PR**: `gh pr view <n> && gh pr view <n> --comments` (PR view shows no comment count, so always both), and `gh pr diff <n>` for the diff. `--comments` omits review comments; fetch those with `gh api repos/{owner}/{repo}/pulls/<n>/comments`.
 - **List external PRs for triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` then keep only `authorAssociation` of `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, or `NONE` (drop `OWNER`/`MEMBER`/`COLLABORATOR`).
 - **Comment / label / close**: `gh pr comment`, `gh pr edit --add-label`/`--remove-label`, `gh pr close`.
 
@@ -31,15 +31,16 @@ Create a GitHub issue.
 
 ## When a skill says "fetch the relevant ticket"
 
-Run `gh issue view <number> --comments`.
+Read it as in **Read an issue** above: body first, then comments.
 
 ## Wayfinding operations
 
 Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
 
 - **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: GitHub's **native issue dependencies**, the canonical, UI-visible representation. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only, the live gate). Where dependencies aren't available, fall back to a `Blocked by: #<n>, #<n>` line at the top of the child body. A ticket is unblocked when every blocker is closed.
-- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
+- **Child ticket**: a GitHub sub-issue of the map: `gh issue create --parent <map> ...`, or `gh issue edit <n> --parent <map>` for an existing issue (`gh issue edit <map> --add-sub-issue <n>,<n>` from the other side). Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
+- **Blocking**: GitHub's **native issue dependencies**, the canonical, UI-visible representation. `gh issue create --blocked-by <n>,<n>` on creation, or `gh issue edit <child> --add-blocked-by <n>` / `gh issue edit <blocker> --add-blocking <n>` later. Plain issue numbers or URLs; no database ids. A ticket is unblocked when every blocker is closed.
+- **Reading structure**: the plain `gh issue view <n>` header already prints `parent:`, `sub-issues:`, `blocked-by:` and `blocking:`. Via `--json` (both `view` and `list`): `parent`, `subIssues`, `subIssuesSummary`, `blockedBy`, `blocking`. **Blockers are listed regardless of state**, in the header and in `blockedBy.totalCount` alike, so a ticket whose blockers are all closed still looks blocked. Check `blockedBy.nodes[].state` before treating it as blocked.
+- **Frontier query**, one call: `gh issue list --state open --limit 200 --json number,parent,assignees,blockedBy --jq '[.[] | select(.parent.number==<map>) | select(.assignees|length==0) | select([.blockedBy.nodes[]|select(.state=="OPEN")]|length==0) | .number] | sort | first'`. Open children of the map, no assignee, no *open* blocker; lowest number wins as the proxy for map order.
 - **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
 - **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.

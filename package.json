@@ -46,10 +46,10 @@
         "@shadcn/lint": "^0.2.0",
         "eslint-plugin-perfectionist": "^5.12.1",
         "lefthook": "^2.1.14",
-        "oxfmt": "^0.70.0",
+        "oxfmt": "^0.71.0",
         "oxlint": "^1.85.0",
         "turbo": "^2.11.4",
-        "ultracite": "7.12.0"
+        "ultracite": "7.12.2"
       },
       "types": {
         "@types/bun": "^1.4.0",
