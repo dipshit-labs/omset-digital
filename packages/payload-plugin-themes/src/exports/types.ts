@@ -4,9 +4,9 @@ export type {
   CreateThemesCollectionOptions,
   SanitizedThemesPluginOptions,
   SyncThemesOptions,
-  ThemeSyncDoc,
-  ThemeSyncPayload,
   ThemesPluginOptions,
   ThemesPluginOverrides,
   ThemesPluginSlugs,
-} from "@/types";
+  ThemeSyncDoc,
+  ThemeSyncPayload,
+} from "../types";

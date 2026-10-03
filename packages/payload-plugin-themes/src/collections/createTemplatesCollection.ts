@@ -1,10 +1,10 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Block, CollectionConfig, CollectionSlug, Field } from "payload";
 
-import { manifestToPayloadBlocks } from "@/fields/ThemeSettingsFields/converter";
-import type { CreateTemplatesCollectionOptions } from "@/types";
-import { generateThemePreviewPath } from "@/utilities/generateThemePreviewPath";
-import { resolveTenantStoreSlug } from "@/utilities/resolveTenantStoreSlug";
+import { manifestToPayloadBlocks } from "../fields/ThemeSettingsFields/converter";
+import type { CreateTemplatesCollectionOptions } from "../types";
+import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
+import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
 export const createTemplatesCollection = (
   optionsOrManifests:

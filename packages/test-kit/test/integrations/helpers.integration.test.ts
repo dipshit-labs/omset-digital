@@ -1,6 +1,5 @@
+import { createTestPayload, resetDatabase } from "@repo/test-kit";
 import { describe, expect, it } from "vitest";
-
-import { createTestPayload, resetDatabase } from "../../src/helpers";
 
 describe("@repo/test-kit lifecycle integration helpers", () => {
   it("boots a real Payload instance with named shared in-memory SQLite URI", async () => {

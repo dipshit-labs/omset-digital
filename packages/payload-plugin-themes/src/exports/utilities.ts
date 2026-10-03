@@ -1,7 +1,7 @@
 export {
   generateThemePreviewPath,
   type GenerateThemePreviewPathOptions,
-} from "@/utilities/generateThemePreviewPath";
+} from "../utilities/generateThemePreviewPath";
 
 export {
   isThemeDocumentEventMessage,
@@ -9,9 +9,9 @@ export {
   type ThemeDocumentEventMessage,
   type ThemeLivePreviewDataMessage,
   type ThemePreviewMessage,
-} from "@/utilities/isThemePreviewMessage";
+} from "../utilities/isThemePreviewMessage";
 
 export {
   resolveTenantStoreSlug,
   type ResolveTenantStoreSlugOptions,
-} from "@/utilities/resolveTenantStoreSlug";
+} from "../utilities/resolveTenantStoreSlug";

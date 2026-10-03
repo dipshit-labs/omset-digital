@@ -1,7 +1,7 @@
 import { Factory } from "fishery";
 import type { Payload } from "payload";
 
-import type { StoreCredentials } from "@/types";
+import type { StoreCredentials } from "../../src/types";
 
 export interface StoreCredentialsTransientParams {
   payload?: Payload;

@@ -1,10 +1,10 @@
 export {
-  ThemeLivePreviewListener,
   ready,
   subscribeThemeLivePreview,
+  ThemeLivePreviewListener,
   type ReadyOptions,
   type SubscribeThemeLivePreviewOptions,
   type ThemeLivePreviewListenerProps,
   type ThemeLivePreviewUpdate,
   type UnsubscribeThemeLivePreview,
-} from "@/components/ThemeLivePreview";
+} from "../components/ThemeLivePreview";

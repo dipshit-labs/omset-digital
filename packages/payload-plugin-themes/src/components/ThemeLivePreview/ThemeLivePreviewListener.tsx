@@ -8,8 +8,7 @@ import type {
 import type { ReactElement } from "react";
 import { useEffect } from "react";
 
-import type { ThemeDocumentEventMessage } from "@/utilities/isThemePreviewMessage";
-
+import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import type { ThemeLivePreviewUpdate } from "./subscribe";
 import { subscribeThemeLivePreview } from "./subscribe";
 
