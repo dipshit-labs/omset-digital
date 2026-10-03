@@ -83,8 +83,8 @@
     "check": "ultracite check --deny-warnings --report-unused-disable-directives",
     "fix": "ultracite fix",
     "knip": "knip --cache --treat-config-hints-as-errors",
-    "clean": "turbo run clean && git clean -xdf .cache .turbo node_modules",
-    "shadcn": "bun --filter @repo/ui shadcn",
+    "clean": "git clean -xdf .cache .turbo node_modules",
+    "clean:workspace": "turbo run clean",
     "prepare": "lefthook install"
   },
   "devDependencies": {

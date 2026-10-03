@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": [
+        "PAYLOAD_SECRET",
+        "PAYLOAD_SEED",
+        "DATABASE_URL",
+        "RESEND_API_KEY",
+        "NEXT_PUBLIC_SERVER_URL"
+      ]
+    },
+    "dev": {
+      "env": [
+        "PAYLOAD_SECRET",
+        "PAYLOAD_SEED",
+        "DATABASE_URL",
+        "RESEND_API_KEY",
+        "NEXT_PUBLIC_SERVER_URL"
+      ]
+    }
+  }
+}

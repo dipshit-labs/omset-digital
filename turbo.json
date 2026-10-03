@@ -2,62 +2,52 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "stream",
   "tasks": {
-    "transit": {
-      "dependsOn": ["^transit"]
-    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
         ".env*",
+        "!.env.test",
         "!**/*.test.*",
         "!**/*.spec.*",
+        "!test/**",
         "!vitest.config.*",
         "!README.md",
         "!AGENTS.md"
       ],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"],
-      "env": [
-        "DATABASE_URL",
-        "PAYLOAD_SECRET",
-        "RESEND_API_KEY",
-        "PAYLOAD_SEED",
-        "NEXT_PUBLIC_SERVER_URL"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "typecheck": {
-      "dependsOn": ["transit"],
-      "outputs": []
+      "dependsOn": ["topo"],
+      "inputs": ["$TURBO_DEFAULT$"]
+    },
+    "test": {
+      "dependsOn": ["topo"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "env": ["DATABASE_URL"]
     },
     "test:unit": {
-      "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.test", "!test/integrations/**"],
-      "outputs": []
+      "dependsOn": ["topo"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test", "!test/integrations/**"]
     },
     "test:integration": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["topo"],
       "inputs": ["$TURBO_DEFAULT$", ".env.test"],
-      "outputs": [],
       "env": ["DATABASE_URL"]
     },
     "test:coverage": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["topo"],
       "inputs": ["$TURBO_DEFAULT$", ".env.test"],
       "outputs": ["coverage/**"],
       "env": ["DATABASE_URL"]
-    },
-    "test": {
-      "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
-      "outputs": []
     },
     "dev": {
       "cache": false,
       "persistent": true,
       "interruptible": true
     },
-    "clean": {
-      "cache": false
-    }
+    "//#clean": { "cache": false },
+    "clean": { "cache": false },
+    "topo": { "dependsOn": ["^topo"] }
   }
 }
