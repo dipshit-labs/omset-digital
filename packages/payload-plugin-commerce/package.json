@@ -46,6 +46,7 @@
     "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
     "@repo/test-kit": "workspace:*",
+    "@repo/types": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/dom": "catalog:test",
     "@testing-library/react": "catalog:test",

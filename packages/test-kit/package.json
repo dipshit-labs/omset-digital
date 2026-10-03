@@ -11,6 +11,18 @@
     "./helpers": {
       "types": "./src/helpers.ts",
       "default": "./src/helpers.ts"
+    },
+    "./msw": {
+      "types": "./src/msw/index.ts",
+      "default": "./src/msw/index.ts"
+    },
+    "./msw/setup": {
+      "types": "./src/msw/setup.ts",
+      "default": "./src/msw/setup.ts"
+    },
+    "./msw/handlers": {
+      "types": "./src/msw/handlers/index.ts",
+      "default": "./src/msw/handlers/index.ts"
     }
   },
   "scripts": {
@@ -18,11 +30,18 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "devDependencies": {
+  "dependencies": {
+    "@libsql/client": "catalog:payload",
+    "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/db-sqlite": "catalog:payload",
+    "msw": "catalog:test",
+    "payload": "catalog:payload",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:types",
-    "payload": "catalog:payload",
+    "@types/pg": "^8.20.0",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
   }

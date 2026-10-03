@@ -1,9 +1,4 @@
-import {
-  createTestReq,
-  describe,
-  it,
-  setTestPayloadConfig,
-} from "@repo/test-kit";
+import { defineIntegrationSuite } from "@repo/test-kit";
 import type { CollectionConfig, Payload } from "payload";
 import { expect } from "vitest";
 
@@ -42,7 +37,7 @@ const storesCollection: CollectionConfig = {
 
 const packagesCollection = createPackagesCollection();
 
-setTestPayloadConfig({
+const { describe, it } = defineIntegrationSuite({
   collections: [storesCollection, packagesCollection],
 });
 
@@ -59,6 +54,7 @@ const createTestStore = (payload: Payload, name: string, slug: string) =>
 
 describe("packages collection integration", () => {
   it("assigns tenant store identifier when creating package with tenant header", async ({
+    createReq,
     payload,
   }) => {
     const store = await createTestStore(payload, "Store Alpha", "store-alpha");
@@ -66,7 +62,7 @@ describe("packages collection integration", () => {
     const headers = new Headers();
     headers.set("cookie", `payload-tenant=${store.id}`);
     headers.set("payload-tenant", String(store.id));
-    const req = createTestReq({ headers });
+    const req = createReq({ headers });
 
     const pkg = await payload.create({
       collection: "packages",

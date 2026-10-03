@@ -1,10 +1,10 @@
 // @vitest-environment node
-import { describe, it, setTestPayloadConfig } from "@repo/test-kit";
+import { defineIntegrationSuite } from "@repo/test-kit";
 import { expect } from "vitest";
 
 import { Orders } from "./index";
 
-setTestPayloadConfig({
+const { describe, it } = defineIntegrationSuite({
   collections: [Orders],
 });
 

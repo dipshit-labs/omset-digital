@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { createTestPayload, resetDatabase } from "./helpers";
 
 describe("@repo/test-kit lifecycle integration helpers", () => {
-  it("boots a real Payload instance with SQLite worker path and caller collections", async () => {
+  it("boots a real Payload instance with named shared in-memory SQLite URI", async () => {
+    const workerId = process.env.VITEST_POOL_ID ?? "0";
+    const expectedUri = `file:test_mem_${workerId}?mode=memory&cache=shared`;
+
     const payload = await createTestPayload({
       collections: [
         {
@@ -18,6 +21,20 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
       expect(payload).toBeDefined();
       expect(payload.collections.widgets).toBeDefined();
       expect(payload.find).toBeTypeOf("function");
+      let clientUrl: string | undefined;
+      const { db } = payload;
+      if (db && typeof db === "object" && "clientConfig" in db) {
+        const { clientConfig } = db;
+        if (
+          clientConfig &&
+          typeof clientConfig === "object" &&
+          "url" in clientConfig
+        ) {
+          clientUrl =
+            typeof clientConfig.url === "string" ? clientConfig.url : undefined;
+        }
+      }
+      expect(clientUrl).toBe(expectedUri);
     } finally {
       await payload.destroy();
     }

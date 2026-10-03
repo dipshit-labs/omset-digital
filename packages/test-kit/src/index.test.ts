@@ -1,23 +1,34 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestReq } from "./helpers";
 import {
+  createAppTestPayload,
+  createTestPayload,
+  getSqliteMemoryUri,
+} from "./helpers";
+import {
+  createTestReq,
+  defineIntegrationSuite,
   describe as fixtureDescribe,
+  handlers,
   it as fixtureIt,
+  server,
   setTestPayloadConfig,
+  test as fixtureTest,
 } from "./index";
 
-describe("@repo/test-kit fixture exports", () => {
-  it("provides describe test suite runner", () => {
+describe("@repo/test-kit public interface exports", () => {
+  it("provides test suite and test case runners", () => {
     expect(fixtureDescribe).toBeTypeOf("function");
-  });
-
-  it("provides it test case runner", () => {
     expect(fixtureIt).toBeTypeOf("function");
+    expect(fixtureTest).toBeTypeOf("function");
+    expect(defineIntegrationSuite).toBeTypeOf("function");
+    expect(setTestPayloadConfig).toBeTypeOf("function");
   });
 
-  it("provides setTestPayloadConfig helper", () => {
-    expect(setTestPayloadConfig).toBeTypeOf("function");
+  it("exports MSW centralized handlers and server instance", () => {
+    expect(server).toBeDefined();
+    expect(Array.isArray(handlers)).toBeTruthy();
+    expect(handlers.length).toBeGreaterThanOrEqual(8);
   });
 });
 
@@ -38,5 +49,15 @@ describe("@repo/test-kit request helpers", () => {
     expect(req.user).toBeNull();
     expect(req.headers).toBeInstanceOf(Headers);
     expect(req.headers.get("x-tenant-id")).toBeNull();
+  });
+});
+
+describe("@repo/test-kit helper exports isolation", () => {
+  it("keeps lower-level database lifecycle functions in helpers module", () => {
+    expect(getSqliteMemoryUri("4")).toBe(
+      "file:test_mem_4?mode=memory&cache=shared"
+    );
+    expect(createTestPayload).toBeTypeOf("function");
+    expect(createAppTestPayload).toBeTypeOf("function");
   });
 });
