@@ -1,89 +1,80 @@
-# Shared test kit and two-tier testing strategy
+# Shared test kit and testing architecture
 
 > **Status:** Accepted
 
-Omset Digital replaces hand-rolled Payload mock clients and manual hook-invocation test patterns with a two-tier harness: pure unit tests for isolated functions, and real Payload Local API integration tests backed by `@payloadcms/db-sqlite` with per-worker ephemeral SQLite databases. A new `@repo/test-kit` package owns the shared fixture helpers and Fishery factories.
+Omset Digital organizes testing into discrete task boundaries: pure unit and UI component tests colocated inside `src/`, and database integration tests in a flat `test/integrations/` directory. Packages run ephemeral tests against named in-memory SQLite instances, while `apps/app` runs against worker-scoped PostgreSQL schemas using `DATABASE_URL`. Outbound network requests to third-party services are intercepted with Mock Service Worker (MSW). Shared test infrastructure lives in `@repo/test-kit`.
 
 ## Context and problem statement
 
-Three test files in the repository implement their own Payload simulators:
+Earlier test setups suffered from five issues:
 
-- `packages/payload-plugin-commerce/src/collections/packages.integration.test.ts` — extracts hooks by array index, builds a hand-rolled `Where` AST parser, and manually sequences `beforeChange`/`afterChange` calls.
-- `packages/payload-plugin-commerce/src/collections/storeCredentials.integration.test.ts` — implements a recursive field-level `beforeChange` pipeline runner to test that credential values are encrypted.
-- `apps/app/src/payload/collections/orders/index.integration.test.ts` — builds a 70-line fake Payload client (`createTestOrderPayloadClient`) with its own `create`, `findByID`, and `update` loop.
-
-All three share the same failure mode: they simulate Payload rather than run it, so they miss real field validation, cascading hook order, Drizzle constraint enforcement, and relation population. Renaming a hook or adding a collection field requires updating the mock in addition to the production code. The mocks also provide false confidence: a test can pass against the fake while the real Payload instance crashes.
-
-A fourth file, `packages/payload-plugin-commerce/src/actions/administrativeAreas.integration.test.ts`, is a different case. The `getProvinces`/`getCities`/`getSubdistricts` functions accept a duck-typed Drizzle executor and bypass Payload entirely. The existing test supplies a hand-written SQL string matcher against the 7,200-row seed dataset; this tests the query output logic, not Payload lifecycle. It should run against a real LibSQL executor rather than a string-matching mock, but it does not need a Payload boot.
+1. Hand-rolled Payload mock clients simulated collection hooks instead of executing real lifecycle validations.
+2. Vitest defaulted to `jsdom` in `apps/app`, requiring manual `// @vitest-environment node` docblocks in dozens of server files.
+3. File-based SQLite on disk spent excessive time spawning worker processes and running Drizzle pushes.
+4. External API clients relied on disparate fetch spies and ad-hoc mocks without standardized network contracts.
+5. Lack of discrete Turborepo task boundaries forced full test execution across packages even when only UI or pure functions changed, with no V8 coverage baseline.
 
 ## Decisions
 
-### 1. Two-tier test classification
+### 1. Suite placement and file conventions
 
-Every test file falls into exactly one of two tiers.
+Test files follow strict placement rules:
 
-**Tier 1 — unit test (`.test.ts`):** Pure functions with no database interaction. Tests hook logic in isolation, access control predicates, pure calculations (shipping formulas, discount rules), and field-level `access.read`/`access.update` guards. These never boot Payload.
+- **Colocated unit and UI tests (`src/`):** Pure logic, utility functions, access predicates, and React components stay directly adjacent to their implementation file. Pure TypeScript tests use `<name>.test.ts`. React component tests use `<name>.test.tsx`.
+- **Flat integration tests (`test/integrations/`):** Tests requiring Payload Local API or database operations live in a flat `test/integrations/` folder at the package or app root. Files retain the `<feature>.integration.test.ts` suffix (for example `test/integrations/packages.integration.test.ts`, `test/integrations/catalog.integration.test.ts`, `test/integrations/webhooks.integration.test.ts`).
+- **Centralized document factories (`test/factories/`):** Fishery factories live in `test/factories/` at package and app roots (for example `apps/app/test/factories/orderFactory.ts`).
 
-**Tier 2 — integration test (`.integration.test.ts`):** Tests that exercise real Payload collection hooks, field validation, relational queries, or full create/update/read round-trips. These always use a real Payload Local API instance backed by `@payloadcms/db-sqlite`.
+### 2. Turborepo task model and caching
 
-A test that only calls `payload.find` or `payload.create` with a real adapter belongs in tier 2. A test that only calls an exported TypeScript function with mock arguments belongs in tier 1. Files that mix both tiers are split.
+Testing splits into discrete Turborepo tasks:
 
-### 2. `@repo/test-kit` package
+- `test:unit`: runs Vitest across `src/**/*.test.{ts,tsx}`. Changes to pure code yield fast Turborepo cache hits.
+- `test:integration`: runs Vitest across `test/integrations/**/*.integration.test.ts`. Declared in `package.json` only for packages and apps that contain integration tests (`apps/app`, `packages/payload-plugin-commerce`, `packages/payload-plugin-themes`, `packages/test-kit`).
+- `test`: composite task depending on `test:unit` and `test:integration`.
+- `test:coverage`: runs Vitest with `@vitest/coverage-v8`, outputting to `coverage/**`. Turborepo caches this task via `outputs: ["coverage/**"]`.
 
-A new `packages/test-kit/` workspace package (`@repo/test-kit`) owns all shared test infrastructure. It is a `devDependency` only and carries zero production imports.
+### 3. Environment dispatch without docblocks
 
-Public exports:
+All Vitest configurations set `environment: "node"` as the default. Component tests render in JSDOM automatically using `environmentMatchGlobs`:
 
 ```typescript
-// Vitest fixture extension — inject a scoped Payload instance per test file
-export { it, describe } from "./src/fixture";
-
-// Raw lifecycle helpers — for files that mix unit + integration tests
-export { createTestPayload } from "./src/createTestPayload";
-export { resetDatabase } from "./src/resetDatabase";
-
-// Mock request builder
-export { createTestReq } from "./src/createTestReq";
+test: {
+  environment: "node",
+  environmentMatchGlobs: [
+    ["**/*.test.tsx", "jsdom"],
+  ],
+}
 ```
+File-level `// @vitest-environment` docblocks remain permitted when an explicit file override is necessary, but are avoided when `environmentMatchGlobs` already resolves the environment.
+### 4. Database isolation strategy
 
-`createTestPayload(overrides)` accepts a partial `SanitizedConfig` (collections, plugins) and boots a Payload instance with `@payloadcms/db-sqlite` pointed at `file:./.tmp/test-${VITEST_POOL_ID ?? 0}.db`. The caller supplies collections; `@repo/test-kit` supplies the adapter and a fixed test secret. It never imports from `apps/app`.
+Local databases isolate by execution scope:
 
-`resetDatabase(payload)` disables foreign key enforcement, deletes all rows from every Drizzle-tracked table, and re-enables foreign key enforcement. Used in `beforeEach` to give each test a clean slate without reinitializing the schema.
+- **Packages (Named in-memory SQLite):** Packages such as `payload-plugin-commerce` boot `@payloadcms/db-sqlite` with `file:test_mem_${workerId}?mode=memory&cache=shared`. Named shared-memory preserves tables across connection pools without writing temporary files to disk.
+- **Core application (Worker-scoped PostgreSQL schemas):** `apps/app` connects to PostgreSQL via `DATABASE_URL`. `@repo/test-kit` derives a worker schema (`test_worker_${VITEST_POOL_ID ?? 0}`). It runs `CREATE SCHEMA IF NOT EXISTS` at boot, table truncation during `resetDatabase`, and `DROP SCHEMA IF EXISTS ... CASCADE` during teardown. If `DATABASE_URL` is missing, tests fail fast.
 
-`createTestReq(opts)` returns a typed `PayloadRequest` stub with `user`, `headers`, and `payload` fields populated. It satisfies the interface needed by hook and access functions without booting a server.
+### 5. Outbound network mocking with MSW
 
-The `it`/`describe` fixture extension wraps `createTestPayload` and `resetDatabase` in Vitest's `test.extend()` API so that a `payload` fixture is available in the test body with zero setup boilerplate for the common case.
+Mock Service Worker handles external network boundaries:
 
-### 3. Fishery factories colocated per package
+- Shared request handlers for third-party gateways (Midtrans, Xendit, RajaOngkir, Resend) live in `@repo/test-kit/src/msw/handlers/`.
+- Global Vitest setup in `@repo/test-kit/src/msw/setup.ts` starts the interceptor before all tests, resets runtime overrides after each test, and closes the server after all tests complete.
+- Tests override specific response codes or network failures using `server.use(...)`.
 
-Document factories using Thoughtbot Fishery live in a `test/` folder at each package root (e.g. `packages/payload-plugin-commerce/test/factories/`). They are not shared via `@repo/test-kit` because factories for plugin-specific documents (packages, store credentials) are only relevant to their own package, and factories for app-layer documents (orders, stores) are only relevant to `apps/app`. Cross-package factory sharing would couple packages through their data shapes.
+### 6. V8 code coverage
 
-Each factory's `onCreate` hook receives a `Payload` instance via `transientParams.payload` and persists the document through the Local API. The factory is typed against generated types from `@repo/types`.
-
-### 4. SQLite isolation strategy
-
-Each Vitest worker receives a unique database file path derived from `VITEST_POOL_ID`. This supports WAL mode, survives parallel test runs without shared-cache bleed, and is cleaned up by deleting the `.tmp/` directory in `afterAll`. In-memory mode (`file::memory:?cache=shared`) is not used as the default because it disables WAL and can bleed between workers within the same process.
-
-### 5. Migration plan for existing files
-
-| File | Action |
-|---|---|
-| `packages/payload-plugin-commerce/src/collections/packages.integration.test.ts` | Rewrite against real Payload + SQLite. Delete `runBeforeHook`, `mockCount`, `countFn`, and `isWhereField`. |
-| `apps/app/src/payload/collections/orders/index.integration.test.ts` | Split. Tests 1–4 (persist/retrieve/update `paymentMetadata`) rewrite against real Payload + SQLite. Tests 5–6 (legacy `afterRead` backfill) and tests 7–8 (field-level access control) move to `orders/paymentMetadata.test.ts` as tier-1 unit tests. Delete `createTestOrderPayloadClient` and `runOrderAfterReadHooks`. |
-| `packages/payload-plugin-commerce/src/collections/storeCredentials.integration.test.ts` | Deferred. Rewrite after the harness is proven on the simpler collections. |
-| `packages/payload-plugin-commerce/src/actions/administrativeAreas.integration.test.ts` | Rewrite against a real LibSQL in-process client. Delete `extractQuery`, `createDatasetSqlDb`, and the SQL string-matching mock engine. No Payload boot required. Rename to `administrativeAreas.test.ts` because it tests pure query output, not Payload lifecycle. |
+Code coverage uses `@vitest/coverage-v8`. Exclusions cover `test/**`, `**/*.test.*`, `**/dist/**`, and `**/test/factories/**`. Core domain packages (`payload-plugin-commerce`, `commerce-adapters`) enforce an 80% statement and branch threshold. `apps/app` runs in report-only mode.
 
 ## Considered options
 
-- **`@payloadcms/db-sqlite` in-memory mode:** Rejected as the default. Disables WAL and has per-process connection semantics that can bleed between Vitest workers. Ephemeral file databases with `VITEST_POOL_ID` are safer.
-- **Live PostgreSQL via Testcontainers:** Rejected for everyday collection and hook tests. Cold start is 3–10 seconds; Docker is not available in all developer environments. Reserved for dedicated database migration smoke tests in CI.
-- **Shared Fishery factories in `@repo/test-kit`:** Rejected. Factories are tightly coupled to collection shapes, which vary per package. Colocating them avoids cross-package data model coupling.
-- **Single `@repo/test-kit` that exports a `test.extend()` fixture only (no raw helpers):** Rejected. Files that test a mix of pure functions and integration scenarios need the raw helpers without importing a custom `it` binding.
+- **Full external test directory for all tests:** Rejected. Moving pure unit and UI tests out of `src/` damages daily development ergonomics for component and utility work.
+- **Live PostgreSQL via Testcontainers:** Rejected. Container boot times add several seconds of overhead per worker, and Docker is unavailable in some development environments. Schemas in a shared test Postgres database provide full dialect fidelity without container overhead.
+- **Bare SQLite `:memory:` mode:** Rejected. A bare `:memory:` connection string drops schemas when separate pool connections open. Named shared-memory mode preserves the database across pool connections during test execution.
 
 ## Consequences
 
-1. `@payloadcms/db-sqlite` must be added to `catalog:payload` at version `3.90.2` and to `devDependencies` in `packages/payload-plugin-commerce` and `apps/app`.
-2. `fishery` must be added to `catalog:test`.
-3. A new `packages/test-kit/` workspace entry appears in the monorepo with its own `package.json`, `tsconfig.json`, and `vitest.config.ts`.
-4. The three mock client patterns in the affected files are deleted on migration; no shims are left behind.
-5. `storeCredentials.integration.test.ts` remains as-is until the sprint that migrates it; its technical debt is tracked here rather than left undocumented.
+1. `@vitest/coverage-v8` and `msw` join `catalog:test` in `package.json`.
+2. `apps/app` requires a valid PostgreSQL instance reachable through `DATABASE_URL` for integration tests.
+3. Packages running integration tests define both `test:unit` and `test:integration`, while pure packages define `test:unit` only.
+4. Routine manual `// @vitest-environment` comments across existing test files are removed in favor of glob matching.
+5. Fishery factories consolidate into root `test/factories/` folders.

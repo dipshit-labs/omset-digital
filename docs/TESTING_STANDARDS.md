@@ -6,12 +6,11 @@ The worked examples behind the testing rules in `CODING_STANDARDS.md`. Read thos
 
 Every test file in this monorepo belongs to one of two tiers.
 
-**Tier 1 — unit test (`.test.ts`):** Pure functions, isolated hook logic, access control predicates, pure calculations. No database, no Payload boot. Runs in under 1 ms per test.
+**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms. Component tests (`.test.tsx`) render in JSDOM via Vitest `environmentMatchGlobs`. No database, no Payload boot.
 
-**Tier 2 — integration test (`.integration.test.ts`):** Real Payload Local API backed by `@payloadcms/db-sqlite`. Tests collection hooks, field validation, relational queries, and round-trip create/update/read behavior. Runs in 15–50 ms per file. No Docker, no network.
+**Tier 2, integration tests (`test/integrations/*.integration.test.ts`):** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root. Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
 
-A file that needs both splits: pure tests go to `.test.ts`, Payload-backed tests to `.integration.test.ts`.
-
+A file that needs both splits: pure tests go to colocated `src/`, Payload-backed tests to `test/integrations/`.
 ## Good tests
 
 Integration tests exercise real code paths through public APIs. They describe what the system does, not how.
@@ -55,7 +54,7 @@ it("registers store successfully", async () => {
   expect(rawRow.rows).toHaveLength(1);
 });
 
-// Bad: Hand-rolled Payload mock — never do this
+// Bad: Hand-rolled Payload mock, never do this
 const createMockPayload = () => ({ find: vi.fn(), create: vi.fn() });
 it("syncThemes creates default templates for store without existing theme", async () => {
   const fakePayload = createMockPayload();
@@ -88,9 +87,7 @@ All integration test infrastructure lives in `@repo/test-kit`. Never copy-paste 
 ### Fixture API (preferred)
 
 Import `it` and `describe` from `@repo/test-kit` to get a `payload` fixture injected per test file with automatic teardown:
-
 ```typescript
-// @vitest-environment node
 import { describe, it } from "@repo/test-kit";
 import { expect } from "vitest";
 import { createPackagesCollection } from "./packages";
@@ -108,9 +105,7 @@ describe("packages collection", () => {
 });
 ```
 
-The fixture boots one Payload instance per file with a worker-scoped ephemeral SQLite database (`file:./.tmp/test-${VITEST_POOL_ID}.db`). It calls `resetDatabase` between every test automatically.
-
-Pass collections and plugins your test needs via `createTestPayload` when you need the raw helpers:
+The fixture boots one Payload instance per file with ephemeral database isolation. Packages use named in-memory SQLite (`file:test_mem_${workerId}?mode=memory&cache=shared`). `apps/app` uses worker-scoped PostgreSQL schemas (`test_worker_${workerId}`) using `DATABASE_URL`. It calls `resetDatabase` between every test automatically.
 
 ```typescript
 import { createTestPayload, resetDatabase, createTestReq } from "@repo/test-kit";
@@ -151,8 +146,7 @@ expect(canRead).toBe(true);
 
 ## Document factories
 
-Use Thoughtbot Fishery for typed document fixtures. Factories live in a `test/factories/` folder at each package root.
-
+Use Thoughtbot Fishery for typed document fixtures. Factories live in a `test/factories/` folder at each package and app root (for example `apps/app/test/factories/` and `packages/payload-plugin-commerce/test/factories/`).
 ```typescript
 // packages/payload-plugin-commerce/test/factories/packageFactory.ts
 import { Factory } from "fishery";
@@ -186,11 +180,10 @@ In unit tests use `factory.build()` (synchronous, no DB). In integration tests u
 
 Mock at system boundaries only: external network APIs, system time, randomness. Everything inside the boundary runs real.
 
-- **Payload operations are never mocked.** Use the real Local API backed by `@payloadcms/db-sqlite`. This is the explicit replacement for `createMockPayload`, `TestPayloadClient`, and any other hand-rolled Payload simulator.
-- **Mock external network boundaries only.** Payment gateways (Midtrans, Xendit) and shipping APIs (RajaOngkir) are mocked at their typed provider seam (`PaymentProvider`, `ShippingProvider`).
+- **Payload operations are never mocked.** Use the real Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app`. Hand-rolled Payload simulators are banned.
+- **Mock external network boundaries with MSW.** Payment gateways (Midtrans, Xendit), shipping APIs (RajaOngkir), and transactional emails (Resend) are intercepted via Mock Service Worker. Central handlers live in `@repo/test-kit/src/msw/handlers/` and tests customize behavior with `server.use(...)`.
 - **Mock system time and randomness.** Use `vi.useFakeTimers()` for time-sensitive token expirations or billing schedules.
 - **Never mock internal collaborators.** If a function requires mocking a sibling file to test it, extract the logic into a pure function or inject the dependency.
-
 ## Storefront themes and UI components
 
 Never boot a full headless browser in unit and integration test suites. Headless browsers require extra setup, run slowly, and assert on styling details that intentional visual changes alter.
@@ -208,3 +201,20 @@ Write one test, make it pass, then write the next. Writing an entire test suite 
 3. Refactor while keeping all tests green.
 
 Each test builds on what the previous cycle proved. Always reach a passing test before refactoring.
+
+## Turborepo test tasks
+
+The monorepo organizes test execution into targeted Turborepo tasks:
+
+- `test:unit`: runs colocated unit and UI tests (`src/**/*.test.{ts,tsx}`). High cache hit rate when business logic is untouched.
+- `test:integration`: runs integration suites (`test/integrations/*.integration.test.ts`). Declared only in packages and apps that contain database integration tests.
+- `test`: composite task that executes both unit and integration verification.
+- `test:coverage`: runs Vitest with `@vitest/coverage-v8`, outputting reports to `coverage/**` with Turborepo caching.
+
+## Code coverage
+
+V8 code coverage evaluates test sufficiency without manual instrumentation:
+
+- **Enforced thresholds:** Core domain packages (`payload-plugin-commerce` and `commerce-adapters`) enforce an 80% statement and branch coverage threshold. Builds fail when coverage drops below this line.
+- **Report-only packages:** Application glue code and pages in `apps/app` collect reports without threshold failure gates.
+- **Standard exclusions:** Test files, factories (`test/factories/**`), generated schemas, and build distributions are excluded from coverage calculations.

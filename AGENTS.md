@@ -20,7 +20,7 @@ Single-context layout with `CONTEXT.md` at root and architecture decision record
 - **Normalized product variants.** Products split across four collections: `products`, `variantTypes`, `variantOptions`, and `variants`. Every variant stores weight in grams for shipping calculations.
 - **Storefront sections.** Section components render as pure React Server Components without client JavaScript.
 - **Declarative theme tokens.** Theme settings bind directly to CSS variables on field definitions. Evaluated centrally with `evaluateThemeCssVars` rather than per-theme functions.
-- **No Payload mocks.** Integration tests run against real Payload Local API backed by ephemeral SQLite via `@repo/test-kit`. Hand-rolled mock clients and hook runners are banned.
+- **No Payload mocks.** Integration tests run against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. Hand-rolled mock clients and hook runners are banned.
 
 ### Repository layout and boundaries
 
@@ -30,16 +30,18 @@ Turborepo monorepo managed with Bun. Packages export TypeScript source directly 
 - `packages/themes/*`. Leaf storefront themes such as `@repo/theme-default`. Theme packages are pure TypeScript with zero Payload runtime dependencies. They import contracts and primitives only from `@repo/theme-core`. Theme layouts structure code into `sections/`, `templates/`, and root `branding.ts`.
 - `packages/ui`. Shared design tokens, CSS variables, and primitives dedicated exclusively to Omset Digital marketing pages and admin interfaces.
 - `packages/types`. Monorepo types and generated Payload schema.
-- `packages/test-kit`. Shared integration test infrastructure: ephemeral SQLite database management, Payload Local API fixture, and typed request stubs. Zero production imports; `devDependency` only.
+- `packages/test-kit`. Shared integration test infrastructure: in-memory SQLite and PostgreSQL schema management, MSW network handlers, Payload Local API fixture, and typed request stubs. Zero production imports; `devDependency` only.
 
 ### Testing
 
-Vitest runs all unit and integration tests across two tiers. Unit tests (`.test.ts`) cover pure functions, hook predicates, and component behaviour. Integration tests (`.integration.test.ts`) run against the real Payload Local API backed by ephemeral SQLite via `@repo/test-kit` — no Docker required.
+Vitest runs unit and integration tests across two tiers. Unit and UI tests live colocated in `src/` (`.test.ts` on Node, `.test.tsx` on JSDOM via `environmentMatchGlobs`). Integration tests (`.integration.test.ts`) live in a flat `test/integrations/` directory, running against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. External network requests are intercepted with MSW.
 
-Run a specific file during iteration: `bun --filter <package> test path/to/file.test.ts` or `bun --filter <package> test path/to/file.integration.test.ts`. Full monorepo suites run in CI.
+Run specific suites during iteration:
+- `bun --filter <package> test:unit`
+- `bun --filter <package> test:integration`
+- Single file: `bun --filter <package> test src/path/to/file.test.ts` or `bun --filter <package> test test/integrations/feature.integration.test.ts`
 
-Never mock Payload operations. Use `@repo/test-kit` fixtures for integration tests and Fishery factories in `packages/<package>/test/factories/` for typed document generation. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
-
+Never mock Payload operations. Use `@repo/test-kit` fixtures for integration tests and Fishery factories in `test/factories/` for typed document generation. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
 ### Runtime server logs
 
 `bun run dev` pipes server output through `scripts/run-with-log.ts` into `.data/logs/`. Read `.data/logs/dev-latest.log` when pages throw at runtime, Payload hooks crash, or SSR fails. See `docs/agents/runtime-logs.md`.
