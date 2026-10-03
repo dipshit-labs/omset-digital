@@ -6,7 +6,7 @@ The worked examples behind the testing rules in `CODING_STANDARDS.md`. Read thos
 
 Every test file in this monorepo belongs to one of two tiers.
 
-**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms. Component tests (`.test.tsx`) render in JSDOM via Vitest `environmentMatchGlobs`. No database, no Payload boot.
+**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms. Component tests (`.test.tsx`) render in JSDOM via project-based environment configs. No database, no Payload boot.
 
 **Tier 2, integration tests (`test/integrations/*.integration.test.ts`):** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root. Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
 

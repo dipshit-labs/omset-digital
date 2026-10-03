@@ -35,17 +35,30 @@ Testing splits into discrete Turborepo tasks:
 
 ### 3. Environment dispatch without docblocks
 
-All Vitest configurations set `environment: "node"` as the default. Component tests render in JSDOM automatically using `environmentMatchGlobs`:
+All Vitest configurations set `environment: "node"` as the default for `.test.ts` files, dispatching `.test.tsx` component tests to `jsdom` via Vitest project configurations. Note that `environmentMatchGlobs` was deprecated and removed in Vitest v3+ in favor of projects:
 
 ```typescript
 test: {
-  environment: "node",
-  environmentMatchGlobs: [
-    ["**/*.test.tsx", "jsdom"],
+  projects: [
+    {
+      test: {
+        environment: "node",
+        include: ["**/*.test.ts"],
+        name: "node",
+      },
+    },
+    {
+      test: {
+        environment: "jsdom",
+        include: ["**/*.test.tsx"],
+        name: "jsdom",
+      },
+    },
   ],
 }
 ```
-File-level `// @vitest-environment` docblocks remain permitted when an explicit file override is necessary, but are avoided when `environmentMatchGlobs` already resolves the environment.
+
+File-level `// @vitest-environment` docblocks remain permitted when an explicit file override is necessary, but are avoided when project configuration already resolves the environment.
 ### 4. Database isolation strategy
 
 Local databases isolate by execution scope:

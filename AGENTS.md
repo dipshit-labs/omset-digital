@@ -34,7 +34,7 @@ Turborepo monorepo managed with Bun. Packages export TypeScript source directly 
 
 ### Testing
 
-Vitest runs unit and integration tests across two tiers. Unit and UI tests live colocated in `src/` (`.test.ts` on Node, `.test.tsx` on JSDOM via `environmentMatchGlobs`). Integration tests (`.integration.test.ts`) live in a flat `test/integrations/` directory, running against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. External network requests are intercepted with MSW.
+Vitest runs unit and integration tests across two tiers. Unit and UI tests live colocated in `src/` (`.test.ts` on Node, `.test.tsx` on JSDOM via project-based environment configs). Integration tests (`.integration.test.ts`) live in a flat `test/integrations/` directory, running against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. External network requests are intercepted with MSW.
 
 Run specific suites during iteration:
 - `bun --filter <package> test:unit`
