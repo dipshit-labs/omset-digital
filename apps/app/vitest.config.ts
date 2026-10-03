@@ -15,13 +15,7 @@ export default defineProject(() => {
   return {
     plugins: [react()],
     resolve: {
-      alias: {
-        "@": path.resolve(dirname, "./src"),
-        "@payload-config": path.resolve(
-          dirname,
-          "./src/payload/payload.config.ts"
-        ),
-      },
+      tsconfigPaths: true,
     },
     test: {
       css: true,
