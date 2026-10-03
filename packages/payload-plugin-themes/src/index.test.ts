@@ -19,7 +19,6 @@ describe("@repo/payload-plugin-themes public export entry points", () => {
     expect(ClientExports.ThemeLivePreviewListener).toBeDefined();
     expect(ClientExports.subscribeThemeLivePreview).toBeDefined();
     expect(ClientExports.ready).toBeDefined();
-    expect(ClientExports.RefreshRouteOnSave).toBeDefined();
   });
 
   it("retains plugin-specific utilities in utilities entry point", () => {

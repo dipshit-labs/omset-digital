@@ -5,12 +5,13 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "@repo/theme-core";
-import { useEffect } from "react";
 import type { ReactElement } from "react";
+import { useEffect } from "react";
 
-import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
-import { subscribeThemeLivePreview } from "./subscribe";
+import type { ThemeDocumentEventMessage } from "@/utilities/isThemePreviewMessage";
+
 import type { ThemeLivePreviewUpdate } from "./subscribe";
+import { subscribeThemeLivePreview } from "./subscribe";
 
 export interface ThemeLivePreviewListenerProps {
   applyToRoot?: boolean;
@@ -74,6 +75,3 @@ export const ThemeLivePreviewListener = ({
 
   return null;
 };
-
-export const RefreshRouteOnSave = ThemeLivePreviewListener;
-export type RefreshRouteOnSaveProps = ThemeLivePreviewListenerProps;

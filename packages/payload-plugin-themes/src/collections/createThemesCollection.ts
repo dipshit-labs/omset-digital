@@ -1,13 +1,11 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { CollectionConfig, Field } from "payload";
 
-import { buildThemeSettingsFields } from "../fields/buildThemeSettingsFields";
-import { enforceSingleLiveTheme } from "../hooks/enforceSingleLiveTheme";
-import type { CreateThemesCollectionOptions } from "../types";
-import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
-import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
-
-export type { CreateThemesCollectionOptions } from "../types";
+import { buildThemeSettingsFields } from "@/fields/ThemeSettingsFields";
+import { enforceSingleLiveTheme } from "@/hooks/enforceSingleLiveTheme";
+import type { CreateThemesCollectionOptions } from "@/types";
+import { generateThemePreviewPath } from "@/utilities/generateThemePreviewPath";
+import { resolveTenantStoreSlug } from "@/utilities/resolveTenantStoreSlug";
 
 export const createThemesCollection = (
   optionsOrManifests: CreateThemesCollectionOptions | ThemeManifestDefinition[]

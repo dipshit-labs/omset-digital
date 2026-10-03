@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { themeTemplateField } from "./index";
+import { themeTemplateField } from "./themeTemplateField";
 
 describe(themeTemplateField, () => {
   it("creates relationship field pointing to templates collection", () => {

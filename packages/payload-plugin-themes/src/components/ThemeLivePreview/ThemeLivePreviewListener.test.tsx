@@ -1,12 +1,10 @@
-import type { ThemeManifestDefinition } from "@repo/theme-core";
 // @vitest-environment jsdom
+
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  RefreshRouteOnSave,
-  ThemeLivePreviewListener,
-} from "./ThemeLivePreviewListener";
+import { ThemeLivePreviewListener } from "./ThemeLivePreviewListener";
 
 const mockManifest: ThemeManifestDefinition = {
   name: "Listener Test Theme",
@@ -164,9 +162,5 @@ describe(ThemeLivePreviewListener, () => {
     );
 
     expect(refreshSpy).not.toHaveBeenCalled();
-  });
-
-  it("exports RefreshRouteOnSave as an alias for ThemeLivePreviewListener", () => {
-    expect(RefreshRouteOnSave).toBe(ThemeLivePreviewListener);
   });
 });

@@ -1,15 +1,7 @@
 import type { RelationshipField } from "payload";
 
-import type { ThemeTemplateFieldOptions } from "../../types";
+export type ThemeTemplateFieldOptions = Partial<RelationshipField>;
 
-export {
-  childBlockToPayloadBlock,
-  manifestToPayloadBlocks,
-  sectionToPayloadBlock,
-  settingFieldToPayloadField,
-  type ConvertFieldOptions,
-} from "./converter";
-export type { ThemeTemplateFieldOptions } from "../../types";
 export const themeTemplateField = (
   overrides?: ThemeTemplateFieldOptions
 ): RelationshipField => {

@@ -1,7 +1,7 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Condition, Field } from "payload";
 
-import { settingFieldToPayloadField } from "./ThemeTemplateField/converter";
+import { settingFieldToPayloadField } from "./converter";
 
 export const buildThemeSettingsFields = (
   manifests: ThemeManifestDefinition[],
@@ -43,6 +43,7 @@ export const buildThemeSettingsFields = (
         ) {
           return false;
         }
+
         if (
           data &&
           typeof data === "object" &&
@@ -51,13 +52,16 @@ export const buildThemeSettingsFields = (
         ) {
           return themeSlugs.has(data.slug);
         }
+
         return true;
       };
+
       field.admin = {
         ...originalAdmin,
         condition,
       };
     }
+
     settingsFields.push(field);
   }
 

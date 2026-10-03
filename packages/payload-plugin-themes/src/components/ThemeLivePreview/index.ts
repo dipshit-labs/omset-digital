@@ -8,12 +8,6 @@ export type {
   UnsubscribeThemeLivePreview,
 } from "./subscribe";
 
-export {
-  RefreshRouteOnSave,
-  ThemeLivePreviewListener,
-} from "./ThemeLivePreviewListener";
+export { ThemeLivePreviewListener } from "./ThemeLivePreviewListener";
 
-export type {
-  RefreshRouteOnSaveProps,
-  ThemeLivePreviewListenerProps,
-} from "./ThemeLivePreviewListener";
+export type { ThemeLivePreviewListenerProps } from "./ThemeLivePreviewListener";

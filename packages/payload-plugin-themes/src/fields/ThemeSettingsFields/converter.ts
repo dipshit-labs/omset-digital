@@ -15,9 +15,7 @@ import type {
 } from "@repo/theme-core";
 import type { Block, Field } from "payload";
 
-import type { ConvertFieldOptions } from "../../types";
-
-export type { ConvertFieldOptions } from "../../types";
+import type { ConvertFieldOptions } from "@/types";
 
 const convertTextField = (setting: TextSettingField): Field => ({
   defaultValue: setting.defaultValue,
@@ -251,7 +249,7 @@ export const settingFieldToPayloadField = (
   }
 };
 
-export const childBlockToPayloadBlock = (
+const childBlockToPayloadBlock = (
   childBlock: SectionBlockDefinition,
   options?: ConvertFieldOptions
 ): Block => ({
@@ -263,7 +261,7 @@ export const childBlockToPayloadBlock = (
   },
 });
 
-export const sectionToPayloadBlock = (
+const sectionToPayloadBlock = (
   themeSlug: string,
   section: AnySectionDefinition,
   options?: ConvertFieldOptions

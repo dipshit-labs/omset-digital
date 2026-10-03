@@ -6,8 +6,7 @@ export type {
   SyncThemesOptions,
   ThemeSyncDoc,
   ThemeSyncPayload,
-  ThemeTemplateFieldOptions,
   ThemesPluginOptions,
   ThemesPluginOverrides,
   ThemesPluginSlugs,
-} from "../types";
+} from "@/types";

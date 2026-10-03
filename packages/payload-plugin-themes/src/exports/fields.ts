@@ -1,4 +1,4 @@
 export {
   themeTemplateField,
   type ThemeTemplateFieldOptions,
-} from "../fields/ThemeTemplateField";
+} from "@/fields/themeTemplateField";

@@ -2,7 +2,7 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingValue,
 } from "@repo/theme-core";
-import type { CollectionConfig, RelationshipField } from "payload";
+import type { CollectionConfig } from "payload";
 
 export interface ThemesPluginSlugs {
   templates?: string;
@@ -61,8 +61,6 @@ export interface CreateTemplatesCollectionOptions {
   tenantsSlug?: string;
   themesSlug?: string;
 }
-
-export type ThemeTemplateFieldOptions = Partial<RelationshipField>;
 
 export interface ConvertFieldOptions {
   defaultMediaSlug?: string;

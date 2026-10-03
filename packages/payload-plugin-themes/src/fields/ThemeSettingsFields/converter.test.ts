@@ -1,14 +1,9 @@
-import type {
-  SectionDefinition,
-  SettingField,
-  ThemeManifestDefinition,
-} from "@repo/theme-core";
+import type { SettingField, ThemeManifestDefinition } from "@repo/theme-core";
 import type { ArrayField, BlocksField, Field, GroupField } from "payload";
 import { describe, expect, it } from "vitest";
 
 import {
   manifestToPayloadBlocks,
-  sectionToPayloadBlock,
   settingFieldToPayloadField,
 } from "./converter";
 
@@ -167,76 +162,6 @@ describe(settingFieldToPayloadField, () => {
   });
 });
 
-describe(sectionToPayloadBlock, () => {
-  it("namespaces block slug as {themeSlug}_{sectionSlug}", () => {
-    const section: SectionDefinition = {
-      name: "Hero Section",
-      slug: "hero",
-      settings: [
-        {
-          label: "Heading",
-          name: "heading",
-          type: "text",
-        },
-      ],
-    };
-
-    const block = sectionToPayloadBlock("default", section);
-
-    expect(block.slug).toBe("default_hero");
-    expect(block.labels).toStrictEqual({
-      plural: "Hero Section",
-      singular: "Hero Section",
-    });
-    expect(block.fields).toHaveLength(1);
-    expect(block.fields[0].type).toBe("text");
-  });
-
-  it("converts child block definitions within sections into child blocks on the section block", () => {
-    const section: SectionDefinition = {
-      name: "Features",
-      slug: "features",
-      blocks: [
-        {
-          labels: { plural: "Features", singular: "Feature" },
-          slug: "feature_item",
-          fields: [
-            {
-              label: "Feature Title",
-              name: "title",
-              type: "text",
-            },
-            {
-              label: "Description",
-              name: "description",
-              type: "textarea",
-            },
-          ],
-        },
-      ],
-      settings: [
-        {
-          label: "Title",
-          name: "title",
-          type: "text",
-        },
-      ],
-    };
-
-    const block = sectionToPayloadBlock("modern", section);
-
-    expect(block.slug).toBe("modern_features");
-    expect(block.fields).toHaveLength(2);
-    // SAFETY: Section block contains blocks field as defined in section definition.
-    const blocksField = block.fields.find(
-      (f: Field) => "name" in f && f.name === "blocks"
-    ) as BlocksField | undefined;
-    expect(blocksField?.blocks).toHaveLength(1);
-    expect(blocksField?.blocks[0].slug).toBe("feature_item");
-    expect(blocksField?.blocks[0].fields).toHaveLength(2);
-  });
-});
-
 describe(manifestToPayloadBlocks, () => {
   it("converts all sections in a theme manifest into namespaced blocks", () => {
     const manifest: ThemeManifestDefinition = {
@@ -245,18 +170,18 @@ describe(manifestToPayloadBlocks, () => {
       version: "1.0.0",
       sections: [
         {
-          name: "Hero",
+          name: "Hero Section",
           slug: "hero",
           settings: [
             {
-              label: "Title",
-              name: "title",
+              label: "Heading",
+              name: "heading",
               type: "text",
             },
           ],
         },
         {
-          name: "Banner",
+          name: "Banner Section",
           slug: "banner",
           settings: [
             {
@@ -269,10 +194,70 @@ describe(manifestToPayloadBlocks, () => {
       ],
     };
 
-    const blocks = manifestToPayloadBlocks(manifest);
+    const [heroBlock, bannerBlock] = manifestToPayloadBlocks(manifest);
 
-    expect(blocks).toHaveLength(2);
-    expect(blocks[0].slug).toBe("default_hero");
-    expect(blocks[1].slug).toBe("default_banner");
+    expect(heroBlock).toMatchObject({
+      labels: { plural: "Hero Section", singular: "Hero Section" },
+      slug: "default_hero",
+      fields: expect.arrayContaining([
+        expect.objectContaining({ type: "text" }),
+      ]),
+    });
+    expect(bannerBlock).toMatchObject({
+      labels: { plural: "Banner Section", singular: "Banner Section" },
+      slug: "default_banner",
+    });
+  });
+
+  it("converts child block definitions within sections into child blocks on the section block", () => {
+    const manifest: ThemeManifestDefinition = {
+      name: "Modern Theme",
+      slug: "modern",
+      version: "1.0.0",
+      sections: [
+        {
+          name: "Features",
+          slug: "features",
+          blocks: [
+            {
+              labels: { plural: "Features", singular: "Feature" },
+              slug: "feature_item",
+              fields: [
+                {
+                  label: "Feature Title",
+                  name: "title",
+                  type: "text",
+                },
+                {
+                  label: "Description",
+                  name: "description",
+                  type: "textarea",
+                },
+              ],
+            },
+          ],
+          settings: [
+            {
+              label: "Title",
+              name: "title",
+              type: "text",
+            },
+          ],
+        },
+      ],
+    };
+
+    const [block] = manifestToPayloadBlocks(manifest);
+    expect(block.slug).toBe("modern_features");
+
+    // SAFETY: Section block contains blocks field as defined in section definition.
+    const blocksField = block.fields.find(
+      (f: Field) => "name" in f && f.name === "blocks"
+    ) as BlocksField | undefined;
+    const [childBlock] = blocksField?.blocks ?? [];
+    expect(childBlock).toMatchObject({
+      slug: "feature_item",
+    });
+    expect(childBlock?.fields).toHaveLength(2);
   });
 });
