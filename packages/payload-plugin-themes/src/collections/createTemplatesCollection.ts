@@ -18,7 +18,7 @@ export const createTemplatesCollection = (
   const manifests = options.manifests ?? [];
   const { tenantField } = options;
   const tenantsSlug = options.tenantsSlug ?? "stores";
-  const allBlocks: Block[] = manifests.flatMap((m) =>
+  const allBlocks: Block[] = manifests.flatMap((m: ThemeManifestDefinition) =>
     manifestToPayloadBlocks(m, { defaultMediaSlug: options.defaultMediaSlug })
   );
 

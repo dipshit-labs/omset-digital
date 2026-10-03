@@ -7,5 +7,6 @@ export default defineProject({
   test: {
     environment: "node",
     name: "commerce-adapters",
+    setupFiles: ["@repo/test-kit/msw/setup"],
   },
 });

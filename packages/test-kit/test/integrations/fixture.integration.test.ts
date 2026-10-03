@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 
-import { defineIntegrationSuite, describe, it } from "./index";
+import { defineIntegrationSuite, describe, it } from "../../src/index";
 
 describe("@repo/test-kit fixture", () => {
   it("provides usable injected payload fixture", async ({ payload }) => {

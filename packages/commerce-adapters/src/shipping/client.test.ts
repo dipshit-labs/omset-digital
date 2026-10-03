@@ -1,18 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { server } from "@repo/test-kit";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it } from "vitest";
 
 import { RajaOngkirClient } from "./client";
 import type { CourierCostResult } from "./types";
 
 describe(RajaOngkirClient, () => {
   const mockApiKey = "mock-rajaongkir-api-key-12345";
-
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   const mockCostResults: CourierCostResult[] = [
     {
@@ -36,24 +30,26 @@ describe(RajaOngkirClient, () => {
       });
 
       let capturedUrl = "";
-      let capturedOptions: RequestInit | undefined;
+      let capturedMethod = "";
+      let capturedApiKey: string | null = null;
+      let capturedContentType: string | null = null;
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: Request | string | URL, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(
-              {
-                rajaongkir: {
-                  results: mockCostResults,
-                  status: { code: 200, description: "OK" },
-                },
+      server.use(
+        http.post("https://api.rajaongkir.com/starter/cost", ({ request }) => {
+          capturedUrl = request.url;
+          capturedMethod = request.method;
+          capturedApiKey = request.headers.get("key");
+          capturedContentType = request.headers.get("content-type");
+          return HttpResponse.json(
+            {
+              rajaongkir: {
+                results: mockCostResults,
+                status: { code: 200, description: "OK" },
               },
-              { status: 200 }
-            )
+            },
+            { status: 200 }
           );
-        }
+        })
       );
 
       const results = await client.calculateCost({
@@ -65,12 +61,11 @@ describe(RajaOngkirClient, () => {
 
       expect(results).toStrictEqual(mockCostResults);
       expect(capturedUrl).toBe("https://api.rajaongkir.com/starter/cost");
-      expect(capturedOptions?.method).toBe("POST");
-
-      // SAFETY: Captures fetch headers as standard record for test assertions.
-      const headers = capturedOptions?.headers as Record<string, string>;
-      expect(headers.key).toBe(mockApiKey);
-      expect(headers["Content-Type"]).toBe("application/x-www-form-urlencoded");
+      expect(capturedMethod).toBe("POST");
+      expect(capturedApiKey).toBe(mockApiKey);
+      expect(capturedContentType).toContain(
+        "application/x-www-form-urlencoded"
+      );
     });
 
     it("encodes standard URL-encoded body parameters without subdistrict types on Starter tier", async () => {
@@ -80,11 +75,12 @@ describe(RajaOngkirClient, () => {
       });
 
       let capturedBody = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: Request | string | URL, init?: RequestInit) => {
-          capturedBody = String(init?.body ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://api.rajaongkir.com/starter/cost",
+          async ({ request }) => {
+            capturedBody = await request.text();
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -92,9 +88,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.calculateCost({
@@ -119,12 +115,14 @@ describe(RajaOngkirClient, () => {
       });
 
       const capturedCouriers: string[] = [];
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: Request | string | URL, init?: RequestInit) => {
-          const bodyParams = new URLSearchParams(String(init?.body ?? ""));
-          capturedCouriers.push(bodyParams.get("courier") ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://api.rajaongkir.com/starter/cost",
+          async ({ request }) => {
+            const body = await request.text();
+            const bodyParams = new URLSearchParams(body);
+            capturedCouriers.push(bodyParams.get("courier") ?? "");
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -132,9 +130,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       const results = await client.calculateCost({
@@ -159,12 +157,13 @@ describe(RajaOngkirClient, () => {
       let capturedUrl = "";
       let capturedBody = "";
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: Request | string | URL, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedBody = String(init?.body ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://pro.rajaongkir.com/api/cost",
+          async ({ request }) => {
+            capturedUrl = request.url;
+            capturedBody = await request.text();
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -172,9 +171,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       const results = await client.calculateCost({
@@ -202,11 +201,12 @@ describe(RajaOngkirClient, () => {
       });
 
       let capturedBody = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: Request | string | URL, init?: RequestInit) => {
-          capturedBody = String(init?.body ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://pro.rajaongkir.com/api/cost",
+          async ({ request }) => {
+            capturedBody = await request.text();
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -214,9 +214,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.calculateCost({
@@ -239,11 +239,12 @@ describe(RajaOngkirClient, () => {
       });
 
       let capturedBody = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: Request | string | URL, init?: RequestInit) => {
-          capturedBody = String(init?.body ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://pro.rajaongkir.com/api/cost",
+          async ({ request }) => {
+            capturedBody = await request.text();
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -251,9 +252,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.calculateCost({
@@ -288,11 +289,12 @@ describe(RajaOngkirClient, () => {
       });
 
       let capturedBody = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: Request | string | URL, init?: RequestInit) => {
-          capturedBody = String(init?.body ?? "");
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://api.rajaongkir.com/starter/cost",
+          async ({ request }) => {
+            capturedBody = await request.text();
+            return HttpResponse.json(
               {
                 rajaongkir: {
                   results: mockCostResults,
@@ -300,9 +302,9 @@ describe(RajaOngkirClient, () => {
                 },
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.calculateCost({
@@ -322,18 +324,20 @@ describe(RajaOngkirClient, () => {
         apiKey: mockApiKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            rajaongkir: {
-              results: [],
-              status: {
-                code: 400,
-                description: "Unknown destination ID",
+      server.use(
+        http.post("https://api.rajaongkir.com/starter/cost", () =>
+          HttpResponse.json(
+            {
+              rajaongkir: {
+                results: [],
+                status: {
+                  code: 400,
+                  description: "Unknown destination ID",
+                },
               },
             },
-          },
-          { status: 200 }
+            { status: 200 }
+          )
         )
       );
 
@@ -353,8 +357,11 @@ describe(RajaOngkirClient, () => {
         apiKey: mockApiKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response("Invalid key", { status: 401 })
+      server.use(
+        http.post(
+          "https://api.rajaongkir.com/starter/cost",
+          () => new HttpResponse("Invalid key", { status: 401 })
+        )
       );
 
       await expect(

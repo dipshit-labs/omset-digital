@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { server } from "@repo/test-kit";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it } from "vitest";
 
 import type { CreatePaymentSessionInput } from "../types";
 import { PaymentWebhookError } from "../types";
@@ -9,14 +11,6 @@ import { verifyMidtransSignature } from "./signature";
 
 describe(MidtransClient, () => {
   const mockServerKey = "SB-Mid-server-TEST12345";
-
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   describe("createSession", () => {
     it("creates a Snap transaction session in sandbox environment with correct Basic Auth header and payload", async () => {
@@ -48,22 +42,26 @@ describe(MidtransClient, () => {
         "https://app.sandbox.midtrans.com/snap/v2/vtweb/mock-snap-token-xyz";
 
       let capturedUrl = "";
-      let capturedOptions: RequestInit | undefined;
+      let capturedAuthHeader: string | null = null;
+      let capturedBody: Record<string, unknown> | null = null;
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://app.sandbox.midtrans.com/snap/v1/transactions",
+          async ({ request }) => {
+            capturedUrl = request.url;
+            capturedAuthHeader = request.headers.get("authorization");
+            // SAFETY: MSW parses JSON request payload as a generic record.
+            capturedBody = (await request.json()) as Record<string, unknown>;
+            return HttpResponse.json(
               {
                 redirect_url: expectedRedirectUrl,
                 token: expectedToken,
               },
               { status: 201 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       const response = await client.createSession(input);
@@ -78,11 +76,9 @@ describe(MidtransClient, () => {
       );
 
       const expectedBasicAuth = `Basic ${Buffer.from(`${mockServerKey}:`).toString("base64")}`;
-      const headers = capturedOptions?.headers as Record<string, string>;
-      expect(headers["Authorization"]).toBe(expectedBasicAuth);
+      expect(capturedAuthHeader).toBe(expectedBasicAuth);
 
-      const body = JSON.parse(String(capturedOptions?.body));
-      expect(body).toStrictEqual({
+      expect(capturedBody).toStrictEqual({
         customer_details: {
           email: "budi@example.com",
           first_name: "Budi",
@@ -110,20 +106,21 @@ describe(MidtransClient, () => {
       });
 
       let capturedUrl = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request) => {
-          capturedUrl = String(url);
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.post(
+          "https://app.midtrans.com/snap/v1/transactions",
+          ({ request }) => {
+            capturedUrl = request.url;
+            return HttpResponse.json(
               {
                 token: "prod-token",
                 redirect_url:
                   "https://app.midtrans.com/snap/v2/vtweb/prod-token",
               },
               { status: 201 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.createSession({
@@ -139,14 +136,16 @@ describe(MidtransClient, () => {
         serverKey: mockServerKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            error_messages: [
-              "transaction_details.order_id has already been taken",
-            ],
-          },
-          { status: 400 }
+      server.use(
+        http.post("https://app.sandbox.midtrans.com/snap/v1/transactions", () =>
+          HttpResponse.json(
+            {
+              error_messages: [
+                "transaction_details.order_id has already been taken",
+              ],
+            },
+            { status: 400 }
+          )
         )
       );
 
@@ -163,12 +162,14 @@ describe(MidtransClient, () => {
         serverKey: mockServerKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            status: "ok",
-          },
-          { status: 200 }
+      server.use(
+        http.post("https://app.sandbox.midtrans.com/snap/v1/transactions", () =>
+          HttpResponse.json(
+            {
+              status: "ok",
+            },
+            { status: 200 }
+          )
         )
       );
 
@@ -189,7 +190,7 @@ describe(MidtransClient, () => {
       });
 
       let capturedUrl = "";
-      let capturedOptions: RequestInit | undefined;
+      let capturedAuthHeader: string | null = null;
 
       const mockStatusResponse = {
         fraud_status: "accept",
@@ -204,14 +205,15 @@ describe(MidtransClient, () => {
         transaction_time: "2026-10-01 10:00:00",
       };
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(mockStatusResponse, { status: 200 })
-          );
-        }
+      server.use(
+        http.get(
+          "https://api.sandbox.midtrans.com/v2/:orderId/status",
+          ({ request }) => {
+            capturedUrl = request.url;
+            capturedAuthHeader = request.headers.get("authorization");
+            return HttpResponse.json(mockStatusResponse, { status: 200 });
+          }
+        )
       );
 
       const status = await client.getTransactionStatus("ORDER-1001");
@@ -240,8 +242,7 @@ describe(MidtransClient, () => {
       );
 
       const expectedBasicAuth = `Basic ${Buffer.from(`${mockServerKey}:`).toString("base64")}`;
-      const headers = capturedOptions?.headers as Record<string, string>;
-      expect(headers["Authorization"]).toBe(expectedBasicAuth);
+      expect(capturedAuthHeader).toBe(expectedBasicAuth);
     });
 
     it("queries order status in production environment when isProduction is true", async () => {
@@ -251,11 +252,12 @@ describe(MidtransClient, () => {
       });
 
       let capturedUrl = "";
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request) => {
-          capturedUrl = String(url);
-          return Promise.resolve(
-            Response.json(
+      server.use(
+        http.get(
+          "https://api.midtrans.com/v2/:orderId/status",
+          ({ request }) => {
+            capturedUrl = request.url;
+            return HttpResponse.json(
               {
                 gross_amount: "50000.00",
                 order_id: "ORDER-PROD-99",
@@ -263,9 +265,9 @@ describe(MidtransClient, () => {
                 transaction_status: "settlement",
               },
               { status: 200 }
-            )
-          );
-        }
+            );
+          }
+        )
       );
 
       await client.getTransactionStatus("ORDER-PROD-99");
@@ -279,13 +281,15 @@ describe(MidtransClient, () => {
         serverKey: mockServerKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            status_code: "404",
-            status_message: "Transaction doesn't exist.",
-          },
-          { status: 404 }
+      server.use(
+        http.get("https://api.sandbox.midtrans.com/v2/:orderId/status", () =>
+          HttpResponse.json(
+            {
+              status_code: "404",
+              status_message: "Transaction doesn't exist.",
+            },
+            { status: 404 }
+          )
         )
       );
 
@@ -299,12 +303,14 @@ describe(MidtransClient, () => {
         serverKey: mockServerKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            status: "not_a_valid_status_payload",
-          },
-          { status: 200 }
+      server.use(
+        http.get("https://api.sandbox.midtrans.com/v2/:orderId/status", () =>
+          HttpResponse.json(
+            {
+              status: "not_a_valid_status_payload",
+            },
+            { status: 200 }
+          )
         )
       );
 

@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

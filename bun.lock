@@ -72,10 +72,12 @@
         "zod": "catalog:core",
       },
       "devDependencies": {
+        "@repo/test-kit": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@types/node": "catalog:types",
         "@types/tsscmp": "catalog:types",
         "@vitest/coverage-v8": "catalog:test",
+        "msw": "catalog:test",
         "typescript": "catalog:types",
         "vitest": "catalog:test",
       },

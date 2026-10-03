@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import type * as UI from "@payloadcms/ui";
 import {
   cleanup,

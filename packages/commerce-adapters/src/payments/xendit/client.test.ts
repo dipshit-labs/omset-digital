@@ -1,7 +1,9 @@
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { server } from "@repo/test-kit";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it } from "vitest";
 
 import type { CreatePaymentSessionInput } from "../types";
 import { PaymentWebhookError } from "../types";
@@ -14,14 +16,6 @@ import {
 
 describe(XenditClient, () => {
   const mockSecretKey = "xnd_development_secret_key_12345";
-
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   it("exposes canonical payment provider id", () => {
     const client = new XenditClient({
@@ -63,25 +57,30 @@ describe(XenditClient, () => {
         "https://checkout.xendit.co/web/inv_651234567890abcdef";
 
       let capturedUrl = "";
-      let capturedOptions: RequestInit | undefined;
+      let capturedAuthHeader: string | null = null;
+      let capturedContentType: string | null = null;
+      let capturedMethod: string | null = null;
+      let parsedBody: Record<string, unknown> | null = null;
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(
-              {
-                amount: 250_000,
-                external_id: "ORDER-2001",
-                id: expectedInvoiceId,
-                invoice_url: expectedInvoiceUrl,
-                status: "PENDING",
-              },
-              { status: 201 }
-            )
+      server.use(
+        http.post("https://api.xendit.co/v2/invoices", async ({ request }) => {
+          capturedUrl = request.url;
+          capturedMethod = request.method;
+          capturedAuthHeader = request.headers.get("authorization");
+          capturedContentType = request.headers.get("content-type");
+          // SAFETY: MSW parses JSON request payload as a generic record.
+          parsedBody = (await request.json()) as Record<string, unknown>;
+          return HttpResponse.json(
+            {
+              amount: 250_000,
+              external_id: "ORDER-2001",
+              id: expectedInvoiceId,
+              invoice_url: expectedInvoiceUrl,
+              status: "PENDING",
+            },
+            { status: 201 }
           );
-        }
+        })
       );
 
       const session = await client.createSession(input);
@@ -91,18 +90,20 @@ describe(XenditClient, () => {
         token: expectedInvoiceId,
       });
 
-      expect(capturedUrl).toBe("https://api.xendit.co/v2/invoices");
       const expectedBase64 = Buffer.from(`${mockSecretKey}:`).toString(
         "base64"
       );
-      expect(capturedOptions).toMatchObject({
+      expect({
+        authHeader: capturedAuthHeader,
+        contentType: capturedContentType,
+        method: capturedMethod,
+        url: capturedUrl,
+      }).toStrictEqual({
+        authHeader: `Basic ${expectedBase64}`,
+        contentType: "application/json",
         method: "POST",
-        headers: {
-          Authorization: `Basic ${expectedBase64}`,
-          "Content-Type": "application/json",
-        },
+        url: "https://api.xendit.co/v2/invoices",
       });
-      const parsedBody = JSON.parse(String(capturedOptions?.body));
       expect(parsedBody).toStrictEqual({
         amount: 250_000,
         currency: "IDR",
@@ -137,21 +138,20 @@ describe(XenditClient, () => {
         orderId: "ORDER-MINIMAL",
       };
 
-      let capturedOptions: RequestInit | undefined;
+      let parsedBody: Record<string, unknown> | null = null;
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (_url: string | URL | Request, init?: RequestInit) => {
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(
-              {
-                id: "inv_min_1",
-                invoice_url: "https://checkout.xendit.co/web/inv_min_1",
-              },
-              { status: 201 }
-            )
+      server.use(
+        http.post("https://api.xendit.co/v2/invoices", async ({ request }) => {
+          // SAFETY: MSW parses JSON request payload as a generic record.
+          parsedBody = (await request.json()) as Record<string, unknown>;
+          return HttpResponse.json(
+            {
+              id: "inv_min_1",
+              invoice_url: "https://checkout.xendit.co/web/inv_min_1",
+            },
+            { status: 201 }
           );
-        }
+        })
       );
 
       const session = await client.createSession(input);
@@ -161,7 +161,6 @@ describe(XenditClient, () => {
         token: "inv_min_1",
       });
 
-      const parsedBody = JSON.parse(String(capturedOptions?.body));
       expect(parsedBody).toStrictEqual({
         amount: 100_000,
         currency: "IDR",
@@ -175,16 +174,18 @@ describe(XenditClient, () => {
         secretKey: mockSecretKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            error_code: "DUPLICATE_EXTERNAL_ID",
-            message: "An invoice with this external_id already exists",
-          },
-          {
-            status: 400,
-            statusText: "Bad Request",
-          }
+      server.use(
+        http.post("https://api.xendit.co/v2/invoices", () =>
+          HttpResponse.json(
+            {
+              error_code: "DUPLICATE_EXTERNAL_ID",
+              message: "An invoice with this external_id already exists",
+            },
+            {
+              status: 400,
+              statusText: "Bad Request",
+            }
+          )
         )
       );
 
@@ -201,8 +202,10 @@ describe(XenditClient, () => {
         secretKey: mockSecretKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json({ id: "inv_missing_url" }, { status: 200 })
+      server.use(
+        http.post("https://api.xendit.co/v2/invoices", () =>
+          HttpResponse.json({ id: "inv_missing_url" }, { status: 200 })
+        )
       );
 
       await expect(
@@ -213,6 +216,7 @@ describe(XenditClient, () => {
       ).rejects.toThrow("Failed to validate Xendit invoice response");
     });
   });
+
   describe("getTransactionStatus", () => {
     const mockInvoiceResponse = {
       amount: 150_000,
@@ -241,16 +245,19 @@ describe(XenditClient, () => {
       });
 
       let capturedUrl = "";
-      let capturedOptions: RequestInit | undefined;
+      let capturedAuthHeader: string | null = null;
+      let capturedMethod: string | null = null;
 
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request, init?: RequestInit) => {
-          capturedUrl = String(url);
-          capturedOptions = init;
-          return Promise.resolve(
-            Response.json(mockInvoiceResponse, { status: 200 })
-          );
-        }
+      server.use(
+        http.get(
+          "https://api.xendit.co/v2/invoices/:invoiceId",
+          ({ request }) => {
+            capturedUrl = request.url;
+            capturedMethod = request.method;
+            capturedAuthHeader = request.headers.get("authorization");
+            return HttpResponse.json(mockInvoiceResponse, { status: 200 });
+          }
+        )
       );
 
       const status = await client.getTransactionStatus("inv_12345");
@@ -288,15 +295,11 @@ describe(XenditClient, () => {
       });
 
       expect(capturedUrl).toBe("https://api.xendit.co/v2/invoices/inv_12345");
+      expect(capturedMethod).toBe("GET");
       const expectedBase64 = Buffer.from(`${mockSecretKey}:`).toString(
         "base64"
       );
-      expect(capturedOptions).toMatchObject({
-        method: "GET",
-        headers: {
-          Authorization: `Basic ${expectedBase64}`,
-        },
-      });
+      expect(capturedAuthHeader).toBe(`Basic ${expectedBase64}`);
     });
 
     it.each([
@@ -312,13 +315,15 @@ describe(XenditClient, () => {
           secretKey: mockSecretKey,
         });
 
-        vi.spyOn(globalThis, "fetch").mockResolvedValue(
-          Response.json(
-            {
-              ...mockInvoiceResponse,
-              status: vendorStatus,
-            },
-            { status: 200 }
+        server.use(
+          http.get("https://api.xendit.co/v2/invoices/:invoiceId", () =>
+            HttpResponse.json(
+              {
+                ...mockInvoiceResponse,
+                status: vendorStatus,
+              },
+              { status: 200 }
+            )
           )
         );
 
@@ -333,28 +338,21 @@ describe(XenditClient, () => {
       });
 
       const capturedUrls: string[] = [];
-      vi.spyOn(globalThis, "fetch").mockImplementation(
-        (url: string | URL | Request) => {
-          const urlStr = String(url);
-          capturedUrls.push(urlStr);
-          if (urlStr === "https://api.xendit.co/v2/invoices/ORDER-1001") {
-            return Promise.resolve(
-              Response.json(
-                { error_code: "INVOICE_NOT_FOUND" },
-                { status: 404 }
-              )
+      server.use(
+        http.get(
+          "https://api.xendit.co/v2/invoices/:invoiceId",
+          ({ request }) => {
+            capturedUrls.push(request.url);
+            return HttpResponse.json(
+              { error_code: "INVOICE_NOT_FOUND" },
+              { status: 404 }
             );
           }
-          if (
-            urlStr ===
-            "https://api.xendit.co/v2/invoices?external_id=ORDER-1001"
-          ) {
-            return Promise.resolve(
-              Response.json([mockInvoiceResponse], { status: 200 })
-            );
-          }
-          return Promise.resolve(new Response(null, { status: 404 }));
-        }
+        ),
+        http.get("https://api.xendit.co/v2/invoices", ({ request }) => {
+          capturedUrls.push(request.url);
+          return HttpResponse.json([mockInvoiceResponse], { status: 200 });
+        })
       );
 
       const result = await client.getTransactionStatus("ORDER-1001");
@@ -371,13 +369,24 @@ describe(XenditClient, () => {
         secretKey: mockSecretKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json(
-          {
-            error_code: "INVOICE_NOT_FOUND",
-            message: "Invoice not found",
-          },
-          { status: 404 }
+      server.use(
+        http.get("https://api.xendit.co/v2/invoices/:invoiceId", () =>
+          HttpResponse.json(
+            {
+              error_code: "INVOICE_NOT_FOUND",
+              message: "Invoice not found",
+            },
+            { status: 404 }
+          )
+        ),
+        http.get("https://api.xendit.co/v2/invoices", () =>
+          HttpResponse.json(
+            {
+              error_code: "INVOICE_NOT_FOUND",
+              message: "Invoice not found",
+            },
+            { status: 404 }
+          )
         )
       );
 
@@ -391,8 +400,10 @@ describe(XenditClient, () => {
         secretKey: mockSecretKey,
       });
 
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        Response.json({ id: "inv_12345" }, { status: 200 })
+      server.use(
+        http.get("https://api.xendit.co/v2/invoices/:invoiceId", () =>
+          HttpResponse.json({ id: "inv_12345" }, { status: 200 })
+        )
       );
 
       await expect(client.getTransactionStatus("inv_12345")).rejects.toThrow(
