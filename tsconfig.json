@@ -1,12 +1,12 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./packages/typescript-config/base.json",
   "compilerOptions": {
     "module": "Preserve",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "declaration": false,
-    "declarationMap": false,
-    "types": ["bun"]
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext"],
+    "types": ["bun"],
+    "allowImportingTsExtensions": true
   },
   "include": ["scripts/**/*"]
 }
