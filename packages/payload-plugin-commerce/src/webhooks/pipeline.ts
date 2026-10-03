@@ -14,7 +14,17 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { Payload, Where } from "payload";
 
-export type SupportedPaymentProvider = "midtrans" | "xendit";
+export const SUPPORTED_PAYMENT_PROVIDERS = ["midtrans", "xendit"] as const;
+
+export type SupportedPaymentProvider =
+  (typeof SUPPORTED_PAYMENT_PROVIDERS)[number];
+
+export const isSupportedPaymentProvider = (
+  provider: unknown
+): provider is SupportedPaymentProvider =>
+  typeof provider === "string" &&
+  // SAFETY: Upcasting readonly tuple to readonly string[] allows Array.prototype.includes to evaluate arbitrary runtime string inputs.
+  (SUPPORTED_PAYMENT_PROVIDERS as readonly string[]).includes(provider);
 
 export interface WebhookPayloadClient {
   find: (args: {

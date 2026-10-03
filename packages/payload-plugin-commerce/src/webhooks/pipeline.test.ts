@@ -6,7 +6,13 @@ import { encryptCredential } from "@repo/commerce-adapters/utils";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { processIncomingWebhook, resolveCredential } from "./pipeline";
+import * as webhooksExports from "../exports/webhooks";
+import {
+  SUPPORTED_PAYMENT_PROVIDERS,
+  isSupportedPaymentProvider,
+  processIncomingWebhook,
+  resolveCredential,
+} from "./pipeline";
 import type { WebhookPayloadClient } from "./pipeline";
 
 interface WhereEquals {
@@ -141,6 +147,51 @@ describe(resolveCredential, () => {
     expect(
       resolveCredential(encrypted, "wrong-secret-32-chars-long-12345")
     ).toBeUndefined();
+  });
+});
+
+describe("SUPPORTED_PAYMENT_PROVIDERS constant", () => {
+  it("contains midtrans and xendit as a readonly tuple", () => {
+    expect(SUPPORTED_PAYMENT_PROVIDERS).toStrictEqual(["midtrans", "xendit"]);
+    expect(SUPPORTED_PAYMENT_PROVIDERS).toHaveLength(2);
+  });
+});
+
+describe(isSupportedPaymentProvider, () => {
+  it.each(["midtrans", "xendit"] as const)(
+    "returns true for supported provider '%s'",
+    (provider) => {
+      expect(isSupportedPaymentProvider(provider)).toBeTruthy();
+    }
+  );
+
+  it.each(["stripe", "paypal", "unknown", "MIDTRANS", "xendit "])(
+    "returns false for unsupported provider '%s'",
+    (provider) => {
+      expect(isSupportedPaymentProvider(provider)).toBeFalsy();
+    }
+  );
+
+  it("returns false for empty string", () => {
+    expect(isSupportedPaymentProvider("")).toBeFalsy();
+  });
+
+  it.each([null, undefined, 123, {}, [], true, false])(
+    "returns false for arbitrary non-string input %j",
+    (input) => {
+      expect(isSupportedPaymentProvider(input)).toBeFalsy();
+    }
+  );
+});
+
+describe("webhooks exports", () => {
+  it("exports SUPPORTED_PAYMENT_PROVIDERS and isSupportedPaymentProvider", () => {
+    expect(webhooksExports.SUPPORTED_PAYMENT_PROVIDERS).toBe(
+      SUPPORTED_PAYMENT_PROVIDERS
+    );
+    expect(webhooksExports.isSupportedPaymentProvider).toBe(
+      isSupportedPaymentProvider
+    );
   });
 });
 
