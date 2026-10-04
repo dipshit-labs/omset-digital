@@ -1,4 +1,3 @@
-// @vitest-environment node
 import type { Store, User } from "@repo/types";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";

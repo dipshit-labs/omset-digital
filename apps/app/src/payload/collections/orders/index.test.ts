@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
 import type { Field, JSONField, PayloadRequest, SelectField } from "payload";
 import { describe, expect, it } from "vitest";

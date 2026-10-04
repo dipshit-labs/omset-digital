@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import type { GetShippingRatesResult } from "@repo/payload-plugin-commerce/actions";
 import {
   cleanup,

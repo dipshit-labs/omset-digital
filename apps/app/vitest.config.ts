@@ -24,7 +24,7 @@ export default defineProject(() => {
         {
           test: {
             environment: "node",
-            include: ["src/**/*.test.ts"],
+            include: ["src/**/*.test.ts", "test/factories/**/*.test.ts"],
             name: "unit",
           },
         },

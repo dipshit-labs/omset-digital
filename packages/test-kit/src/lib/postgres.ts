@@ -1,7 +1,7 @@
 import type { Payload } from "payload";
 import { Pool } from "pg";
 
-import type { ProvisionPostgresWorkerSchemaOptions } from "./types";
+import type { PgPoolLike, ProvisionPostgresWorkerSchemaOptions } from "./types";
 
 export const getPostgresWorkerSchemaName = (workerId?: string): string => {
   const id = workerId ?? process.env.VITEST_POOL_ID ?? "0";
@@ -60,9 +60,9 @@ export const dropPostgresWorkerSchema = async (
       "query" in db.pool &&
       typeof db.pool.query === "function"
     ) {
-      // SAFETY: Verified db.pool.query is a callable query function from postgres pool.
-      const poolQuery = db.pool.query as (query: string) => Promise<unknown>;
-      await poolQuery(
+      // SAFETY: Verified db.pool conforms to PgPoolLike with callable query function.
+      const pool = db.pool as PgPoolLike;
+      await pool.query(
         `DROP SCHEMA IF EXISTS "${schemaName.replaceAll('"', '""')}" CASCADE;`
       );
     }

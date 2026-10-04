@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { createInMemoryRateCache } from "@repo/payload-plugin-commerce/actions";
 import { describe, expect, it, vi } from "vitest";
 

@@ -1,4 +1,3 @@
-// @vitest-environment node
 import type { Page, Store, Template, Theme } from "@repo/types";
 import type { PaginatedDocs } from "payload";
 import { describe, expect, it } from "vitest";

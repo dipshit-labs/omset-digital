@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { createPackagesCollection } from "@repo/payload-plugin-commerce";
@@ -11,15 +10,20 @@ import {
 import type { Config } from "@repo/types";
 import { expect } from "vitest";
 
-import { Categories } from "../categories";
-import { Media } from "../media";
-import { Stores } from "../stores";
-import { Users } from "../users";
-import { Products } from "./index";
-import { getStashedVirtualData } from "./lifecycle";
-import { productFactory } from "./test/factories/productFactory";
-import { variantFactory } from "./test/factories/variantFactory";
-import { VariantOptions, Variants, VariantTypes } from "./variants";
+import { Categories } from "@/payload/collections/categories";
+import { Media } from "@/payload/collections/media";
+import { Products } from "@/payload/collections/products";
+import { getStashedVirtualData } from "@/payload/collections/products/lifecycle";
+import {
+  VariantOptions,
+  Variants,
+  VariantTypes,
+} from "@/payload/collections/products/variants";
+import { Stores } from "@/payload/collections/stores";
+import { Users } from "@/payload/collections/users";
+
+import { productFactory } from "../factories/productFactory";
+import { variantFactory } from "../factories/variantFactory";
 
 const packagesCollection = createPackagesCollection();
 

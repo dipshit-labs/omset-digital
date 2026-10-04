@@ -1,8 +1,7 @@
-// @vitest-environment node
 import { defineIntegrationSuite } from "@repo/test-kit";
 import { expect } from "vitest";
 
-import { Orders } from "./index";
+import { Orders } from "@/payload/collections/orders";
 
 const { describe, it } = defineIntegrationSuite({
   collections: [Orders],

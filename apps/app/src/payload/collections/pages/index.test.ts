@@ -1,4 +1,3 @@
-// @vitest-environment node
 import type { PayloadRequest } from "payload";
 import { describe, expect, it } from "vitest";
 

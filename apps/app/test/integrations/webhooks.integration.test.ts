@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { generateMidtransSignature } from "@repo/commerce-adapters/payments";
 import { encryptCredential } from "@repo/commerce-adapters/utils";
@@ -9,11 +8,10 @@ import { NextRequest } from "next/server";
 import type { Payload } from "payload";
 import { expect } from "vitest";
 
+import { POST } from "@/app/api/webhooks/[provider]/[storeSlug]/route";
 import { Orders } from "@/payload/collections/orders";
 import { Stores } from "@/payload/collections/stores";
 import { Users } from "@/payload/collections/users";
-
-import { POST } from "./route";
 
 const MIDTRANS_SERVER_KEY = "SB-Mid-server-TEST12345";
 const XENDIT_SECRET_KEY = "xnd_development_secret_12345";

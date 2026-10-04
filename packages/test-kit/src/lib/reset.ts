@@ -39,13 +39,7 @@ export const resetPostgresDatabase = async (
     "query" in db.pool &&
     typeof db.pool.query === "function"
   ) {
-    // SAFETY: Verified db.pool.query is a callable query function from postgres pool.
-    const poolQuery = db.pool.query as (
-      query: string,
-      params?: unknown[]
-    ) => Promise<{ rows?: { tablename?: string }[] }>;
-
-    const tablesResult = await poolQuery(
+    const tablesResult = await db.pool.query(
       "SELECT tablename FROM pg_tables WHERE schemaname = $1;",
       [schemaName]
     );
@@ -69,7 +63,9 @@ export const resetPostgresDatabase = async (
       )
       .join(", ");
 
-    await poolQuery(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE;`);
+    await db.pool.query(
+      `TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE;`
+    );
   }
 };
 

@@ -1,4 +1,3 @@
-// @vitest-environment node
 import type { LegacyOrderRecord } from "@repo/payload-plugin-commerce/types";
 import { createTestReq } from "@repo/test-kit";
 import type { Order } from "@repo/types";
