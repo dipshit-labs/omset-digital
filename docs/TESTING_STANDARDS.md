@@ -6,11 +6,12 @@ The worked examples behind the testing rules in `CODING_STANDARDS.md`. Read thos
 
 Every test file in this monorepo belongs to one of two tiers.
 
-**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms. Component tests (`.test.tsx`) render in JSDOM via project-based environment configs. No database, no Payload boot.
+**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms via the `unit` project. Component tests (`.test.tsx`) render in JSDOM via the `ui` project. No database, no Payload boot.
 
-**Tier 2, integration tests (`test/integrations/*.integration.test.ts`):** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root. Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
+**Tier 2, integration tests (`test/integrations/*.integration.test.ts`):** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root, dispatched via the `integration` project (`environment: "node"`, `fileParallelism: false`). Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
 
 A file that needs both splits: pure tests go to colocated `src/`, Payload-backed tests to `test/integrations/`.
+
 ## Good tests
 
 Integration tests exercise real code paths through public APIs. They describe what the system does, not how.
@@ -184,6 +185,7 @@ Mock at system boundaries only: external network APIs, system time, randomness. 
 - **Mock external network boundaries with MSW.** Payment gateways (Midtrans, Xendit), shipping APIs (RajaOngkir), and transactional emails (Resend) are intercepted via Mock Service Worker. Central handlers live in `@repo/test-kit/src/msw/handlers/` and tests customize behavior with `server.use(...)`.
 - **Mock system time and randomness.** Use `vi.useFakeTimers()` for time-sensitive token expirations or billing schedules.
 - **Never mock internal collaborators.** If a function requires mocking a sibling file to test it, extract the logic into a pure function or inject the dependency.
+
 ## Storefront themes and UI components
 
 Never boot a full headless browser in unit and integration test suites. Headless browsers require extra setup, run slowly, and assert on styling details that intentional visual changes alter.
@@ -206,15 +208,15 @@ Each test builds on what the previous cycle proved. Always reach a passing test 
 
 The monorepo organizes test execution into targeted Turborepo tasks:
 
-- `test:unit`: runs colocated unit and UI tests (`src/**/*.test.{ts,tsx}`). High cache hit rate when business logic is untouched.
-- `test:integration`: runs integration suites (`test/integrations/*.integration.test.ts`). Declared only in packages and apps that contain database integration tests.
+- `test:unit`: runs colocated unit and UI tests by targeting projects (`vitest run --project '*unit*' --project '*ui*'`, or `--project '*unit*'` in pure Node packages). High cache hit rate when business logic is untouched.
+- `test:integration`: runs integration suites by targeting the integration project (`vitest run --project '*integration*'`). Declared only in packages and apps that contain database integration tests.
 - `test`: composite task that executes both unit and integration verification.
-- `test:coverage`: runs Vitest with `@vitest/coverage-v8`, outputting reports to `coverage/**` with Turborepo caching.
+- `test:coverage`: runs full-workspace Vitest coverage with `@vitest/coverage-v8` centrally from root `vitest.config.ts`, outputting reports to `coverage/**` with Turborepo caching.
 
 ## Code coverage
 
-V8 code coverage evaluates test sufficiency without manual instrumentation:
+V8 Coverage is configured once in root `vitest.config.ts` across all projects:
 
 - **Enforced thresholds:** Core domain packages (`payload-plugin-commerce` and `commerce-adapters`) enforce an 80% statement and branch coverage threshold. Builds fail when coverage drops below this line.
 - **Report-only packages:** Application glue code and pages in `apps/app` collect reports without threshold failure gates.
-- **Standard exclusions:** Test files, factories (`test/factories/**`), generated schemas, and build distributions are excluded from coverage calculations.
+- **Centralized scope:** Coverage includes `packages/*/src/**/*.{ts,tsx}` and `apps/*/src/**/*.{ts,tsx}`. Exclusions cover test files (`**/*.test.{ts,tsx}`, `**/*.integration.test.{ts,tsx}`), test fixtures (`**/test/**`), generated schemas (`**/generated.ts`), and TypeScript declarations (`**/*.d.ts`).

@@ -34,7 +34,7 @@ Turborepo monorepo managed with Bun. Packages export TypeScript source directly 
 
 ### Testing
 
-Vitest runs unit and integration tests across two tiers. Unit and UI tests live colocated in `src/` (`.test.ts` on Node, `.test.tsx` on JSDOM via project-based environment configs). Integration tests (`.integration.test.ts`) live in a flat `test/integrations/` directory, running against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. External network requests are intercepted with MSW.
+Vitest runs unit and integration tests across two tiers mapped to named projects (`unit`, `ui`, `integration`). Unit and UI tests live colocated in `src/` (`.test.ts` on Node, `.test.tsx` on JSDOM). Integration tests (`.integration.test.ts`) live in a flat `test/integrations/` directory, running against the real Payload Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app` via `@repo/test-kit`. External network requests are intercepted with MSW.
 
 Run specific suites during iteration:
 - `bun --filter <package> test:unit`
@@ -42,6 +42,7 @@ Run specific suites during iteration:
 - Single file: `bun --filter <package> test src/path/to/file.test.ts` or `bun --filter <package> test test/integrations/feature.integration.test.ts`
 
 Never mock Payload operations. Use `@repo/test-kit` fixtures for integration tests and Fishery factories in `test/factories/` for typed document generation. For test design, boundary mocking, and worked examples, see `docs/TESTING_STANDARDS.md`.
+
 ### Runtime server logs
 
 `bun run dev` pipes server output through `scripts/run-with-log.ts` into `.data/logs/`. Read `.data/logs/dev-latest.log` when pages throw at runtime, Payload hooks crash, or SSR fails. See `docs/agents/runtime-logs.md`.
