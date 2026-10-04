@@ -4,7 +4,6 @@ export default defineConfig({
   test: {
     environment: "node",
     coverage: {
-      include: ["packages/*/src/**/*.{ts,tsx}", "apps/*/src/**/*.{ts,tsx}"],
       provider: "v8",
       reporter: ["text", "json", "html"],
       reportsDirectory: "./coverage",
@@ -14,6 +13,11 @@ export default defineConfig({
         "**/test/**",
         "**/generated.ts",
         "**/*.d.ts",
+      ],
+      include: [
+        "packages/*/src/**/*.{ts,tsx}",
+        "packages/themes/*/src/**/*.{ts,tsx}",
+        "apps/*/src/**/*.{ts,tsx}",
       ],
       thresholds: {
         "packages/commerce-adapters/**": {
@@ -29,6 +33,7 @@ export default defineConfig({
     projects: [
       "apps/*/vitest.config.{ts,js}",
       "packages/*/vitest.config.{ts,js}",
+      "packages/themes/*/vitest.config.{ts,js}",
     ],
   },
 });

@@ -351,9 +351,131 @@ describe(calculateShippingRates, () => {
         storeSlug: "toko-kopi",
       },
     });
-
     expect(result.success).toBeFalsy();
     expect(result.error).toMatch(/shipping is not enabled/iu);
     expect(result.rates).toHaveLength(0);
+  });
+
+  it("handles missing store, missing originAddress, and missing credentials", async () => {
+    const cache = createInMemoryRateCache();
+    // 1. Missing store
+    const emptyPayload: ShippingRatesPayloadClient = {
+      find: vi
+        .fn<() => Promise<{ docs: unknown[] }>>()
+        .mockResolvedValue({ docs: [] }),
+    };
+    const resNoStore = await calculateShippingRates({
+      cache,
+      payload: emptyPayload,
+      input: {
+        customerDestination: { cityId: 152 },
+        items: [{ weight: 100 }],
+        storeSlug: "missing-store",
+      },
+    });
+    expect(resNoStore.success).toBeFalsy();
+
+    // 2. Store missing originAddress
+    const storeNoOrigin = { ...mockStore, originAddress: null };
+    const noOriginPayload: ShippingRatesPayloadClient = {
+      find: vi
+        .fn<() => Promise<{ docs: unknown[] }>>()
+        .mockResolvedValue({ docs: [storeNoOrigin] }),
+    };
+    const resNoOrigin = await calculateShippingRates({
+      cache,
+      payload: noOriginPayload,
+      input: {
+        customerDestination: { cityId: 152 },
+        items: [{ weight: 100 }],
+        storeSlug: "toko-kopi",
+      },
+    });
+    expect(resNoOrigin.success).toBeFalsy();
+
+    // 3. Missing RajaOngkir credentials
+    const noCredsPayload: ShippingRatesPayloadClient = {
+      find: vi
+        .fn<
+          ({ collection }: MockPayloadQueryArgs) => Promise<{ docs: unknown[] }>
+        >()
+        .mockImplementation(({ collection }: MockPayloadQueryArgs) => {
+          if (collection === "stores") {
+            return Promise.resolve({ docs: [mockStore] });
+          }
+          return Promise.resolve({ docs: [] });
+        }),
+    };
+    const resNoCreds = await calculateShippingRates({
+      cache,
+      payload: noCredsPayload,
+      input: {
+        customerDestination: { cityId: 152 },
+        items: [{ weight: 100 }],
+        storeSlug: "toko-kopi",
+      },
+    });
+    expect(resNoCreds.success).toBeFalsy();
+  });
+
+  it("recovers from corrupted cache and uses explicit packageId", async () => {
+    const cache = createInMemoryRateCache();
+    const explicitPackage = {
+      dimensions: { height: 10, length: 20, width: 15 },
+      id: 99,
+      isDefault: false,
+      store: 1,
+      tareWeight: { unit: "g", value: 50 },
+    };
+
+    const mockFind = vi
+      .fn<
+        ({ collection }: MockPayloadQueryArgs) => Promise<{ docs: unknown[] }>
+      >()
+      .mockImplementation(({ collection }: MockPayloadQueryArgs) => {
+        if (collection === "stores") {
+          return Promise.resolve({ docs: [mockStore] });
+        }
+        if (collection === "storeCredentials") {
+          return Promise.resolve({ docs: [mockCredentials] });
+        }
+        if (collection === "packages") {
+          return Promise.resolve({ docs: [explicitPackage] });
+        }
+        return Promise.resolve({ docs: [] });
+      });
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        rajaongkir: {
+          results: mockRajaOngkirResults,
+          status: { code: 200, description: "OK" },
+        },
+      })
+    );
+
+    // Corrupt the cache key
+    const key = generateRateCacheKey({
+      couriers: ["jne", "pos", "tiki"],
+      destId: 152,
+      originId: 574,
+      weightTier: resolveWeightTier(1000),
+    });
+    await cache.set(key, "invalid-json{{{");
+
+    const result = await calculateShippingRates({
+      cache,
+      payload: { find: mockFind },
+      secret: masterSecret,
+      input: {
+        customerDestination: { cityId: 152 },
+        items: [{ weight: 500 }],
+        packageId: 99,
+        storeSlug: "toko-kopi",
+      },
+    });
+
+    expect(result.success).toBeTruthy();
+    expect(result.rates.length).toBeGreaterThan(0);
   });
 });

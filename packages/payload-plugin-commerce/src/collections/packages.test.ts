@@ -122,6 +122,96 @@ describe("packages collection factory", () => {
     expect(collection.hooks?.beforeChange).toHaveLength(2);
     expect(collection.hooks?.afterChange).toHaveLength(1);
   });
+
+  it("supports custom slugs and merges custom overrides", () => {
+    const collection = createPackagesCollection({
+      slug: "custom-packages",
+      storesSlug: "custom-stores",
+      overrides: {
+        admin: { useAsTitle: "customTitle" },
+        hooks: {
+          beforeChange: [vi.fn<() => void>()],
+        },
+      },
+    });
+
+    expect(collection.slug).toBe("custom-packages");
+    expect(collection.admin?.useAsTitle).toBe("customTitle");
+    expect(collection.hooks?.beforeChange).toHaveLength(3);
+  });
+
+  describe("access controls", () => {
+    const collection = createPackagesCollection();
+
+    it("create access requires authenticated user", () => {
+      // SAFETY: Cast access control predicate to typed test invoker
+      const createAccess = collection.access?.create as (args: {
+        req: unknown;
+      }) => boolean;
+      expect(createAccess({ req: { user: { id: 1 } } })).toBeTruthy();
+      expect(createAccess({ req: { user: null } })).toBeFalsy();
+    });
+
+    it("read access always returns true", () => {
+      // SAFETY: Cast access control predicate to typed test invoker
+      const readAccess = collection.access?.read as (args: {
+        req: unknown;
+      }) => boolean;
+      expect(readAccess({ req: {} })).toBeTruthy();
+    });
+
+    it("delete access checks authentication, super-admin, and store tenant bounds", () => {
+      // SAFETY: Cast access control predicate to typed test invoker
+      const deleteAccess = collection.access?.delete as (args: {
+        req: unknown;
+      }) => unknown;
+      expect(deleteAccess({ req: { user: null } })).toBeFalsy();
+      expect(
+        deleteAccess({ req: { user: { roles: ["super-admin"] } } })
+      ).toBeTruthy();
+      expect(
+        deleteAccess({
+          req: {
+            user: {
+              roles: ["editor"],
+              stores: [{ id: 10 }, 20, null, undefined],
+            },
+          },
+        })
+      ).toStrictEqual({ store: { in: [10, 20] } });
+      expect(
+        deleteAccess({
+          req: { user: { roles: ["editor"], stores: [] } },
+        })
+      ).toBeTruthy();
+    });
+
+    it("update access checks authentication, super-admin, and store tenant bounds", () => {
+      // SAFETY: Cast access control predicate to typed test invoker
+      const updateAccess = collection.access?.update as (args: {
+        req: unknown;
+      }) => unknown;
+      expect(updateAccess({ req: { user: null } })).toBeFalsy();
+      expect(
+        updateAccess({ req: { user: { roles: ["super-admin"] } } })
+      ).toBeTruthy();
+      expect(
+        updateAccess({
+          req: {
+            user: {
+              roles: ["editor"],
+              stores: [{ id: 5 }, 15],
+            },
+          },
+        })
+      ).toStrictEqual({ store: { in: [5, 15] } });
+      expect(
+        updateAccess({
+          req: { user: { roles: ["editor"], stores: [] } },
+        })
+      ).toBeTruthy();
+    });
+  });
 });
 
 describe("enforceStoreOnCreate hook", () => {
@@ -184,6 +274,39 @@ describe("enforceStoreOnCreate hook", () => {
         data,
         operation: "create",
         req: {},
+      })
+    ).rejects.toThrow("No active store selected.");
+  });
+
+  it("bypasses store enforcement for super-admin user", async () => {
+    const data: MockPackageRecord = { title: "Super Admin Box" };
+    const result = await runBeforeChange(hook, {
+      data,
+      operation: "create",
+      req: { user: { roles: ["super-admin"] } },
+    });
+
+    expect(result).toStrictEqual(data);
+  });
+
+  it("handles string tenant ID from plain object headers", async () => {
+    const data: MockPackageRecord = { title: "Box String Tenant" };
+    const result = await runBeforeChange(hook, {
+      data,
+      operation: "create",
+      req: { headers: { cookie: "payload-tenant=store-alpha" } },
+    });
+
+    expect(result).toStrictEqual({ ...data, store: "store-alpha" });
+  });
+
+  it("handles headers without tenant cookie", async () => {
+    const data: MockPackageRecord = { title: "Box No Cookie" };
+    await expect(
+      runBeforeChange(hook, {
+        data,
+        operation: "create",
+        req: { headers: { cookie: "other=val" } },
       })
     ).rejects.toThrow("No active store selected.");
   });
@@ -283,6 +406,62 @@ describe("default package management hooks", () => {
 
       expect(result?.isDefault).toBeTruthy();
     });
+
+    it("skips default package sync when skipDefaultPackageSync is set in context", async () => {
+      const data: MockPackageRecord = {
+        isDefault: false,
+        store: 1,
+        title: "Skip Box",
+      };
+      const result = await runBeforeChange(beforeChange, {
+        data,
+        operation: "create",
+        req: { context: { skipDefaultPackageSync: true } },
+      });
+
+      expect(result).toStrictEqual(data);
+    });
+
+    it("returns data unchanged when store cannot be resolved", async () => {
+      const data: MockPackageRecord = {
+        isDefault: false,
+        title: "No Store Box",
+      };
+      const result = await runBeforeChange(beforeChange, {
+        data,
+        operation: "create",
+        req: {},
+      });
+
+      expect(result).toStrictEqual(data);
+    });
+
+    it("resolves storeId from populated store object and allows unsetting isDefault if another default exists", async () => {
+      const countMock = vi
+        .fn<() => Promise<{ totalDocs: number }>>()
+        .mockResolvedValue({ totalDocs: 1 });
+      const req = { payload: { count: countMock } };
+      const data: MockPackageRecord = {
+        isDefault: false,
+        title: "Default Box",
+      };
+      const originalDoc = {
+        id: 11,
+        isDefault: true,
+        // SAFETY: Test populated store object structure
+        store: { id: 55 } as never,
+        title: "Default Box",
+      };
+
+      const result = await runBeforeChange(beforeChange, {
+        data,
+        operation: "update",
+        originalDoc,
+        req,
+      });
+
+      expect(result?.isDefault).toBeFalsy();
+    });
   });
 
   describe("afterChange hook", () => {
@@ -341,6 +520,64 @@ describe("default package management hooks", () => {
       });
 
       expect(updateMock).not.toHaveBeenCalled();
+    });
+
+    it("skips syncing when skipDefaultPackageSync is true in request context", async () => {
+      const updateMock = vi.fn<() => Promise<{ docs: unknown[] }>>();
+      const req = {
+        context: { skipDefaultPackageSync: true },
+        payload: { update: updateMock },
+      };
+      const doc = { id: 27, isDefault: true, store: 5, title: "Default" };
+
+      await runAfterChange(afterChange, {
+        data: {},
+        doc,
+        operation: "update",
+        req,
+      });
+
+      expect(updateMock).not.toHaveBeenCalled();
+    });
+
+    it("handles doc with null or object store in afterChange", async () => {
+      const updateMock = vi
+        .fn<() => Promise<{ docs: unknown[] }>>()
+        .mockResolvedValue({ docs: [] });
+      const req = { payload: { update: updateMock } };
+
+      await runAfterChange(afterChange, {
+        data: {},
+        operation: "update",
+        req,
+        doc: {
+          id: 28,
+          isDefault: true,
+          store: undefined as never,
+          title: "No Store",
+        },
+      });
+      expect(updateMock).not.toHaveBeenCalled();
+
+      await runAfterChange(afterChange, {
+        data: {},
+        operation: "update",
+        req,
+        // SAFETY: Test populated store object structure
+        doc: {
+          id: 29,
+          isDefault: true,
+          store: { id: 88 } as never,
+          title: "Populated Store",
+        },
+      });
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            and: expect.arrayContaining([{ store: { equals: 88 } }]),
+          }),
+        })
+      );
     });
   });
 });

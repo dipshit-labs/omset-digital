@@ -66,6 +66,17 @@ describe(isValidPaymentStatusTransition, () => {
     expect(isValidPaymentStatusTransition("cancelled", "failed")).toBeFalsy();
     expect(isValidPaymentStatusTransition("cancelled", "expired")).toBeFalsy();
   });
+
+  it("handles non-canonical and unknown states", () => {
+    // SAFETY: Testing runtime validation of invalid string cast
+    expect(
+      isValidPaymentStatusTransition(undefined, "unknown" as never)
+    ).toBeFalsy();
+    // SAFETY: Testing runtime validation of invalid string cast
+    expect(
+      isValidPaymentStatusTransition("unknown" as never, "paid")
+    ).toBeFalsy();
+  });
 });
 
 describe("preventPaymentStatusReversion hook", () => {

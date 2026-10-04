@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { getAdministrativeAreasSeedData } from "../data/seedData";
 import {
@@ -137,5 +137,55 @@ describe("administrative areas SQL tests with real LibSQL in-memory executor", (
 
     const elapsed = performance.now() - start;
     expect(elapsed).toBeLessThan(500);
+  });
+
+  it("throws TypeError on non-numeric provinceId and cityId", async () => {
+    await expect(getCities("invalid-id", db)).rejects.toThrow(TypeError);
+    await expect(getSubdistricts("invalid-id", db)).rejects.toThrow(TypeError);
+  });
+
+  it("supports Drizzle holder and pg-like query executors with { rows } response", async () => {
+    const mockRows = [
+      { province_id: 1, province_name: "Bali" },
+      { province_id: 5, province_name: "DI Yogyakarta" },
+    ];
+
+    const drizzleHolder = {
+      db: {
+        drizzle: {
+          execute: vi
+            .fn<() => Promise<{ rows: typeof mockRows }>>()
+            .mockResolvedValue({ rows: mockRows }),
+        },
+      },
+    };
+    const provinces = await getProvinces(drizzleHolder);
+    expect(provinces).toHaveLength(2);
+
+    const queryExecutor = {
+      query: vi
+        .fn<(_sql: unknown, params: unknown) => Promise<unknown>>()
+        .mockImplementation((_sql: unknown, params: unknown) => {
+          if (params) {
+            return Promise.resolve({
+              rows: [
+                { city_id: 39, city_name: "Bantul", city_type: "Kabupaten" },
+              ],
+            });
+          }
+          return Promise.resolve([
+            {
+              postal_code: "55715",
+              subdistrict_id: 537,
+              subdistrict_name: "Bambang Lipuro",
+            },
+          ]);
+        }),
+    };
+    const cities = await getCities(5, queryExecutor);
+    expect(cities).toHaveLength(1);
+
+    const subdistricts = await getSubdistricts(39, queryExecutor);
+    expect(subdistricts).toHaveLength(1);
   });
 });

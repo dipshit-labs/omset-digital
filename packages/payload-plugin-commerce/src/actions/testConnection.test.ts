@@ -254,5 +254,94 @@ describe("Test Connection Actions", () => {
 
       expect(result.success).toBeTruthy();
     });
+
+    it("dispatches xendit input correctly", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn<typeof fetch>()
+          .mockResolvedValue(createMockResponse({ balance: 1_000_000 }, 200))
+      );
+
+      const result = await testConnection({
+        isProduction: false,
+        provider: "xendit",
+        secretKey: "xnd_test_123",
+      });
+
+      expect(result.success).toBeTruthy();
+    });
+
+    it("dispatches rajaongkir input correctly", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn<typeof fetch>().mockResolvedValue(
+          createMockResponse(
+            {
+              rajaongkir: {
+                results: [{ province_id: "1" }],
+                status: { code: 200 },
+              },
+            },
+            200
+          )
+        )
+      );
+
+      const result = await testConnection({
+        accountType: "starter",
+        apiKey: "raja_123",
+        provider: "rajaongkir",
+      });
+
+      expect(result.success).toBeTruthy();
+    });
+
+    it("handles unsupported provider safely", async () => {
+      // SAFETY: Testing runtime fallback for unsupported provider input.
+      const unknownInput = { provider: "unknown" };
+      const result = await testConnection(unknownInput as never);
+
+      expect(result.success).toBeFalsy();
+      expect(result.error).toBe("UNSUPPORTED_PROVIDER");
+    });
+
+    it("handles network errors and rejection across providers", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn<typeof fetch>()
+          .mockRejectedValue(new Error("Network connection down"))
+      );
+
+      const midtransRes = await testMidtransConnection({
+        isProduction: false,
+        serverKey: "server-key",
+      });
+      expect(midtransRes.error).toBe("NETWORK_ERROR");
+
+      const xenditRes = await testXenditConnection({
+        isProduction: false,
+        secretKey: "secret-key",
+      });
+      expect(xenditRes.error).toBe("NETWORK_ERROR");
+
+      const rajaRes = await testRajaOngkirConnection({
+        accountType: "starter",
+        apiKey: "api-key",
+      });
+      expect(rajaRes.error).toBe("NETWORK_ERROR");
+
+      // Non-Error rejection fallback
+      vi.stubGlobal(
+        "fetch",
+        vi.fn<typeof fetch>().mockRejectedValue("string-error")
+      );
+      const rajaRes2 = await testRajaOngkirConnection({
+        accountType: "starter",
+        apiKey: "api-key",
+      });
+      expect(rajaRes2.error).toBe("NETWORK_ERROR");
+    });
   });
 });

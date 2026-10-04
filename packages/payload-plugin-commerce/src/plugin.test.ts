@@ -195,4 +195,45 @@ describe(commercePlugin, () => {
     );
     expect(paymentMetadata).toBeDefined();
   });
+
+  it("handles pre-existing collections, pre-existing Integrations tab, and enabled = false", async () => {
+    const existingStoresWithTabs: CollectionConfig = {
+      slug: "stores",
+      fields: [
+        {
+          type: "tabs",
+          tabs: [
+            { fields: [], label: "General" },
+            {
+              fields: [{ name: "credentialsManager", type: "ui" } as never],
+              label: "Integrations",
+            },
+          ],
+        },
+      ],
+    };
+
+    const preExistingCollections: CollectionConfig[] = [
+      existingStoresWithTabs,
+      { fields: [], slug: "storeCredentials" },
+      { fields: [], slug: "administrativeAreas" },
+      { fields: [], slug: "packages" },
+    ];
+
+    const pluginDisabled = commercePlugin({ enabled: false });
+    const result = await pluginDisabled(
+      createMockConfig(preExistingCollections)
+    );
+
+    expect(result.collections).toHaveLength(4);
+    const stores = result.collections?.find((c) => c.slug === "stores");
+    // SAFETY: Cast field to tabs shape for test assertion
+    const tabsField = stores?.fields.find((f) => f.type === "tabs") as {
+      tabs: { label: string; fields: unknown[] }[];
+    };
+    const integrationsTab = tabsField.tabs.find(
+      (t) => t.label === "Integrations"
+    );
+    expect(integrationsTab?.fields.length).toBeGreaterThan(0);
+  });
 });

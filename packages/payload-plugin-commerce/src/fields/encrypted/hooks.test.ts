@@ -152,4 +152,42 @@ describe(createEncryptedFieldBeforeChange, () => {
       "rajaongkir-api-key-123"
     );
   });
+
+  it("handles string path, resolver function, and missing secret error", async () => {
+    // 1. Function resolver
+    const hookWithFn = createEncryptedFieldBeforeChange(() => TEST_SECRET);
+    const resFn = await hookWithFn(
+      createHookArgs({
+        field: { name: "apiKey", type: "text" },
+        req: {} as never,
+        value: "value-with-fn",
+      })
+    );
+    expect(isCiphertext(resFn)).toBeTruthy();
+
+    // 2. String path dot notation
+    const hook = createEncryptedFieldBeforeChange(TEST_SECRET);
+    const resStringPath = await hook(
+      createHookArgs({
+        field: { name: "serverKey", type: "text" },
+        originalDoc: { midtrans: { serverKey: "existing-ciphertext" } },
+        // SAFETY: FieldHook path parameter accepts string at runtime for dot-notation lookup.
+        path: "midtrans.serverKey" as never,
+        value: "",
+      })
+    );
+    expect(resStringPath).toBe("existing-ciphertext");
+
+    // 3. Missing secret error
+    const hookNoSecret = createEncryptedFieldBeforeChange();
+    expect(() =>
+      hookNoSecret(
+        createHookArgs({
+          field: { name: "key", type: "text" },
+          req: { payload: {} } as never,
+          value: "secret-data",
+        })
+      )
+    ).toThrow("Encryption secret not found");
+  });
 });

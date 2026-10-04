@@ -5,7 +5,7 @@ import type {
   SelectField,
   TextField,
 } from "payload";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createStoreCredentialsCollection } from "./storeCredentials";
 
@@ -110,5 +110,107 @@ describe("storeCredentials collection factory", () => {
     ) as TextField | undefined;
 
     expect(apiKeyField?.hooks?.beforeChange).toHaveLength(1);
+  });
+
+  describe("access controls", () => {
+    const collection = createStoreCredentialsCollection();
+    type AccessFn = (args: { req: { user: unknown } }) => boolean;
+
+    it("requires authenticated user for create and read", () => {
+      const { create, read } = collection.access ?? {};
+      const authed = { req: { user: { id: 1 } } };
+      const anon = { req: { user: null } };
+
+      // SAFETY: Cast access control predicate to typed test invoker
+      const createFn = create as AccessFn;
+      const readFn = read as AccessFn;
+
+      expect(createFn(authed)).toBeTruthy();
+      expect(createFn(anon)).toBeFalsy();
+      expect(readFn(authed)).toBeTruthy();
+      expect(readFn(anon)).toBeFalsy();
+    });
+
+    it("requires authenticated user for delete and update", () => {
+      const { delete: del, update } = collection.access ?? {};
+      const authed = { req: { user: { id: 1 } } };
+      const anon = { req: { user: null } };
+
+      // SAFETY: Cast access control predicate to typed test invoker
+      const deleteFn = del as AccessFn;
+      const updateFn = update as AccessFn;
+
+      expect(deleteFn(authed)).toBeTruthy();
+      expect(deleteFn(anon)).toBeFalsy();
+      expect(updateFn(authed)).toBeTruthy();
+      expect(updateFn(anon)).toBeFalsy();
+    });
+  });
+
+  describe("afterChange syncActiveProvidersToStore hook", () => {
+    const collection = createStoreCredentialsCollection();
+    const [afterChangeHook] = collection.hooks?.afterChange ?? [];
+    // SAFETY: Cast collection afterChange hook to test runner
+    const runHook = afterChangeHook as (args: unknown) => Promise<unknown>;
+
+    it("syncs active providers to store document and handles skipSync", async () => {
+      const updateMock = vi.fn<() => Promise<unknown>>().mockResolvedValue({});
+      const req = { payload: { update: updateMock } };
+
+      // 1. Successful sync
+      await runHook({
+        context: {},
+        req,
+        doc: {
+          paymentProvider: "midtrans",
+          shippingProvider: "rajaongkir",
+          store: 42,
+        },
+      });
+
+      expect(updateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collection: "stores",
+          context: { skipSync: true },
+          id: 42,
+          data: {
+            activePaymentProvider: "midtrans",
+            activeShippingProvider: "rajaongkir",
+          },
+        })
+      );
+
+      // 2. Skip when context.skipSync is true
+      updateMock.mockClear();
+      await runHook({
+        context: { skipSync: true },
+        doc: { store: 42 },
+        req,
+      });
+      expect(updateMock).not.toHaveBeenCalled();
+
+      // 3. Skip when store is missing or empty object
+      await runHook({
+        context: {},
+        doc: { store: null },
+        req,
+      });
+      await runHook({
+        context: {},
+        doc: { store: {} },
+        req,
+      });
+      expect(updateMock).not.toHaveBeenCalled();
+
+      // 4. Catches update errors without throwing
+      updateMock.mockRejectedValueOnce(new Error("Update failed"));
+      await expect(
+        runHook({
+          context: {},
+          doc: { store: 42 },
+          req,
+        })
+      ).resolves.toBeDefined();
+    });
   });
 });

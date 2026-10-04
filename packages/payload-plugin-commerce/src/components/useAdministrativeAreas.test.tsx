@@ -165,4 +165,87 @@ describe(useAdministrativeAreas, () => {
       })
     );
   });
+
+  it("initializes with provided initial values and updates postal code", () => {
+    const onChange = vi.fn<(addr: unknown) => void>();
+    const { result } = renderHook(() =>
+      useAdministrativeAreas({
+        onChange,
+        initialValue: {
+          cityId: 39,
+          cityName: "Bantul",
+          cityType: "Kabupaten",
+          postalCode: "55715",
+          provinceId: 5,
+          provinceName: "DI Yogyakarta",
+          streetAddress: "Jl. Sudirman No. 1",
+          subdistrictId: 537,
+          subdistrictName: "Bambang Lipuro",
+        },
+      })
+    );
+
+    expect(result.current.postalCode).toBe("55715");
+    expect(result.current.streetAddress).toBe("Jl. Sudirman No. 1");
+
+    act(() => {
+      result.current.setPostalCode("12345");
+    });
+    expect(result.current.postalCode).toBe("12345");
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ postalCode: "12345" })
+    );
+  });
+
+  it("updates street address and notifies onChange", () => {
+    const onChange = vi.fn<(addr: unknown) => void>();
+    const { result } = renderHook(() =>
+      useAdministrativeAreas({
+        initialValue: { streetAddress: "Jl. Sudirman No. 1" },
+        onChange,
+      })
+    );
+
+    act(() => {
+      result.current.setStreetAddress("Jl. Malioboro 10");
+    });
+    expect(result.current.streetAddress).toBe("Jl. Malioboro 10");
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ streetAddress: "Jl. Malioboro 10" })
+    );
+  });
+
+  it("handles fetch errors gracefully across all levels", async () => {
+    const fetchProvinces = vi
+      .fn<() => Promise<never>>()
+      .mockRejectedValue(new Error("Failed provinces"));
+    const fetchCities = vi
+      .fn<() => Promise<never>>()
+      .mockRejectedValue(new Error("Failed cities"));
+    const fetchSubdistricts = vi
+      .fn<() => Promise<never>>()
+      .mockRejectedValue(new Error("Failed subdistricts"));
+
+    const { result } = renderHook(() =>
+      useAdministrativeAreas({
+        fetchCities,
+        fetchProvinces,
+        fetchSubdistricts,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.error).toBe("Failed provinces");
+    });
+
+    await act(async () => {
+      await result.current.selectProvince(5);
+    });
+    expect(result.current.error).toBe("Failed cities");
+
+    await act(async () => {
+      await result.current.selectCity(39);
+    });
+    expect(result.current.error).toBe("Failed subdistricts");
+  });
 });

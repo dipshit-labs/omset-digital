@@ -202,4 +202,44 @@ describe(OriginAddressField, () => {
     expect(mockSetSubdistrictId).toHaveBeenCalledWith("537");
     expect(mockSetPostalCode).toHaveBeenCalledWith("55715");
   });
+
+  it("exercises default fetchers with global fetch and renders unconfigured fallback", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<(url: string) => Promise<Response>>()
+        .mockImplementation((url: string) => {
+          if (url.includes("type=provinces")) {
+            return Promise.resolve(Response.json(mockProvinces));
+          }
+          if (url.includes("type=cities")) {
+            return Promise.resolve(Response.json(mockCities));
+          }
+          if (url.includes("type=subdistricts")) {
+            return Promise.resolve(Response.json(mockSubdistricts));
+          }
+          return Promise.resolve(new Response("Not found", { status: 404 }));
+        })
+    );
+
+    render(<OriginAddressField />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Active Origin Location/iu)).toBeDefined();
+    });
+    cleanup();
+
+    // Test error paths in default fetchers
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn<() => Promise<Response>>()
+        .mockResolvedValue(new Response("Error", { status: 500 }))
+    );
+
+    render(<OriginAddressField />);
+    await waitFor(() => {
+      expect(screen.getByText(/Active Origin Location/iu)).toBeDefined();
+    });
+  });
 });

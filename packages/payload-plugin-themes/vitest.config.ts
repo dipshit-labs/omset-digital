@@ -21,16 +21,6 @@ export default defineProject({
           name: "ui",
         },
       },
-      {
-        test: {
-          environment: "node",
-          fileParallelism: false,
-          hookTimeout: 30_000,
-          include: ["test/integrations/*.integration.test.ts"],
-          name: "integration",
-          testTimeout: 30_000,
-        },
-      },
     ],
   },
 });

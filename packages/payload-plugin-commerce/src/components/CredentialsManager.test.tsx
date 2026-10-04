@@ -183,4 +183,83 @@ describe(CredentialsManager, () => {
       ).toBeDefined();
     });
   });
+
+  it("handles Xendit and RajaOngkir connection testing and failure states", async () => {
+    const mockTestConnection = vi
+      .fn<() => Promise<{ message: string; success: boolean }>>()
+      .mockResolvedValueOnce({ message: "Xendit connected", success: true })
+      .mockResolvedValueOnce({ message: "RajaOngkir connected", success: true })
+      .mockRejectedValueOnce(new Error("Connection timeout"));
+
+    render(<CredentialsManager onTestConnection={mockTestConnection} />);
+
+    // Test Xendit
+    fireEvent.click(screen.getByRole("radio", { name: /xendit/iu }));
+    fireEvent.change(screen.getByLabelText(/secret api key/iu), {
+      target: { value: "xnd_sec_123" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /test xendit connection/iu })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/xendit connected/iu)).toBeDefined();
+    });
+
+    // Test RajaOngkir
+    fireEvent.click(screen.getByRole("radio", { name: /rajaongkir/iu }));
+    fireEvent.change(screen.getByLabelText(/rajaongkir api key/iu), {
+      target: { value: "ro_key_123" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /test rajaongkir connection/iu })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/rajaongkir connected/iu)).toBeDefined();
+    });
+
+    // Test Connection Error
+    fireEvent.click(
+      screen.getByRole("button", { name: /test rajaongkir connection/iu })
+    );
+    await waitFor(() => {
+      expect(screen.getByText(/connection timeout/iu)).toBeDefined();
+    });
+  });
+
+  it("handles save credentials success and failure states", async () => {
+    const onSave = vi
+      .fn<() => Promise<void>>()
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(new Error("Failed to persist"));
+
+    render(
+      <CredentialsManager
+        onSave={onSave}
+        onTestConnection={vi
+          .fn<() => Promise<{ message: string; success: boolean }>>()
+          .mockResolvedValue({ message: "ok", success: true })}
+      />
+    );
+
+    // Initial credentials save
+    const saveButton = screen.getByRole("button", {
+      name: /save credentials/iu,
+    });
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledOnce();
+      expect(
+        screen.getByText(/credentials saved successfully/iu)
+      ).toBeDefined();
+    });
+
+    // Save with error
+    fireEvent.click(saveButton);
+    await waitFor(() => {
+      expect(screen.getByText(/failed to persist/iu)).toBeDefined();
+    });
+  });
 });
