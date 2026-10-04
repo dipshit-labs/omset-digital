@@ -5,9 +5,25 @@ export default defineProject({
     tsconfigPaths: true,
   },
   test: {
-    environment: "node",
-    hookTimeout: 30_000,
     name: "test-kit",
-    testTimeout: 30_000,
+    projects: [
+      {
+        test: {
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+          name: "unit",
+        },
+      },
+      {
+        test: {
+          environment: "node",
+          fileParallelism: false,
+          hookTimeout: 30_000,
+          include: ["test/integrations/*.integration.test.ts"],
+          name: "integration",
+          testTimeout: 30_000,
+        },
+      },
+    ],
   },
 });

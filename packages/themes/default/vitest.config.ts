@@ -10,15 +10,15 @@ export default defineProject({
       {
         test: {
           environment: "node",
-          include: ["**/*.test.ts"],
-          name: "node",
+          include: ["src/**/*.test.ts"],
+          name: "unit",
         },
       },
       {
         test: {
           environment: "jsdom",
-          include: ["**/*.test.tsx"],
-          name: "jsdom",
+          include: ["src/**/*.test.tsx"],
+          name: "ui",
         },
       },
     ],

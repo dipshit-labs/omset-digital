@@ -36,9 +36,8 @@
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "test": "vitest run",
-    "test:unit": "vitest run --exclude '**/*.integration.test.*'",
-    "test:integration": "vitest run --passWithNoTests test/integrations",
-    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run --project '*unit*' --project '*ui*'",
+    "test:integration": "vitest run --project '*integration*'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

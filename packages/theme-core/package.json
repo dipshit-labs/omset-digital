@@ -29,8 +29,7 @@
   "scripts": {
     "clean": "git clean -xdf .cache .next .turbo dist node_modules",
     "test": "vitest run",
-    "test:unit": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run --project '*unit*' --project '*ui*'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

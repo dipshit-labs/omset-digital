@@ -5,8 +5,16 @@ export default defineProject({
     tsconfigPaths: true,
   },
   test: {
-    environment: "node",
     name: "commerce-adapters",
-    setupFiles: ["@repo/test-kit/msw/setup"],
+    projects: [
+      {
+        test: {
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+          name: "unit",
+          setupFiles: ["@repo/test-kit/msw/setup"],
+        },
+      },
+    ],
   },
 });

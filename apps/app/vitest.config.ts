@@ -18,30 +18,40 @@ export default defineProject(() => {
       tsconfigPaths: true,
     },
     test: {
-      css: true,
       environment: "node",
       name: "app",
       projects: [
         {
           test: {
             environment: "node",
-            include: ["**/*.test.ts"],
-            name: "node",
+            include: ["src/**/*.test.ts"],
+            name: "unit",
           },
         },
         {
           test: {
+            css: true,
             environment: "jsdom",
-            include: ["**/*.test.tsx"],
-            name: "jsdom",
+            include: ["src/**/*.test.tsx"],
+            name: "ui",
+            server: {
+              deps: {
+                inline: [/@payloadcms\/ui/u, /react-image-crop/u],
+              },
+            },
+          },
+        },
+        {
+          test: {
+            environment: "node",
+            fileParallelism: false,
+            hookTimeout: 30_000,
+            include: ["test/integrations/*.integration.test.ts"],
+            name: "integration",
+            testTimeout: 30_000,
           },
         },
       ],
-      server: {
-        deps: {
-          inline: [/@payloadcms\/ui/u, /react-image-crop/u],
-        },
-      },
     },
   };
 });

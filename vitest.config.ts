@@ -1,23 +1,17 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   test: {
     environment: "node",
     coverage: {
+      include: ["packages/*/src/**/*.{ts,tsx}", "apps/*/src/**/*.{ts,tsx}"],
       provider: "v8",
       reporter: ["text", "json", "html"],
       reportsDirectory: "./coverage",
       exclude: [
-        "**/node_modules/**",
-        "**/dist/**",
-        "**/.next/**",
-        "**/coverage/**",
-        "**/*.test.{ts,tsx,js,jsx}",
-        "**/*.spec.{ts,tsx,js,jsx}",
-        "**/test/factories/**",
+        "**/*.test.{ts,tsx}",
+        "**/*.integration.test.{ts,tsx}",
+        "**/test/**",
         "**/generated.ts",
         "**/*.d.ts",
       ],
@@ -33,8 +27,8 @@ export default defineConfig({
       },
     },
     projects: [
-      "apps/**/vitest.config.{ts,js}",
-      "packages/**/vitest.config.{ts,js}",
+      "apps/*/vitest.config.{ts,js}",
+      "packages/*/vitest.config.{ts,js}",
     ],
   },
 });

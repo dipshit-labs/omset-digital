@@ -5,22 +5,20 @@ export default defineProject({
     tsconfigPaths: true,
   },
   test: {
-    hookTimeout: 30_000,
     name: "theme-core",
-    testTimeout: 30_000,
     projects: [
       {
         test: {
           environment: "node",
-          include: ["**/*.test.ts"],
-          name: "node",
+          include: ["src/**/*.test.ts"],
+          name: "unit",
         },
       },
       {
         test: {
           environment: "jsdom",
           include: ["**/*.test.tsx"],
-          name: "jsdom",
+          name: "ui",
         },
       },
     ],
