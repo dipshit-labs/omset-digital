@@ -2,38 +2,47 @@ import { createTestPayload, resetDatabase } from "@repo/test-kit";
 import { describe, expect, it } from "vitest";
 
 describe("@repo/test-kit lifecycle integration helpers", () => {
-  it("boots a real Payload instance with named shared in-memory SQLite URI", async () => {
-    const workerId = process.env.VITEST_POOL_ID ?? "0";
-    const expectedUri = `file:test_mem_${workerId}?mode=memory&cache=shared`;
-
+  it("boots a real Payload instance with in-tree in-memory PGlite adapter and relations", async () => {
     const payload = await createTestPayload({
       collections: [
         {
-          fields: [{ name: "title", type: "text" }],
+          fields: [{ name: "name", type: "text" }],
+          slug: "categories",
+        },
+        {
           slug: "widgets",
+          fields: [
+            { name: "title", type: "text" },
+            {
+              name: "category",
+              relationTo: "categories",
+              type: "relationship",
+            },
+          ],
         },
       ],
     });
 
     try {
       await resetDatabase(payload);
-      expect(payload).toBeDefined();
+      expect(payload.db.name).toBe("postgres");
       expect(payload.collections.widgets).toBeDefined();
-      expect(payload.find).toBeTypeOf("function");
-      let clientUrl: string | undefined;
-      const { db } = payload;
-      if (db && typeof db === "object" && "clientConfig" in db) {
-        const { clientConfig } = db;
-        if (
-          clientConfig &&
-          typeof clientConfig === "object" &&
-          "url" in clientConfig
-        ) {
-          clientUrl =
-            typeof clientConfig.url === "string" ? clientConfig.url : undefined;
-        }
-      }
-      expect(clientUrl).toBe(expectedUri);
+
+      const category = await payload.create({
+        collection: "categories",
+        data: { name: "Electronics" },
+      });
+
+      const widget = await payload.create({
+        collection: "widgets",
+        data: { category: category.id, title: "Gadget" },
+      });
+
+      const foundWidget = await payload.findByID({
+        collection: "widgets",
+        id: widget.id,
+      });
+      expect(foundWidget.title).toBe("Gadget");
     } finally {
       await payload.destroy();
     }

@@ -123,18 +123,12 @@ const buildVariantPayload = (
   };
 
   if (existingVariant) {
-    if (rawPricing) {
-      payload.pricing = extractPricing(rawPricing, existingVariant.pricing);
-    }
-    if (rawInventory) {
-      payload.inventory = extractInventory(
-        rawInventory,
-        existingVariant.inventory
-      );
-    }
-    if (rawShipping) {
-      payload.shipping = extractShipping(rawShipping, existingVariant.shipping);
-    }
+    payload.pricing = extractPricing(rawPricing, existingVariant.pricing);
+    payload.inventory = extractInventory(
+      rawInventory,
+      existingVariant.inventory
+    );
+    payload.shipping = extractShipping(rawShipping, existingVariant.shipping);
   } else {
     payload.inventory = extractInventory(rawInventory);
     payload.pricing = extractPricing(rawPricing);

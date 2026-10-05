@@ -1,6 +1,11 @@
 import type { PayloadRequest } from "payload";
 
-import type { CreateTestReqOptions } from "./types";
+export interface CreateTestReqOptions {
+  headers?: Headers;
+  user?: unknown;
+}
+
+export type CreateReqFn = (options?: CreateTestReqOptions) => PayloadRequest;
 
 export const createTestReq = (
   options?: CreateTestReqOptions

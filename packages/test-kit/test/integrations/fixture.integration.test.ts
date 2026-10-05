@@ -1,4 +1,9 @@
-import { defineIntegrationSuite, describe, it } from "@repo/test-kit";
+import {
+  defineIntegrationSuite,
+  describe,
+  integrationSuite,
+  it,
+} from "@repo/test-kit";
 import { expect } from "vitest";
 
 describe("@repo/test-kit fixture", () => {
@@ -75,3 +80,38 @@ customSuite.describe("defineIntegrationSuite runner", () => {
     }
   );
 });
+
+const newSuite = integrationSuite({
+  collections: [
+    {
+      fields: [{ name: "name", type: "text" }],
+      slug: "tags",
+    },
+  ],
+});
+
+newSuite.describe(
+  "integrationSuite runner with integrationTest fixtures",
+  () => {
+    newSuite.it(
+      "injects payload and req fixtures in newSuite",
+      async ({ payload, req }) => {
+        expect(payload).toBeDefined();
+        expect(req).toBeDefined();
+        const tag = await payload.create({
+          collection: "tags",
+          data: { name: "typescript" },
+        });
+        expect(tag.name).toBe("typescript");
+      }
+    );
+
+    newSuite.test(
+      "resets database between test cases in newSuite",
+      async ({ payload }) => {
+        const found = await payload.find({ collection: "tags" });
+        expect(found.totalDocs).toBe(0);
+      }
+    );
+  }
+);

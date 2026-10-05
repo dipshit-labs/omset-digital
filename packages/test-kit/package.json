@@ -25,9 +25,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@libsql/client": "catalog:payload",
+    "@electric-sql/pglite": "catalog:payload",
     "@payloadcms/db-postgres": "catalog:payload",
-    "@payloadcms/db-sqlite": "catalog:payload",
+    "@payloadcms/drizzle": "3.90.2",
+    "drizzle-orm": "0.45.2",
     "msw": "catalog:test",
     "payload": "catalog:payload",
     "pg": "^8.20.0"

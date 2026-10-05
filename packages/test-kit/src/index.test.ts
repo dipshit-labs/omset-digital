@@ -2,22 +2,33 @@ import { describe, expect, it } from "vitest";
 
 import {
   createAppTestPayload,
+  createTestDatabase,
   createTestPayload,
   createTestReq,
   defineIntegrationSuite,
   describe as fixtureDescribe,
+  destroyTestPayload,
+  integrationSuite,
+  integrationTest,
   it as fixtureIt,
-  test as fixtureTest,
+  resetDatabase,
   setTestPayloadConfig,
+  test as fixtureTest,
 } from "./index";
-import { getSqliteMemoryUri } from "./lib/sqlite";
 import { handlers, server } from "./msw";
+import { createPgLiteAdapter } from "./payload/database/pglite";
+import { getPostgresWorkerSchemaName } from "./payload/database/postgres";
 
 describe("@repo/test-kit public interface exports", () => {
-  it("provides test suite and test case runners", () => {
+  it("provides primary test suite and case runners", () => {
     expect(fixtureDescribe).toBeTypeOf("function");
     expect(fixtureIt).toBeTypeOf("function");
     expect(fixtureTest).toBeTypeOf("function");
+    expect(integrationSuite).toBeTypeOf("function");
+    expect(integrationTest).toBeTypeOf("function");
+  });
+
+  it("maintains backward-compatible legacy test exports", () => {
     expect(defineIntegrationSuite).toBeTypeOf("function");
     expect(setTestPayloadConfig).toBeTypeOf("function");
   });
@@ -27,12 +38,19 @@ describe("@repo/test-kit public interface exports", () => {
     expect(Array.isArray(handlers)).toBeTruthy();
     expect(handlers.length).toBeGreaterThanOrEqual(8);
   });
+
+  it("exports canonical payload and database lifecycle functions", () => {
+    expect(createTestPayload).toBeTypeOf("function");
+    expect(destroyTestPayload).toBeTypeOf("function");
+    expect(resetDatabase).toBeTypeOf("function");
+    expect(createTestDatabase).toBeTypeOf("function");
+  });
 });
 
 describe("@repo/test-kit request helpers", () => {
   it("returns a typed PayloadRequest stub with custom user and headers", () => {
     const headers = new Headers({ "x-tenant-id": "store-42" });
-    const user = { email: "merchant@example.com", id: 10 };
+    const user = { id: 10, email: "merchant@example.com" };
     const req = createTestReq({ headers, user });
 
     expect(req.user).toStrictEqual(user);
@@ -50,11 +68,9 @@ describe("@repo/test-kit request helpers", () => {
 });
 
 describe("@repo/test-kit helper exports isolation", () => {
-  it("keeps lower-level database lifecycle functions in helpers module", () => {
-    expect(getSqliteMemoryUri("4")).toBe(
-      "file:test_mem_4?mode=memory&cache=shared"
-    );
-    expect(createTestPayload).toBeTypeOf("function");
+  it("keeps lower-level database lifecycle functions in database module", () => {
+    expect(getPostgresWorkerSchemaName("4")).toBe("test_worker_4");
+    expect(createPgLiteAdapter).toBeTypeOf("function");
     expect(createAppTestPayload).toBeTypeOf("function");
   });
 });

@@ -17,18 +17,6 @@ const MIDTRANS_SERVER_KEY = "SB-Mid-server-TEST12345";
 const XENDIT_SECRET_KEY = "xnd_development_secret_12345";
 const XENDIT_WEBHOOK_TOKEN = "xnd_webhook_token_secret_54321";
 
-interface PayloadCacheEntry {
-  initializedCrons: boolean;
-  payload: Payload;
-  promise: Promise<unknown> | null;
-  reload: boolean;
-  ws: unknown;
-}
-
-declare global {
-  var _payload: Map<string, PayloadCacheEntry> | undefined;
-}
-
 const registerPayloadInstance = (payload: Payload): void => {
   if (!global._payload) {
     global._payload = new Map();

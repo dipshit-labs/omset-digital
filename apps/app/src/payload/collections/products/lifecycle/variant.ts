@@ -29,6 +29,7 @@ export const findDefaultVariant = async (
     limit: 10,
     overrideAccess: true,
     req,
+    sort: "-updatedAt",
     where: { product: { equals: productId } },
   });
 

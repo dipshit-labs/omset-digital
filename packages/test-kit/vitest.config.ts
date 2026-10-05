@@ -9,19 +9,19 @@ export default defineProject({
     projects: [
       {
         test: {
+          name: "unit",
           environment: "node",
           include: ["src/**/*.test.ts"],
-          name: "unit",
           setupFiles: ["@repo/test-kit/msw/setup"],
         },
       },
       {
         test: {
+          name: "integration",
           environment: "node",
           fileParallelism: false,
           hookTimeout: 30_000,
           include: ["test/integrations/*.integration.test.ts"],
-          name: "integration",
           testTimeout: 30_000,
         },
       },
