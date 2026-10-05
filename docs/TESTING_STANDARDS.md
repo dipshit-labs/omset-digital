@@ -1,16 +1,16 @@
 # Testing standards
 
-The worked examples behind the testing rules in `CODING_STANDARDS.md`. Read those two core rules first: verify behavior through public interfaces, and mock at system boundaries only. Everything here shows how they look in practice.
+Worked examples and implementation contracts for the testing rules defined in `CODING_STANDARDS.md`. Test observable behavior through public interfaces, and mock at external system boundaries only.
 
 ## Two tiers
 
 Every test file in this monorepo belongs to one of two tiers.
 
-**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`):** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms via the `unit` project. Component tests (`.test.tsx`) render in JSDOM via the `ui` project. No database, no Payload boot.
+**Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`).** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms via the `unit` project. Component tests (`.test.tsx`) render in JSDOM via the `ui` project. No database, no Payload boot.
 
-**Tier 2, integration tests (`test/integrations/*.integration.test.ts`):** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root, dispatched via the `integration` project (`environment: "node"`, `fileParallelism: false`). Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
+**Tier 2, integration tests (`test/integrations/*.integration.test.ts`).** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root, dispatched via the `integration` project (`environment: "node"`, `fileParallelism: false`). Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
 
-A file that needs both splits: pure tests go to colocated `src/`, Payload-backed tests to `test/integrations/`.
+When a feature needs both unit and relational verification, split test files: pure logic to colocated `src/`, Payload-backed tests to `test/integrations/`.
 
 ## Good tests
 
@@ -38,7 +38,7 @@ it("assigns tenant store identifier when creating package with tenant header", a
 - Survive internal refactors.
 - Include one logical assertion per test.
 
-## Bad tests
+## Anti-patterns and red flags
 
 ```typescript
 // Bad: Mocks an internal collaborator, testing implementation rather than behavior
@@ -55,7 +55,7 @@ it("registers store successfully", async () => {
   expect(rawRow.rows).toHaveLength(1);
 });
 
-// Bad: Hand-rolled Payload mock, never do this
+// Anti-pattern: Hand-rolled Payload mock bypasses collection hooks and validation
 const createMockPayload = () => ({ find: vi.fn(), create: vi.fn() });
 it("syncThemes creates default templates for store without existing theme", async () => {
   const fakePayload = createMockPayload();
@@ -69,17 +69,17 @@ it("returns slug with prefix", () => {
 });
 ```
 
-Red flags:
+Signs of brittle or low-confidence tests:
 
-- Mocking internal collaborators or your own utility functions with `vi.mock`.
-- Testing unexported private helper functions.
-- Asserting on internal call counts or the sequence of internal steps.
-- Tests breaking after a refactor when observable behavior did not change.
+- Mocking internal collaborators or utility functions with `vi.mock`. Exercise the real implementation instead.
+- Testing unexported private helper functions. Verify output through the public interface.
+- Asserting on internal call counts or the sequence of internal steps instead of final state.
+- Tests breaking after internal refactoring when observable behavior did not change.
 - Test names describing how the code works instead of what outcome occurs.
-- Verifying state through direct database queries when the public API provides the query.
+- Verifying database rows directly when public collection APIs provide the read query.
 - Testing trivial one-line mappings or string concatenations where the test mirrors the source code.
 - Thin delegation tests for route handlers where the test only verifies that an action called a service. Test the service logic directly instead.
-- Hand-rolled Payload mock clients (`createMockPayload`, `createTestOrderPayloadClient`) or manual hook runners (`runBeforeHook`, `runCollectionBeforeChangeHooks`). Use `@repo/test-kit` instead.
+- Hand-rolled Payload mock clients (`createMockPayload`, `createTestOrderPayloadClient`) or manual hook runners. Use `@repo/test-kit` instead.
 
 ## `@repo/test-kit`
 
@@ -179,44 +179,35 @@ In unit tests use `factory.build()` (synchronous, no DB). In integration tests u
 
 ## Mocking at a boundary
 
-Mock at system boundaries only: external network APIs, system time, randomness. Everything inside the boundary runs real.
+Mock at system boundaries only: external network APIs, system time, and randomness. Internal code runs real.
 
-- **Payload operations are never mocked.** Use the real Local API backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app`. Hand-rolled Payload simulators are banned.
-- **Mock external network boundaries with MSW.** Payment gateways (Midtrans, Xendit), shipping APIs (RajaOngkir), and transactional emails (Resend) are intercepted via Mock Service Worker. Central handlers live in `@repo/test-kit/src/msw/handlers/` and tests customize behavior with `server.use(...)`.
-- **Mock system time and randomness.** Use `vi.useFakeTimers()` for time-sensitive token expirations or billing schedules.
-- **Never mock internal collaborators.** If a function requires mocking a sibling file to test it, extract the logic into a pure function or inject the dependency.
+- **Real Payload execution.** Run integration tests against the real Local API via `@repo/test-kit`, backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app`. Hand-rolled Payload simulators are banned.
+- **MSW for third-party network boundaries.** Intercept external HTTP calls (payment gateways, shipping APIs, transactional emails) using Mock Service Worker handlers in `@repo/test-kit/src/msw/handlers/`. Customize behavior per test with `server.use(...)`.
+- **SDK-style interface mocking.** Mock typed SDK or provider methods rather than raw HTTP fetchers. Each method provides a single return shape without conditional URL or header branching in test setup.
+- **System time and randomness.** Control time-sensitive expirations and billing schedules with `vi.useFakeTimers()`.
+- **Real internal collaborators.** Exercise real internal collaborators directly. If a unit resists direct testing, extract pure functions or inject dependencies.
 
 ## Storefront themes and UI components
 
-Never boot a full headless browser in unit and integration test suites. Headless browsers require extra setup, run slowly, and assert on styling details that intentional visual changes alter.
+Keep automated test suites headless-browser free.
 
-- **Test props schemas and settings bindings.** Validate that section schemas, template definitions, and declarative `cssVar` bindings produce valid contracts when evaluated with `evaluateThemeCssVars`. These are pure data transformations and run instantly.
-- **Test component interactivity in jsdom.** Render interactive client components with `@testing-library/react` and assert on accessible roles or user interactions.
-- **Verify user flows with the browser tool.** Visual appearance, responsive layouts, and live preview belong in interactive browser verification runs rather than automated pixel test assertions. See `docs/agents/browser-verification.md`.
+- **Schema and token contracts.** Validate section schemas, template definitions, and declarative `cssVar` bindings as pure data transformations using `evaluateThemeCssVars`.
+- **Component interactivity in JSDOM.** Render interactive client components with `@testing-library/react` and assert on accessible roles or user interactions.
+- **Interactive visual verification.** Verify visual appearance, responsive layouts, and live preview using the `browser` tool. See `docs/agents/browser-verification.md`.
 
 ## Vertical slice test-driven development
 
-Write one test, make it pass, then write the next. Writing an entire test suite before writing implementation code produces tests that assert on imagined details and resist natural design improvements.
+Follow a tight red-green-refactor loop for vertical slices:
 
-1. Write a failing test for a single observable behavior.
-2. Write the minimum code required to turn the test green.
-3. Refactor while keeping all tests green.
+1. **Red.** Write a failing test for a single observable behavior.
+2. **Green.** Write the minimum code required to turn the test green.
+3. **Refactor.** Improve design while all tests remain green.
 
 Each test builds on what the previous cycle proved. Always reach a passing test before refactoring.
 
-## Turborepo test tasks
-
-The monorepo organizes test execution into targeted Turborepo tasks:
-
-- `test:unit`: runs colocated unit and UI tests by targeting projects (`vitest run --project '*unit*' --project '*ui*'`, or `--project '*unit*'` in pure Node packages). High cache hit rate when business logic is untouched.
-- `test:integration`: runs integration suites by targeting the integration project (`vitest run --project '*integration*'`). Declared only in packages and apps that contain database integration tests.
-- `test`: composite task that executes both unit and integration verification.
-- `test:coverage`: runs full-workspace Vitest coverage with `@vitest/coverage-v8` centrally from root `vitest.config.ts`, outputting reports to `coverage/**` with Turborepo caching.
-
 ## Code coverage
 
-V8 Coverage is configured once in root `vitest.config.ts` across all projects:
+Coverage thresholds enforce testing discipline where regression risk is highest:
 
-- **Enforced thresholds:** Core domain packages (`payload-plugin-commerce` and `commerce-adapters`) enforce an 80% statement and branch coverage threshold. Builds fail when coverage drops below this line.
-- **Report-only packages:** Application glue code and pages in `apps/app` collect reports without threshold failure gates.
-- **Centralized scope:** Coverage includes `packages/*/src/**/*.{ts,tsx}` and `apps/*/src/**/*.{ts,tsx}`. Exclusions cover test files (`**/*.test.{ts,tsx}`, `**/*.integration.test.{ts,tsx}`), test fixtures (`**/test/**`), generated schemas (`**/generated.ts`), and TypeScript declarations (`**/*.d.ts`).
+- **Enforced thresholds.** Core domain packages (`payload-plugin-commerce` and `commerce-adapters`) enforce an 80% statement and branch coverage threshold. Builds fail when coverage drops below this line.
+- **Report-only packages.** Application routes and glue code in `apps/app` collect reports without threshold failure gates.
