@@ -3,7 +3,7 @@
 **Author:** Technical Architecture Research  
 **Date:** September 2026  
 **Status:** Completed  
-**Target Repository:** Omset Digital  
+**Target Repository:** Omset Digital
 
 ---
 
@@ -62,20 +62,20 @@ export default buildConfig({
     livePreview: {
       breakpoints: [
         {
-          label: 'Mobile',
-          name: 'mobile',
+          label: "Mobile",
+          name: "mobile",
           width: 375,
           height: 667,
         },
         {
-          label: 'Tablet',
-          name: 'tablet',
+          label: "Tablet",
+          name: "tablet",
           width: 768,
           height: 1024,
         },
         {
-          label: 'Desktop',
-          name: 'desktop',
+          label: "Desktop",
+          name: "desktop",
           width: 1440,
           height: 900,
         },
@@ -83,7 +83,7 @@ export default buildConfig({
     },
   },
   // ...
-})
+});
 ```
 
 `breakpoints` define the device viewport dimensions selectable in the live preview top toolbar. The admin provider (`LivePreviewProvider` in `packages/ui/src/providers/LivePreview/index.tsx`) automatically prepends a `responsive` breakpoint with `width: '100%'` and `height: '100%'` so editors can freely resize the panel.
@@ -93,25 +93,25 @@ export default buildConfig({
 In `templates/website/src/collections/Pages/index.ts`, collections define `admin.livePreview` and `admin.preview`:
 
 ```ts
-export const Pages: CollectionConfig<'pages'> = {
-  slug: 'pages',
+export const Pages: CollectionConfig<"pages"> = {
+  slug: "pages",
   admin: {
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ["title", "slug", "updatedAt"],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
           slug: data?.slug,
-          collection: 'pages',
+          collection: "pages",
           req,
         }),
     },
     preview: (data, { req }) =>
       generatePreviewPath({
         slug: data?.slug as string,
-        collection: 'pages',
+        collection: "pages",
         req,
       }),
-    useAsTitle: 'title',
+    useAsTitle: "title",
   },
   // ...
   versions: {
@@ -123,7 +123,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
     maxPerDoc: 50,
   },
-}
+};
 ```
 
 Key observations:
@@ -138,37 +138,37 @@ Key observations:
 The helper `templates/website/src/utilities/generatePreviewPath.ts` constructs the preview entry URL:
 
 ```ts
-import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
-import { PayloadRequest, CollectionSlug } from 'payload'
+import { PreviewSearchParams } from "@/app/(frontend)/next/preview/route";
+import { PayloadRequest, CollectionSlug } from "payload";
 
 const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
-  posts: '/posts',
-  pages: '',
-}
+  posts: "/posts",
+  pages: "",
+};
 
 type Props = {
-  collection: keyof typeof collectionPrefixMap
-  slug: string
-  req: PayloadRequest
-}
+  collection: keyof typeof collectionPrefixMap;
+  slug: string;
+  req: PayloadRequest;
+};
 
 export const generatePreviewPath = ({ collection, slug }: Props) => {
   if (slug === undefined || slug === null) {
-    return null
+    return null;
   }
 
   // Encode to support slugs with special characters
-  const encodedSlug = encodeURIComponent(slug)
+  const encodedSlug = encodeURIComponent(slug);
 
   const encodedParams = new URLSearchParams({
     path: `${collectionPrefixMap[collection]}/${encodedSlug}`,
-    previewSecret: process.env.PREVIEW_SECRET || '',
-  } satisfies PreviewSearchParams)
+    previewSecret: process.env.PREVIEW_SECRET || "",
+  } satisfies PreviewSearchParams);
 
-  const url = `/next/preview?${encodedParams.toString()}`
+  const url = `/next/preview?${encodedParams.toString()}`;
 
-  return url
-}
+  return url;
+};
 ```
 
 The function returns a relative path pointing to `/next/preview`. In `LivePreviewProvider`, Payload converts relative paths to absolute URLs using `window.location.origin` if the app runs on the same domain, or uses `req` headers when previewing against external domains.
@@ -182,66 +182,78 @@ The preview entry point lives at `templates/website/src/app/(frontend)/next/prev
 ### 4.1 Route Implementation
 
 ```ts
-import type { PayloadRequest } from 'payload'
-import { getPayload } from 'payload'
-import { getSafeRedirect } from 'payload/shared'
+import type { PayloadRequest } from "payload";
+import { getPayload } from "payload";
+import { getSafeRedirect } from "payload/shared";
 
-import { draftMode } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { NextRequest } from 'next/server'
+import { draftMode } from "next/headers";
+import { redirect } from "next/navigation";
+import { NextRequest } from "next/server";
 
-import configPromise from '@payload-config'
+import configPromise from "@payload-config";
 
 export type PreviewSearchParams = {
-  path: string
-  previewSecret: string
-}
+  path: string;
+  previewSecret: string;
+};
 
 export async function GET(req: NextRequest): Promise<Response> {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
 
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = new URL(req.url);
 
-  const path = searchParams.get('path')
-  const previewSecret = searchParams.get('previewSecret')
+  const path = searchParams.get("path");
+  const previewSecret = searchParams.get("previewSecret");
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    return new Response("You are not allowed to preview this page", {
+      status: 403,
+    });
   }
 
   if (!path) {
-    return new Response('Insufficient search params', { status: 404 })
+    return new Response("Insufficient search params", { status: 404 });
   }
 
-  const safePath = getSafeRedirect({ fallbackTo: '', redirectTo: path })
+  const safePath = getSafeRedirect({ fallbackTo: "", redirectTo: path });
 
   if (!safePath) {
-    return new Response('This endpoint can only be used for relative previews', { status: 500 })
+    return new Response(
+      "This endpoint can only be used for relative previews",
+      { status: 500 }
+    );
   }
 
-  let user
+  let user;
 
   try {
     const authResult = await payload.auth({
       req: req as unknown as PayloadRequest,
       headers: req.headers,
-    })
-    user = authResult.user
+    });
+    user = authResult.user;
   } catch (error) {
-    payload.logger.error({ err: error }, 'Error verifying token for live preview')
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    payload.logger.error(
+      { err: error },
+      "Error verifying token for live preview"
+    );
+    return new Response("You are not allowed to preview this page", {
+      status: 403,
+    });
   }
 
-  const draft = await draftMode()
+  const draft = await draftMode();
 
   if (!user) {
-    draft.disable()
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    draft.disable();
+    return new Response("You are not allowed to preview this page", {
+      status: 403,
+    });
   }
 
-  draft.enable()
+  draft.enable();
 
-  redirect(safePath)
+  redirect(safePath);
 }
 ```
 
@@ -258,12 +270,12 @@ export async function GET(req: NextRequest): Promise<Response> {
 A companion endpoint at `templates/website/src/app/(frontend)/next/exit-preview/route.ts` clears the preview session:
 
 ```ts
-import { draftMode } from 'next/headers'
+import { draftMode } from "next/headers";
 
 export async function GET(): Promise<Response> {
-  const draft = await draftMode()
-  draft.disable()
-  return new Response('Draft mode is disabled')
+  const draft = await draftMode();
+  draft.disable();
+  return new Response("Draft mode is disabled");
 }
 ```
 
@@ -280,29 +292,29 @@ Once Draft Mode is enabled, page components load drafts dynamically via Payload'
 From `templates/website/src/app/(frontend)/[slug]/page.tsx`:
 
 ```tsx
-import { draftMode } from 'next/headers'
-import React, { cache } from 'react'
-import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
-import configPromise from '@payload-config'
-import { LivePreviewListener } from '@/components/LivePreviewListener'
-import { RenderHero } from '@/heros/RenderHero'
-import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { draftMode } from "next/headers";
+import React, { cache } from "react";
+import { getPayload, type RequiredDataFromCollectionSlug } from "payload";
+import configPromise from "@payload-config";
+import { LivePreviewListener } from "@/components/LivePreviewListener";
+import { RenderHero } from "@/heros/RenderHero";
+import { RenderBlocks } from "@/blocks/RenderBlocks";
 
 export default async function Page({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
-  const decodedSlug = decodeURIComponent(slug)
-  const url = '/' + decodedSlug
+  const { isEnabled: draft } = await draftMode();
+  const { slug = "home" } = await paramsPromise;
+  const decodedSlug = decodeURIComponent(slug);
+  const url = "/" + decodedSlug;
 
   const page = await queryPageBySlug({
     slug: decodedSlug,
-  })
+  });
 
   if (!page) {
-    return <PayloadRedirects url={url} />
+    return <PayloadRedirects url={url} />;
   }
 
-  const { hero, layout } = page
+  const { hero, layout } = page;
 
   return (
     <article className="pt-16 pb-24">
@@ -314,7 +326,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <RenderHero {...hero} />
       <RenderBlocks blocks={layout} />
     </article>
-  )
+  );
 }
 ```
 
@@ -324,12 +336,12 @@ The data fetcher uses React's `cache` utility to deduplicate queries between the
 
 ```ts
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = await draftMode()
+  const { isEnabled: draft } = await draftMode();
 
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
 
   const result = await payload.find({
-    collection: 'pages',
+    collection: "pages",
     draft,
     limit: 1,
     pagination: false,
@@ -339,10 +351,10 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
         equals: slug,
       },
     },
-  })
+  });
 
-  return result.docs?.[0] || null
-})
+  return result.docs?.[0] || null;
+});
 ```
 
 Two query parameters govern draft resolution:
@@ -413,20 +425,20 @@ Before transmitting live updates, Payload Admin confirms that the preview target
    ```ts
    // packages/live-preview/src/ready.ts
    export const ready = (args: { serverURL: string }): void => {
-     const { serverURL } = args
+     const { serverURL } = args;
 
-     if (typeof window !== 'undefined') {
-       const windowToPostTo: Window = window?.opener || window?.parent
+     if (typeof window !== "undefined") {
+       const windowToPostTo: Window = window?.opener || window?.parent;
 
        windowToPostTo?.postMessage(
          {
-           type: 'payload-live-preview',
+           type: "payload-live-preview",
            ready: true,
          },
-         serverURL,
-       )
+         serverURL
+       );
      }
-   }
+   };
    ```
 2. The Admin panel (`packages/ui/src/providers/LivePreview/index.tsx`) listens for messages:
    ```ts
@@ -434,14 +446,14 @@ Before transmitting live updates, Payload Admin confirms that the preview target
      if (
        url?.startsWith(event.origin) &&
        event.data &&
-       typeof event.data === 'object' &&
-       event.data.type === 'payload-live-preview'
+       typeof event.data === "object" &&
+       event.data.type === "payload-live-preview"
      ) {
        if (event.data.ready) {
-         setAppIsReady(true)
+         setAppIsReady(true);
        }
      }
-   }
+   };
    ```
 3. Once `appIsReady` becomes `true`, Admin enables the preview toolbar and begins broadcasting change messages.
 
@@ -451,37 +463,45 @@ This is the approach used by `templates/website`:
 
 1. **Client listener component.** In `templates/website/src/components/LivePreviewListener/index.tsx`:
    ```tsx
-   'use client'
-   import { getClientSideURL } from '@/utilities/getURL'
-   import { RefreshRouteOnSave as PayloadLivePreview } from '@payloadcms/live-preview-react'
-   import { useRouter } from 'next/navigation'
-   import React from 'react'
+   "use client";
+   import { getClientSideURL } from "@/utilities/getURL";
+   import { RefreshRouteOnSave as PayloadLivePreview } from "@payloadcms/live-preview-react";
+   import { useRouter } from "next/navigation";
+   import React from "react";
 
    export const LivePreviewListener: React.FC = () => {
-     const router = useRouter()
-     return <PayloadLivePreview refresh={router.refresh} serverURL={getClientSideURL()} />
-   }
+     const router = useRouter();
+     return (
+       <PayloadLivePreview
+         refresh={router.refresh}
+         serverURL={getClientSideURL()}
+       />
+     );
+   };
    ```
 2. **Document event detection.** In `packages/live-preview-react/src/RefreshRouteOnSave.tsx`:
    ```tsx
    const onMessage = useCallback(
      (event: MessageEvent) => {
        if (isDocumentEvent(event, serverURL)) {
-         if (typeof refresh === 'function') {
-           refresh()
+         if (typeof refresh === "function") {
+           refresh();
          }
        }
      },
-     [refresh, serverURL],
-   )
+     [refresh, serverURL]
+   );
    ```
    `isDocumentEvent` checks:
    ```ts
-   export const isDocumentEvent = (event: MessageEvent, serverURL: string): boolean =>
+   export const isDocumentEvent = (
+     event: MessageEvent,
+     serverURL: string
+   ): boolean =>
      event.origin === serverURL &&
      event.data &&
-     typeof event.data === 'object' &&
-     event.data.type === 'payload-document-event'
+     typeof event.data === "object" &&
+     event.data.type === "payload-document-event";
    ```
 3. **Execution cycle:**
    - The editor modifies a field in Admin.
@@ -497,19 +517,21 @@ This is the approach used by `templates/website`:
 When a project renders pages using React client components (`'use client'`) rather than React Server Components, it uses `useLivePreview`:
 
 ```tsx
-'use client'
-import { useLivePreview } from '@payloadcms/live-preview-react'
-import type { Page as PageType } from '@/payload-types'
+"use client";
+import { useLivePreview } from "@payloadcms/live-preview-react";
+import type { Page as PageType } from "@/payload-types";
 
-export const PageClient: React.FC<{ initialPage: PageType }> = ({ initialPage }) => {
+export const PageClient: React.FC<{ initialPage: PageType }> = ({
+  initialPage,
+}) => {
   const { data, isLoading } = useLivePreview<PageType>({
     initialData: initialPage,
-    serverURL: 'http://localhost:3000',
+    serverURL: "http://localhost:3000",
     depth: 2,
-  })
+  });
 
-  return <h1>{data.title}</h1>
-}
+  return <h1>{data.title}</h1>;
+};
 ```
 
 How `useLivePreview` synchronizes uncommitted data:
@@ -527,7 +549,7 @@ How `useLivePreview` synchronizes uncommitted data:
 2. **Client subscriber.** In `packages/live-preview/src/subscribe.ts`, the hook registers `handleMessage`, which delegates to `mergeData`.
 3. **Uncommitted relationship population.** Unsaved form data contains only raw relation IDs (for example, `hero.media: '60c72b2f...'`), not populated objects. To render images and related posts correctly without saving to the database, `mergeData.ts` sends a POST request with method override to Payload's REST API:
    ```ts
-   const url = `${serverURL}${apiPath}/${endpoint}`
+   const url = `${serverURL}${apiPath}/${endpoint}`;
 
    return fetch(url, {
      body: JSON.stringify({
@@ -536,13 +558,13 @@ How `useLivePreview` synchronizes uncommitted data:
        flattenLocales: false,
        locale,
      }),
-     credentials: 'include',
+     credentials: "include",
      headers: {
-       'Content-Type': 'application/json',
-       'X-Payload-HTTP-Method-Override': 'GET',
+       "Content-Type": "application/json",
+       "X-Payload-HTTP-Method-Override": "GET",
      },
-     method: 'POST',
-   })
+     method: "POST",
+   });
    ```
 4. **Server method override handling.** In `packages/payload/src/utilities/handleEndpoints.ts`, Payload checks for `X-Payload-HTTP-Method-Override: GET`. It reads the uncommitted JSON body attached to `req.data`, runs the collection's population hooks at the requested depth, and returns the fully populated document.
 5. **Compounding state cache.** In `handleMessage.ts`, the merged result caches in `_payloadLivePreview.previousData` so subsequent field changes compound over top of previously populated relationships without flickering.
@@ -552,7 +574,7 @@ How `useLivePreview` synchronizes uncommitted data:
 ## 7. Direct Comparison of Live Preview Architectures
 
 | Characteristic | Server-Side Live Preview (`RefreshRouteOnSave`) | Client-Side Live Preview (`useLivePreview`) |
-| :--- | :--- | :--- |
+| :-- | :-- | :-- |
 | **Component Model** | Pure React Server Components (`async function Page`) | React Client Components (`'use client'`) |
 | **Primary Source Reference** | `templates/website/src/app/(frontend)/[slug]/page.tsx` | `packages/live-preview-react/src/useLivePreview.ts` |
 | **Triggering Message** | `{ type: 'payload-document-event' }` | `{ type: 'payload-live-preview' }` |

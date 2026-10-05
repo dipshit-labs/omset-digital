@@ -16,7 +16,7 @@ const tab = await browser.open({
   name: "storefront-home",
   url: "http://localhost:3000",
 });
-await tab.waitForSelector('main');
+await tab.waitForSelector("main");
 ```
 
 Inspect accessible hierarchy and layout structure:

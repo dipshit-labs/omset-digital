@@ -47,6 +47,7 @@ export async function processIncomingWebhook(args: {
 ```
 
 The orchestrator:
+
 1. Resolves the Store and verifies the provider is active.
 2. Retrieves and decrypts the Store Credentials.
 3. Dispatches to `PaymentProvider.parseWebhook()`. Returns semantic HTTP status codes on failure (401 for bad signature, 400 for malformed payload).

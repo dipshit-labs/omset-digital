@@ -17,7 +17,7 @@ const tab = await browser.open({
   name: "theme-preview",
   url: "http://localhost:3000/admin/collections/themes",
 });
-await tab.waitForSelector('main');
+await tab.waitForSelector("main");
 ```
 
 The preview pane embeds an iframe pointing to the storefront preview route (`/next/preview`).

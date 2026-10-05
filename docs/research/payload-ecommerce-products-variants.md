@@ -3,7 +3,7 @@
 **Author:** Technical Architecture Research  
 **Date:** September 2026  
 **Status:** Completed  
-**Target Repository:** Omset Digital  
+**Target Repository:** Omset Digital
 
 ---
 
@@ -117,18 +117,18 @@ Source implementation from `packages/plugin-ecommerce/src/fields/variantsFields.
 
 ```ts
 export const variantsFields = ({
-  variantsSlug = 'variants',
-  variantTypesSlug = 'variantTypes',
+  variantsSlug = "variants",
+  variantTypesSlug = "variantTypes",
 }) => {
   return [
     {
-      name: 'enableVariants',
-      type: 'checkbox',
-      label: ({ t }) => t('plugin-ecommerce:enableVariants'),
+      name: "enableVariants",
+      type: "checkbox",
+      label: ({ t }) => t("plugin-ecommerce:enableVariants"),
     },
     {
-      name: 'variantTypes',
-      type: 'relationship',
+      name: "variantTypes",
+      type: "relationship",
       admin: {
         condition: ({ enableVariants }) => Boolean(enableVariants),
       },
@@ -136,23 +136,24 @@ export const variantsFields = ({
       relationTo: variantTypesSlug,
     },
     {
-      name: 'variants',
-      type: 'join',
+      name: "variants",
+      type: "join",
       admin: {
         condition: ({ enableVariants, variantTypes }) => {
-          const enabledVariants = Boolean(enableVariants)
-          const hasManyVariantTypes = Array.isArray(variantTypes) && variantTypes.length > 0
-          return enabledVariants && hasManyVariantTypes
+          const enabledVariants = Boolean(enableVariants);
+          const hasManyVariantTypes =
+            Array.isArray(variantTypes) && variantTypes.length > 0;
+          return enabledVariants && hasManyVariantTypes;
         },
-        defaultColumns: ['title', 'options', 'inventory', 'prices', '_status'],
+        defaultColumns: ["title", "options", "inventory", "prices", "_status"],
         disabled: { column: true },
       },
       collection: variantsSlug,
       maxDepth: 2,
-      on: 'product',
+      on: "product",
     },
-  ]
-}
+  ];
+};
 ```
 
 #### Variant Types Collection (`createVariantTypesCollection.ts`)
@@ -196,16 +197,16 @@ export const variantsCollectionBeforeChange =
   ({ productsSlug, variantOptionsSlug }) =>
   async ({ data, req }) => {
     if (data?.options?.length && data.options.length > 0) {
-      const titleArray: string[] = []
+      const titleArray: string[] = [];
       const product = await req.payload.findByID({
         id: data.product,
         collection: productsSlug,
         depth: 0,
         select: { title: true, variantTypes: true },
-      })
+      });
 
-      if (product.title && typeof product.title === 'string') {
-        titleArray.push(product.title)
+      if (product.title && typeof product.title === "string") {
+        titleArray.push(product.title);
       }
 
       for (const option of data.options) {
@@ -214,16 +215,16 @@ export const variantsCollectionBeforeChange =
           collection: variantOptionsSlug,
           depth: 0,
           select: { label: true },
-        })
+        });
         if (variantOption?.label) {
-          titleArray.push(variantOption.label)
+          titleArray.push(variantOption.label);
         }
       }
 
-      data.title = titleArray.join(' — ')
+      data.title = titleArray.join(" — ");
     }
-    return data
-  }
+    return data;
+  };
 ```
 
 This produces titles such as `Tshirt — Black — Small`, ensuring readable references in admin tables, carts, orders, and database queries.
@@ -235,16 +236,18 @@ The `validateOptions` function runs before persisting variant options:
 1. **Option completeness:** Checks that the number of selected options matches the number of `variantTypes` configured on the parent product:
    ```ts
    if (values.length < product?.variantTypes?.length) {
-     return t('ecommerce:variantOptionsRequiredAll')
+     return t("ecommerce:variantOptionsRequiredAll");
    }
    ```
 2. **Option combination uniqueness:** Queries all existing non-deleted variants on the parent product, excluding the current variant ID. It checks whether an existing variant already has the identical set of option IDs:
    ```ts
    const exists = existingOptions.some(
-     (combo) => combo.length === values.length && combo.every((val) => values.includes(val)),
-   )
+     (combo) =>
+       combo.length === values.length &&
+       combo.every((val) => values.includes(val))
+   );
    if (exists) {
-     return t('ecommerce:variantOptionsAlreadyExists')
+     return t("ecommerce:variantOptionsAlreadyExists");
    }
    ```
 
@@ -268,31 +271,28 @@ incomingConfig.typescript.schema.push((args) =>
     ...args,
     collectionSlugMap,
     sanitizedPluginConfig,
-  }),
-)
+  })
+);
 ```
 
 Inside `pushTypeScriptProperties.ts`, the plugin registers an `ecommerce` object definition containing references to each collection slug:
 
 ```ts
-export const pushTypeScriptProperties = ({
-  collectionSlugMap,
-  jsonSchema,
-}) => {
-  const propertiesMap = new Map<string, { $ref: string }>()
+export const pushTypeScriptProperties = ({ collectionSlugMap, jsonSchema }) => {
+  const propertiesMap = new Map<string, { $ref: string }>();
 
   Object.entries(collectionSlugMap).forEach(([key, slug]) => {
-    propertiesMap.set(key, { $ref: `#/$defs/${slug}` })
-    requiredCollectionProperties.push(slug)
-  })
+    propertiesMap.set(key, { $ref: `#/$defs/${slug}` });
+    requiredCollectionProperties.push(slug);
+  });
 
   jsonSchema.properties.ecommerce = {
-    type: 'object',
+    type: "object",
     additionalProperties: false,
-    description: 'Generated by the Payload Ecommerce plugin',
+    description: "Generated by the Payload Ecommerce plugin",
     properties: {
       collections: {
-        type: 'object',
+        type: "object",
         additionalProperties: false,
         properties: {
           ...Object.fromEntries(propertiesMap),
@@ -300,11 +300,11 @@ export const pushTypeScriptProperties = ({
         required: requiredCollectionProperties,
       },
     },
-    required: ['collections'],
-  }
+    required: ["collections"],
+  };
 
-  return jsonSchema
-}
+  return jsonSchema;
+};
 ```
 
 ### 4.2 Module Augmentation (`types/utilities.ts`)
@@ -313,40 +313,41 @@ To provide type safety before `generate:types` has run, the plugin declares fall
 
 ```ts
 type CartsUntyped = {
-  [key: string]: any
-  id: DefaultDocumentIDType
-  items?: any[]
-  subtotal?: number
-}
+  [key: string]: any;
+  id: DefaultDocumentIDType;
+  items?: any[];
+  subtotal?: number;
+};
 
 type AddressesUntyped = {
-  [key: string]: any
-  id: DefaultDocumentIDType
-}
+  [key: string]: any;
+  id: DefaultDocumentIDType;
+};
 
 type EcommerceBase = {
   collections: {
-    addresses: AddressesUntyped
-    carts: CartsUntyped
-  }
-}
+    addresses: AddressesUntyped;
+    carts: CartsUntyped;
+  };
+};
 
 type ResolveEcommerceType<T> = T extends { ecommerce: infer E }
   ? E
   : T extends { ecommerceUntyped: infer E }
     ? E
-    : EcommerceBase
+    : EcommerceBase;
 
-export type TypedEcommerce = EcommerceBase & ResolveEcommerceType<GeneratedTypes>
+export type TypedEcommerce = EcommerceBase &
+  ResolveEcommerceType<GeneratedTypes>;
 
-declare module 'payload' {
+declare module "payload" {
   export interface GeneratedTypes {
     ecommerceUntyped: {
       collections: {
-        addresses: AddressesUntyped
-        carts: CartsUntyped
-      }
-    }
+        addresses: AddressesUntyped;
+        carts: CartsUntyped;
+      };
+    };
   }
 }
 ```
@@ -371,18 +372,20 @@ export interface Product {
         version: number;
         [k: string]: unknown;
       }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      direction: ("ltr" | "rtl") | null;
+      format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
       indent: number;
       version: number;
     };
     [k: string]: unknown;
   } | null;
-  gallery?: {
-    image: string | Media;
-    variantOption?: (string | null) | VariantOption;
-    id?: string | null;
-  }[] | null;
+  gallery?:
+    | {
+        image: string | Media;
+        variantOption?: (string | null) | VariantOption;
+        id?: string | null;
+      }[]
+    | null;
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   inventory?: number | null;
   enableVariants?: boolean | null;
@@ -406,7 +409,7 @@ export interface Product {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
+  _status?: ("draft" | "published") | null;
 }
 ```
 
@@ -426,7 +429,7 @@ export interface Variant {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
+  _status?: ("draft" | "published") | null;
 }
 ```
 
@@ -466,15 +469,17 @@ In both `Cart` and `Order`, line items reference both `product` and optional `va
 ```ts
 export interface Cart {
   id: string;
-  items?: {
-    product?: (string | null) | Product;
-    variant?: (string | null) | Variant;
-    quantity: number;
-    id?: string | null;
-  }[] | null;
-  status?: ('active' | 'purchased' | 'abandoned') | null;
+  items?:
+    | {
+        product?: (string | null) | Product;
+        variant?: (string | null) | Variant;
+        quantity: number;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ("active" | "purchased" | "abandoned") | null;
   subtotal?: number | null;
-  currency?: 'USD' | null;
+  currency?: "USD" | null;
   // ...
 }
 ```
@@ -497,13 +502,13 @@ ecommercePlugin({
     isDocumentOwner,
   },
   customers: {
-    slug: 'users',
+    slug: "users",
   },
   products: {
     productsCollectionOverride: ProductsCollection,
   },
   // ...
-})
+});
 ```
 
 The override in `src/collections/Products/index.ts` accepts `{ defaultCollection }` and restructures the admin layout into tabs:
@@ -573,7 +578,7 @@ VariantSelector.tsx:                               Gallery.tsx:
 1. Reads all URL params                            1. Reads URL params
 2. Finds matching Variant in variants.docs         2. Matches option ID with gallery[i].variantOption
 3. Updates URL with ?variant=variant_id            3. Scrolls carousel to that photo
-4. Disables out-of-stock options                   
+4. Disables out-of-stock options
            |
            v
 AddToCart.tsx:
@@ -610,41 +615,41 @@ The template seed script (`templates/ecommerce/src/endpoints/seed/index.ts`) ill
 ```ts
 // 1. Create Variant Types
 const sizeVariantType = await payload.create({
-  collection: 'variantTypes',
-  data: { name: 'size', label: 'Size' },
-})
+  collection: "variantTypes",
+  data: { name: "size", label: "Size" },
+});
 
 // 2. Create Variant Options
 const small = await payload.create({
-  collection: 'variantOptions',
-  data: { label: 'Small', value: 'small', variantType: sizeVariantType.id },
-})
+  collection: "variantOptions",
+  data: { label: "Small", value: "small", variantType: sizeVariantType.id },
+});
 
 // 3. Create Parent Product
 const productTshirt = await payload.create({
-  collection: 'products',
+  collection: "products",
   data: {
-    title: 'Tshirt',
-    slug: 'tshirt',
+    title: "Tshirt",
+    slug: "tshirt",
     enableVariants: true,
     variantTypes: [sizeVariantType.id],
     gallery: [{ image: imageId, variantOption: small.id }],
     // ...
   },
-})
+});
 
 // 4. Create Concrete Variants
 await payload.create({
-  collection: 'variants',
+  collection: "variants",
   data: {
     product: productTshirt.id,
     options: [small.id],
     inventory: 50,
     priceInUSDEnabled: true,
     priceInUSD: 4999,
-    _status: 'published',
+    _status: "published",
   },
-})
+});
 ```
 
 ---
@@ -654,7 +659,7 @@ await payload.create({
 Omset Digital's domain model defines `Product`, `SKU`, `Variant Axis`, and `Digital Asset` within a multi-tenant Bring-Your-Own-Key (BYOK) architecture. Comparing Payload's official plugin model with Omset Digital's architecture highlights key architectural differences:
 
 | Architectural Dimension | Payload Ecommerce Plugin / Template | Omset Digital Domain & Requirements |
-| :--- | :--- | :--- |
+| :-- | :-- | :-- |
 | **Domain Terminology** | Product -> Variant -> VariantType -> VariantOption | Product -> SKU -> Variant Axis -> Option Value |
 | **Multi-Tenancy** | Single-tenant global collections. No tenant scoping on options. | Strict multi-tenant isolation. Every product, SKU, and option must be scoped to a Tenant. |
 | **Storage Model** | Four separate collections linked via `join` and relationships. | Hybrid option: Dedicated collections or denormalized SKU arrays depending on query scale. |

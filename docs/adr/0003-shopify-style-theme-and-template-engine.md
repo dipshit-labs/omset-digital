@@ -11,6 +11,7 @@ Accepted
 The previous design attempted to enforce a single platform-wide design token schema (`TemplateTokenSchema`) and dynamic plugin schema injection onto the core store record. This constrained themes to a fixed set of color slots, leaked Payload dependencies into theme packages, and caused cross-template field collisions when switching designs.
 
 We chose Shopify's isolated-instance model with a plugin-driven engine:
+
 1. **`Stores` collection**: Represents the merchant's business entity and universal store identity (store name, public email, phone, logo, favicon, social links), scoping all products, orders, and themes.
 2. **`Themes` collection**: Injected by the plugin. Represents installed theme instances scoped to a `Store`, stores global theme settings (colors, typography presets), and joins to child `Template` documents. Exactly one theme has `isLive: true` per store.
 3. **`Templates` collection**: Injected by the plugin. Belongs to a specific theme (`theme: relationship to 'themes'`). Holds the template type (`home`, `product`, `collection`, `page`) and an ordered `sections` blocks field.

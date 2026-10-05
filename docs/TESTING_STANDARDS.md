@@ -18,14 +18,24 @@ Integration tests exercise real code paths through public APIs. They describe wh
 
 ```typescript
 // Good: Tests observable behavior through the real Payload Local API
-it("assigns tenant store identifier when creating package with tenant header", async ({ payload }) => {
-  const store = await payload.create({ collection: "stores", data: { name: "Toko Baru", slug: "toko-baru" } });
+it("assigns tenant store identifier when creating package with tenant header", async ({
+  payload,
+}) => {
+  const store = await payload.create({
+    collection: "stores",
+    data: { name: "Toko Baru", slug: "toko-baru" },
+  });
   const headers = new Headers();
   headers.set("payload-tenant", String(store.id));
 
   const pkg = await payload.create({
     collection: "packages",
-    data: { title: "Medium Box", isDefault: false, dimensions: { length: 20, width: 15, height: 10 }, tareWeight: { value: 100, unit: "g" } },
+    data: {
+      title: "Medium Box",
+      isDefault: false,
+      dimensions: { length: 20, width: 15, height: 10 },
+      tareWeight: { value: 100, unit: "g" },
+    },
     req: { headers } as any,
   });
 
@@ -51,7 +61,10 @@ it("calls internal sync utility during theme registration", async () => {
 // Bad: Bypasses the public interface to query the database directly
 it("registers store successfully", async () => {
   await createStore({ name: "Toko Kopi" });
-  const rawRow = await postgresClient.query("SELECT * FROM stores WHERE name = $1", ["Toko Kopi"]);
+  const rawRow = await postgresClient.query(
+    "SELECT * FROM stores WHERE name = $1",
+    ["Toko Kopi"]
+  );
   expect(rawRow.rows).toHaveLength(1);
 });
 
@@ -88,18 +101,26 @@ All integration test infrastructure lives in `@repo/test-kit`. Never copy-paste 
 ### Fixture API (preferred)
 
 Import `it` and `describe` from `@repo/test-kit` to get a `payload` fixture injected per test file with automatic teardown:
+
 ```typescript
 import { describe, it } from "@repo/test-kit";
 import { expect } from "vitest";
 import { createPackagesCollection } from "./packages";
 
 describe("packages collection", () => {
-  it("marks first package as default when store has no existing packages", async ({ payload }) => {
-    const store = await payload.create({ collection: "stores", data: { name: "Toko A", slug: "toko-a" } });
+  it("marks first package as default when store has no existing packages", async ({
+    payload,
+  }) => {
+    const store = await payload.create({
+      collection: "stores",
+      data: { name: "Toko A", slug: "toko-a" },
+    });
     const pkg = await payload.create({
       collection: "packages",
       data: { title: "Box 1", isDefault: false },
-      req: { headers: new Headers({ "payload-tenant": String(store.id) }) } as any,
+      req: {
+        headers: new Headers({ "payload-tenant": String(store.id) }),
+      } as any,
     });
     expect(pkg.isDefault).toBe(true);
   });
@@ -109,7 +130,11 @@ describe("packages collection", () => {
 The fixture boots one Payload instance per file with ephemeral database isolation. Packages use named in-memory SQLite (`file:test_mem_${workerId}?mode=memory&cache=shared`). `apps/app` uses worker-scoped PostgreSQL schemas (`test_worker_${workerId}`) using `DATABASE_URL`. It calls `resetDatabase` between every test automatically.
 
 ```typescript
-import { createTestPayload, resetDatabase, createTestReq } from "@repo/test-kit";
+import {
+  createTestPayload,
+  resetDatabase,
+  createTestReq,
+} from "@repo/test-kit";
 ```
 
 ### `createTestPayload(overrides)`
@@ -148,6 +173,7 @@ expect(canRead).toBe(true);
 ## Document factories
 
 Use Thoughtbot Fishery for typed document fixtures. Factories live in a `test/factories/` folder at each package and app root (for example `apps/app/test/factories/` and `packages/payload-plugin-commerce/test/factories/`).
+
 ```typescript
 // packages/payload-plugin-commerce/test/factories/packageFactory.ts
 import { Factory } from "fishery";
@@ -157,8 +183,12 @@ import type { Payload } from "payload";
 export const packageFactory = Factory.define<Package, { payload?: Payload }>(
   ({ sequence, onCreate, transientParams }) => {
     onCreate(async (pkg) => {
-      if (!transientParams.payload) throw new Error("Payload instance required");
-      return transientParams.payload.create({ collection: "packages", data: pkg }) as Promise<Package>;
+      if (!transientParams.payload)
+        throw new Error("Payload instance required");
+      return transientParams.payload.create({
+        collection: "packages",
+        data: pkg,
+      }) as Promise<Package>;
     });
 
     return {

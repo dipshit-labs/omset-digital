@@ -76,6 +76,7 @@ test: {
 ```
 
 File-level `// @vitest-environment` docblocks remain permitted when an explicit file override is necessary, but are avoided when project configuration already resolves the environment.
+
 ### 4. Database isolation strategy
 
 Local databases isolate by execution scope:
@@ -105,6 +106,7 @@ The root coverage configuration defines:
 - Thresholds: `packages/commerce-adapters/**` and `packages/payload-plugin-commerce/**` enforce an 80% statement and branch coverage threshold. Builds fail when coverage drops below this line. `apps/app` runs in report-only mode.
 
 Package-level `test:coverage` scripts are omitted because project configs cannot evaluate coverage independently. Coverage runs for the full workspace via root Vitest execution.
+
 ## Considered options
 
 - **Full external test directory for all tests:** Rejected. Moving pure unit and UI tests out of `src/` damages daily development ergonomics for component and utility work.

@@ -9,11 +9,13 @@ Accepted (supersedes styling and dependency boundaries in ADR-0003)
 ## Context and decision
 
 The previous architecture coupled theme packages to `@repo/ui` for tokens and CSS variables, while `@repo/payload-plugin-themes` bundled headless DSL contracts together with Payload-specific database hooks and tenant store seeding. This caused three architectural problems:
+
 1. Theme styling bled into platform brand styling, creating collision risks between storefronts and marketing pages.
 2. Theme components relied on opinionated shadcn styles instead of giving theme authors full control over their visual markup.
 3. Theme packages and tests depended on Payload runtime libraries, while the Payload plugin carried hardcoded assumptions about multi-tenant store records.
 
 We restructured the system into two distinct layers:
+
 1. **Unified Theme Engine (`@repo/theme-core`)**: A single package with explicit subpath exports:
    - `@repo/theme-core`: Pure TypeScript DSL (`defineTheme`, `defineSection`), schema types, client manifest mappers, token definitions, and token evaluation (`evaluateThemeCssVars`). Zero React and zero DOM dependencies.
    - `@repo/theme-core/primitives`: Unstyled Base UI layout primitives (`Button`, `Dialog`, `Sheet`, `Accordion`, `Input`) using a shadcn-compatible API, accessible e-commerce primitives (`ProductPrice`, `QuantityInput`, `VariantSelector`, `CartSheet`), and environment-aware `<Link>` and `<Image>` adapters that use Next.js in production and standard HTML fallbacks during testing. Primitives enforce structural and behavioral styling (spatial positioning, viewport bounds, transitions, keyboard navigation, focus rings) with zero cosmetic styling (no background or border colors, surface padding left to themes). Multi-node domain primitives support slot styling through a `classNames` dictionary and stable `data-slot` selectors.

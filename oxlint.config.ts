@@ -11,9 +11,11 @@ export default defineConfig({
   jsPlugins: [...(shadcn.jsPlugins ?? []), "eslint-plugin-perfectionist"],
   ignorePatterns: [
     ...(core.ignorePatterns ?? []),
-    "apps/app/src/app/(payload)/**/*",
-    "apps/app/src/migrations/**/*",
+    "**/.agents/**",
+    "apps/app/src/app/(payload)/**",
+    "apps/app/src/migrations/**",
     "packages/types/src/payload/generated.ts",
+    "packages/ui/src/components/ui/**",
   ],
 
   overrides: [
@@ -26,13 +28,6 @@ export default defineConfig({
         "shadcn/no-restyle": "off",
         "shadcn/no-unknown-classes": "off",
         "shadcn/require-static-classes": "off",
-      },
-    },
-    {
-      files: ["packages/ui/src/components/ui/**/*.{ts,tsx}"],
-      rules: {
-        "func-style": "off",
-        "react/function-component-definition": "off",
       },
     },
     {

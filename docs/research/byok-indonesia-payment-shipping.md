@@ -3,7 +3,7 @@
 **Author:** Technical Architecture Research  
 **Date:** September 2026  
 **Status:** Completed  
-**Target Repository:** Omset Digital  
+**Target Repository:** Omset Digital
 
 ---
 
@@ -198,7 +198,7 @@ Accessing `params.provider` synchronously triggers runtime warnings in developme
 
 #### 3.3.2 Stream consumption: `req.text()` versus `req.json()`
 
-The request body stream in Next.js 15 can only be consumed once. Calling `await req.json()` prevents subsequent calls to `await req.text()`. 
+The request body stream in Next.js 15 can only be consumed once. Calling `await req.json()` prevents subsequent calls to `await req.text()`.
 
 To support HMAC signature verification, auditing, and JSON parsing without reading the stream multiple times:
 
@@ -215,11 +215,11 @@ Node.js provides `crypto.timingSafeEqual(bufferA, bufferB)`. The function requir
 The safe comparison helper must check length prior to comparison:
 
 ```ts
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export function timingSafeEqualString(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, 'utf8');
-  const bufB = Buffer.from(b, 'utf8');
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
   if (bufA.length !== bufB.length) {
     return false;
   }
@@ -232,18 +232,18 @@ export function timingSafeEqualString(a: string, b: string): boolean {
 Below is the production-ready route handler for `/api/webhooks/[provider]/[storeSlug]/route.ts`. It resolves the tenant store from Payload Local API, decrypts the gateway credentials, executes the provider-specific verification, and returns standard HTTP responses:
 
 ```ts
-import crypto from 'node:crypto';
-import { NextRequest, NextResponse } from 'next/server';
-import { getPayload } from 'payload';
-import configPromise from '@payload-config';
-import { decryptCredential } from '@/lib/crypto/aes-gcm';
+import crypto from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
+import configPromise from "@payload-config";
+import { decryptCredential } from "@/lib/crypto/aes-gcm";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function safeCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, 'utf8');
-  const bufB = Buffer.from(b, 'utf8');
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
   if (bufA.length !== bufB.length) {
     return false;
   }
@@ -256,19 +256,22 @@ export async function POST(
 ): Promise<NextResponse> {
   const { provider, storeSlug } = await params;
 
-  if (provider !== 'midtrans' && provider !== 'xendit') {
-    return NextResponse.json({ error: 'Unsupported provider' }, { status: 404 });
+  if (provider !== "midtrans" && provider !== "xendit") {
+    return NextResponse.json(
+      { error: "Unsupported provider" },
+      { status: 404 }
+    );
   }
 
   const rawBody = await req.text();
   if (!rawBody) {
-    return NextResponse.json({ error: 'Empty payload' }, { status: 400 });
+    return NextResponse.json({ error: "Empty payload" }, { status: 400 });
   }
 
   // 1. Resolve tenant store via Payload Local API
   const payload = await getPayload({ config: configPromise });
   const storeResult = await payload.find({
-    collection: 'stores',
+    collection: "stores",
     where: {
       slug: { equals: storeSlug },
     },
@@ -279,55 +282,67 @@ export async function POST(
 
   const store = storeResult.docs[0];
   if (!store) {
-    return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+    return NextResponse.json({ error: "Store not found" }, { status: 404 });
   }
 
   // 2. Validate active payment provider block
   const activeProvider = store.paymentProviders?.[0];
   if (!activeProvider || activeProvider.blockType !== provider) {
-    return NextResponse.json({ error: 'Provider not configured for store' }, { status: 400 });
+    return NextResponse.json(
+      { error: "Provider not configured for store" },
+      { status: 400 }
+    );
   }
 
   // 3. Provider-specific signature verification
-  if (provider === 'midtrans') {
+  if (provider === "midtrans") {
     let body: Record<string, unknown>;
     try {
       body = JSON.parse(rawBody);
     } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    const orderId = String(body.order_id ?? '');
-    const statusCode = String(body.status_code ?? '');
-    const grossAmount = String(body.gross_amount ?? '');
-    const incomingSignature = String(body.signature_key ?? '');
+    const orderId = String(body.order_id ?? "");
+    const statusCode = String(body.status_code ?? "");
+    const grossAmount = String(body.gross_amount ?? "");
+    const incomingSignature = String(body.signature_key ?? "");
 
     if (!orderId || !statusCode || !grossAmount || !incomingSignature) {
-      return NextResponse.json({ error: 'Missing required signature fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required signature fields" },
+        { status: 400 }
+      );
     }
 
     // Decrypt tenant serverKey
     const serverKey = decryptCredential(activeProvider.serverKey);
     const hashInput = `${orderId}${statusCode}${grossAmount}${serverKey}`;
-    const expectedSignature = crypto.createHash('sha512').update(hashInput).digest('hex');
+    const expectedSignature = crypto
+      .createHash("sha512")
+      .update(hashInput)
+      .digest("hex");
 
     if (!safeCompare(incomingSignature, expectedSignature)) {
-      return NextResponse.json({ error: 'Invalid Midtrans signature' }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid Midtrans signature" },
+        { status: 401 }
+      );
     }
 
     // Process Midtrans transaction status
-    const transactionStatus = String(body.transaction_status ?? '');
-    const fraudStatus = String(body.fraud_status ?? '');
-    let canonicalStatus: 'pending' | 'paid' | 'failed' | 'expired' = 'pending';
+    const transactionStatus = String(body.transaction_status ?? "");
+    const fraudStatus = String(body.fraud_status ?? "");
+    let canonicalStatus: "pending" | "paid" | "failed" | "expired" = "pending";
 
-    if (transactionStatus === 'capture') {
-      canonicalStatus = fraudStatus === 'challenge' ? 'pending' : 'paid';
-    } else if (transactionStatus === 'settlement') {
-      canonicalStatus = 'paid';
-    } else if (['deny', 'cancel', 'failure'].includes(transactionStatus)) {
-      canonicalStatus = 'failed';
-    } else if (transactionStatus === 'expire') {
-      canonicalStatus = 'expired';
+    if (transactionStatus === "capture") {
+      canonicalStatus = fraudStatus === "challenge" ? "pending" : "paid";
+    } else if (transactionStatus === "settlement") {
+      canonicalStatus = "paid";
+    } else if (["deny", "cancel", "failure"].includes(transactionStatus)) {
+      canonicalStatus = "failed";
+    } else if (transactionStatus === "expire") {
+      canonicalStatus = "expired";
     }
 
     // Dispatch internal event or update order in Payload
@@ -339,53 +354,68 @@ export async function POST(
       rawEvent: body,
     });
 
-    return NextResponse.json({ status: 'OK' }, { status: 200 });
+    return NextResponse.json({ status: "OK" }, { status: 200 });
   }
 
-  if (provider === 'xendit') {
-    const callbackTokenHeader = req.headers.get('x-callback-token');
-    const signatureHeader = req.headers.get('x-callback-signature');
+  if (provider === "xendit") {
+    const callbackTokenHeader = req.headers.get("x-callback-token");
+    const signatureHeader = req.headers.get("x-callback-signature");
 
     // Case A: Modern HMAC-SHA256 signature
     if (signatureHeader && activeProvider.webhookSecret) {
       const secret = decryptCredential(activeProvider.webhookSecret);
       const expectedSignature = crypto
-        .createHmac('sha256', secret)
+        .createHmac("sha256", secret)
         .update(rawBody)
-        .digest('hex');
+        .digest("hex");
 
       if (!safeCompare(signatureHeader, expectedSignature)) {
-        return NextResponse.json({ error: 'Invalid Xendit HMAC signature' }, { status: 401 });
+        return NextResponse.json(
+          { error: "Invalid Xendit HMAC signature" },
+          { status: 401 }
+        );
       }
-    } 
+    }
     // Case B: Static callback token
     else if (callbackTokenHeader && activeProvider.webhookToken) {
       const expectedToken = decryptCredential(activeProvider.webhookToken);
       if (!safeCompare(callbackTokenHeader, expectedToken)) {
-        return NextResponse.json({ error: 'Invalid Xendit callback token' }, { status: 401 });
+        return NextResponse.json(
+          { error: "Invalid Xendit callback token" },
+          { status: 401 }
+        );
       }
     } else {
-      return NextResponse.json({ error: 'Missing Xendit verification headers' }, { status: 401 });
+      return NextResponse.json(
+        { error: "Missing Xendit verification headers" },
+        { status: 401 }
+      );
     }
 
     let body: Record<string, unknown>;
     try {
       body = JSON.parse(rawBody);
     } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
     // Process Xendit invoice or payment status
-    const externalId = String(body.external_id ?? (body.data as Record<string, unknown>)?.reference_id ?? '');
-    const status = String(body.status ?? (body.data as Record<string, unknown>)?.status ?? '').toUpperCase();
-    let canonicalStatus: 'pending' | 'paid' | 'failed' | 'expired' = 'pending';
+    const externalId = String(
+      body.external_id ??
+        (body.data as Record<string, unknown>)?.reference_id ??
+        ""
+    );
+    const status = String(
+      body.status ?? (body.data as Record<string, unknown>)?.status ?? ""
+    ).toUpperCase();
+    let canonicalStatus: "pending" | "paid" | "failed" | "expired" = "pending";
 
-    if (['PAID', 'SETTLED', 'SUCCEEDED'].includes(status)) {
-      canonicalStatus = 'paid';
-    } else if (['EXPIRED'].includes(status)) {
-      canonicalStatus = 'expired';
-    } else if (['FAILED'].includes(status)) {
-      canonicalStatus = 'failed';
+    if (["PAID", "SETTLED", "SUCCEEDED"].includes(status)) {
+      canonicalStatus = "paid";
+    } else if (["EXPIRED"].includes(status)) {
+      canonicalStatus = "expired";
+    } else if (["FAILED"].includes(status)) {
+      canonicalStatus = "failed";
     }
 
     await handlePaymentStatusUpdate({
@@ -396,10 +426,10 @@ export async function POST(
       rawEvent: body,
     });
 
-    return NextResponse.json({ status: 'OK' }, { status: 200 });
+    return NextResponse.json({ status: "OK" }, { status: 200 });
   }
 
-  return NextResponse.json({ error: 'Unhandled provider' }, { status: 500 });
+  return NextResponse.json({ error: "Unhandled provider" }, { status: 500 });
 }
 
 async function handlePaymentStatusUpdate(_args: {
@@ -426,7 +456,7 @@ RajaOngkir is the standard shipping rate aggregator for Indonesian couriers (JNE
 RajaOngkir divides access into three subscription tiers:
 
 | Feature / Limit | Starter Tier (Free) | Basic Tier (Paid) | Pro Tier (Paid) |
-| :--- | :--- | :--- | :--- |
+| :-- | :-- | :-- | :-- |
 | **Base URL** | `https://api.rajaongkir.com/starter` | `https://api.rajaongkir.com/basic` | `https://pro.rajaongkir.com/api` |
 | **Couriers Supported** | 3 (JNE, POS, TIKI) | 6 (JNE, POS, TIKI, PCP, RPX, ESL) | 20+ (JNE, POS, TIKI, SiCepat, J&T, AnterAja, Wahana, Lion, etc.) |
 | **Geographic Resolution** | City / Kabupaten level only | City / Kabupaten level only | Subdistrict (`kecamatan`) level |
@@ -473,6 +503,7 @@ origin=501&destination=114&weight=1000&courier=jne
 ```
 
 Parameters:
+
 - `origin`: City ID (integer).
 - `destination`: City ID (integer).
 - `weight`: Weight in grams (integer).
@@ -490,6 +521,7 @@ origin=574&originType=subdistrict&destination=2094&destinationType=subdistrict&w
 ```
 
 Parameters:
+
 - `origin`: Geographic ID (integer).
 - `originType`: Required granularity level. Allowed values: `"city"` or `"subdistrict"`.
 - `destination`: Geographic ID (integer).
@@ -513,7 +545,7 @@ Omset Digital stores `originSubdistrictId` on the Store document under `Store.sh
 Although RajaOngkir accepts arbitrary gram values, couriers calculate actual billing weights using proprietary rounding rules and volumetric formulas:
 
 | Courier | Minimum Billable Weight | Rounding Threshold | Example: 1,180 grams | Example: 1,320 grams |
-| :--- | :--- | :--- | :--- | :--- |
+| :-- | :-- | :-- | :-- | :-- |
 | **JNE (Reguler)** | 1,000 g (1 kg) | Up to 1,200 g rounds down to 1 kg; 1,201 g rounds up to 2 kg | Billed as 1 kg | Billed as 2 kg |
 | **TIKI** | 1,000 g (1 kg) | Up to 1,200 g or 1,299 g (service-dependent) rounds down | Billed as 1 kg | Billed as 2 kg |
 | **POS Indonesia** | 1,000 g (1 kg) | Strict 1,000 g increments; some parcel services allow 500 g tiers | Billed as 1 kg | Billed as 2 kg |
@@ -578,9 +610,7 @@ Hit (<10ms)  Miss (1.5s - 3s)
 
 - **Data:** Shipping service options and pricing returned by `POST /cost`.
 - **Volatility:** Courier tariffs change periodically (quarterly fuel surcharges or annual tariff revisions).
-- **Strategy:** Construct a deterministic cache key based on origin, destination, weight tier, and courier set:
-  $$\text{Key} = \text{sha256}(\text{originId} + \text{":"} + \text{destId} + \text{":"} + \text{weightTier} + \text{":"} + \text{courier})$$
-  Weight tiering can normalize weights (e.g., packages between 1 g and 1,000 g share the 1 kg tier for couriers that have 1 kg minimums).
+- **Strategy:** Construct a deterministic cache key based on origin, destination, weight tier, and courier set: $$\text{Key} = \text{sha256}(\text{originId} + \text{":"} + \text{destId} + \text{":"} + \text{weightTier} + \text{":"} + \text{courier})$$ Weight tiering can normalize weights (e.g., packages between 1 g and 1,000 g share the 1 kg tier for couriers that have 1 kg minimums).
 - **TTL:** 6 to 12 hours.
 - **Storefront UX implication:** When a customer updates their address, display an immediate loading skeleton on the shipping selection card. Fetch quotes asynchronously. If RajaOngkir times out or a courier fails, display cached quotes if available or present the remaining successful couriers without failing the entire checkout page.
 
@@ -595,41 +625,46 @@ BYOK credentials (Midtrans Server Key, Xendit Secret Key, Webhook Tokens) must b
 Payload CMS exposes encryption methods on the payload instance (`payload.encrypt` and `payload.decrypt`). To determine whether native methods are suitable for merchant payment credentials, we inspect the implementation in `node_modules/payload/dist/auth/crypto.js`:
 
 ```js
-import crypto from 'crypto';
-const algorithm = 'aes-256-ctr';
+import crypto from "crypto";
+const algorithm = "aes-256-ctr";
 
 export function encrypt(text) {
-    const iv = crypto.randomBytes(16);
-    const secret = this.secret;
-    const cipher = crypto.createCipheriv(algorithm, secret, iv);
-    const encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
-    const ivString = iv.toString('hex');
-    return `${ivString}${encrypted}`;
+  const iv = crypto.randomBytes(16);
+  const secret = this.secret;
+  const cipher = crypto.createCipheriv(algorithm, secret, iv);
+  const encrypted = cipher.update(text, "utf8", "hex") + cipher.final("hex");
+  const ivString = iv.toString("hex");
+  return `${ivString}${encrypted}`;
 }
 
 export function decrypt(hash) {
-    const iv = hash.slice(0, 32);
-    const content = hash.slice(32);
-    const secret = this.secret;
-    const decipher = crypto.createDecipheriv(algorithm, secret, Buffer.from(iv, 'hex'));
-    return decipher.update(content, 'hex', 'utf8') + decipher.final('utf8');
+  const iv = hash.slice(0, 32);
+  const content = hash.slice(32);
+  const secret = this.secret;
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    secret,
+    Buffer.from(iv, "hex")
+  );
+  return decipher.update(content, "hex", "utf8") + decipher.final("utf8");
 }
 ```
 
 And in `node_modules/payload/dist/index.js` (line 321):
 
 ```js
-this.secret = crypto.createHash('sha256').update(this.config.secret).digest('hex').slice(0, 32);
+this.secret = crypto
+  .createHash("sha256")
+  .update(this.config.secret)
+  .digest("hex")
+  .slice(0, 32);
 ```
 
 #### 5.1.1 Architectural vulnerabilities of Payload native encryption
 
-1. **Unauthenticated cipher (`aes-256-ctr`):**
-   Payload uses Counter Mode (CTR). CTR is a stream cipher mode that is malleable. It lacks an authentication tag (MAC). If an attacker with database read/write access flips bits in the stored ciphertext, the decrypted plaintext exhibits corresponding bit flips without triggering any decryption error. High-security payment credentials require Authenticated Encryption with Associated Data (AEAD), such as AES-256-GCM.
-2. **Reduced key entropy:**
-   Payload derives `this.secret` by taking the SHA-256 digest of the secret in hexadecimal format (64 characters) and slicing the first 32 characters (`.slice(0, 32)`). A 32-character hexadecimal string contains characters only in the set `[0-9a-f]`. Passing a 32-character ASCII hex string into `createCipheriv` provides only 128 bits of actual key entropy instead of the full 256 bits required for AES-256.
-3. **No authentication tag handling:**
-   Because CTR mode has no auth tag, Payload serialization stores only `${ivString}${encrypted}`. If ciphertext is truncated or corrupted, decryption silently returns corrupted text instead of failing fast.
+1. **Unauthenticated cipher (`aes-256-ctr`):** Payload uses Counter Mode (CTR). CTR is a stream cipher mode that is malleable. It lacks an authentication tag (MAC). If an attacker with database read/write access flips bits in the stored ciphertext, the decrypted plaintext exhibits corresponding bit flips without triggering any decryption error. High-security payment credentials require Authenticated Encryption with Associated Data (AEAD), such as AES-256-GCM.
+2. **Reduced key entropy:** Payload derives `this.secret` by taking the SHA-256 digest of the secret in hexadecimal format (64 characters) and slicing the first 32 characters (`.slice(0, 32)`). A 32-character hexadecimal string contains characters only in the set `[0-9a-f]`. Passing a 32-character ASCII hex string into `createCipheriv` provides only 128 bits of actual key entropy instead of the full 256 bits required for AES-256.
+3. **No authentication tag handling:** Because CTR mode has no auth tag, Payload serialization stores only `${ivString}${encrypted}`. If ciphertext is truncated or corrupted, decryption silently returns corrupted text instead of failing fast.
 
 **Conclusion:** Native `payload.encrypt` is designed for non-critical auth token storage (such as internal user API keys). It must not be used for merchant payment gateway secrets. Omset Digital must implement a custom Node.js `crypto` AES-256-GCM module.
 
@@ -644,20 +679,26 @@ The custom encryption module implements NIST SP 800-38D compliant AES-256-GCM:
 - **Serialization format:** Versioned delimiter string: `v1:<iv_hex>:<authTag_hex>:<ciphertext_hex>`.
 
 ```ts
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-const ALGORITHM = 'aes-256-gcm';
+const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12; // 96 bits per NIST SP 800-38D
 const TAG_LENGTH = 16; // 128 bits auth tag
-const CURRENT_VERSION = 'v1';
+const CURRENT_VERSION = "v1";
 
 // Derive 32-byte key using HKDF from platform master secret
 function deriveMasterKey(): Buffer {
   const secret = process.env.PAYLOAD_SECRET;
   if (!secret || secret.length < 32) {
-    throw new Error('PAYLOAD_SECRET must be at least 32 characters');
+    throw new Error("PAYLOAD_SECRET must be at least 32 characters");
   }
-  return crypto.hkdfSync('sha256', secret, 'omset-digital-salt', 'payment-byok-aes-key', 32);
+  return crypto.hkdfSync(
+    "sha256",
+    secret,
+    "omset-digital-salt",
+    "payment-byok-aes-key",
+    32
+  );
 }
 
 let cachedKey: Buffer | null = null;
@@ -679,34 +720,34 @@ export function encryptCredential(plaintext: string): string {
   });
 
   const ciphertext = Buffer.concat([
-    cipher.update(plaintext, 'utf8'),
+    cipher.update(plaintext, "utf8"),
     cipher.final(),
   ]);
 
   const authTag = cipher.getAuthTag();
 
-  return `${CURRENT_VERSION}:${iv.toString('hex')}:${authTag.toString('hex')}:${ciphertext.toString('hex')}`;
+  return `${CURRENT_VERSION}:${iv.toString("hex")}:${authTag.toString("hex")}:${ciphertext.toString("hex")}`;
 }
 
 export function decryptCredential(serialized: string): string {
-  if (!serialized || !serialized.startsWith('v1:')) {
+  if (!serialized || !serialized.startsWith("v1:")) {
     // If not ciphertext, return as-is or handle legacy
     return serialized;
   }
 
-  const parts = serialized.split(':');
+  const parts = serialized.split(":");
   if (parts.length !== 4) {
-    throw new Error('Invalid ciphertext format');
+    throw new Error("Invalid ciphertext format");
   }
 
   const [version, ivHex, tagHex, cipherHex] = parts;
-  if (version !== 'v1') {
+  if (version !== "v1") {
     throw new Error(`Unsupported encryption version: ${version}`);
   }
 
-  const iv = Buffer.from(ivHex, 'hex');
-  const authTag = Buffer.from(tagHex, 'hex');
-  const ciphertext = Buffer.from(cipherHex, 'hex');
+  const iv = Buffer.from(ivHex, "hex");
+  const authTag = Buffer.from(tagHex, "hex");
+  const ciphertext = Buffer.from(cipherHex, "hex");
 
   const decipher = crypto.createDecipheriv(ALGORITHM, getKey(), iv, {
     authTagLength: TAG_LENGTH,
@@ -719,11 +760,11 @@ export function decryptCredential(serialized: string): string {
     decipher.final(),
   ]);
 
-  return decrypted.toString('utf8');
+  return decrypted.toString("utf8");
 }
 
 export function isCiphertext(value: unknown): boolean {
-  return typeof value === 'string' && value.startsWith('v1:');
+  return typeof value === "string" && value.startsWith("v1:");
 }
 ```
 
@@ -757,9 +798,7 @@ A naive `beforeChange` hook encrypts whatever value is passed:
 
 ```ts
 // DANGEROUS: Causes double-encryption loops
-beforeChange: [
-  ({ value }) => encryptCredential(value)
-]
+beforeChange: [({ value }) => encryptCredential(value)];
 ```
 
 Consider this sequence:
@@ -783,8 +822,8 @@ To prevent credential loss and double-encryption loops, every encrypted field mu
 Here is the reusable field factory:
 
 ```ts
-import type { Field } from 'payload';
-import { encryptCredential, isCiphertext } from '@/lib/crypto/aes-gcm';
+import type { Field } from "payload";
+import { encryptCredential, isCiphertext } from "@/lib/crypto/aes-gcm";
 
 export function createEncryptedSecretField(options: {
   name: string;
@@ -794,10 +833,11 @@ export function createEncryptedSecretField(options: {
   return {
     name: options.name,
     label: options.label,
-    type: 'text',
+    type: "text",
     required: options.required ?? false,
     admin: {
-      description: 'Encrypted at rest using AES-256-GCM. Hidden from standard read queries.',
+      description:
+        "Encrypted at rest using AES-256-GCM. Hidden from standard read queries.",
     },
     access: {
       read: () => false, // Never expose over HTTP REST/GraphQL
@@ -806,7 +846,7 @@ export function createEncryptedSecretField(options: {
       beforeChange: [
         ({ value, originalDoc, siblingData }) => {
           // 1. If value is empty or undefined, retain existing value from originalDoc
-          if (value === undefined || value === null || value === '') {
+          if (value === undefined || value === null || value === "") {
             if (originalDoc) {
               // Find matching block in originalDoc if within blocks field
               const blockIndex = siblingData?.id;
@@ -870,8 +910,8 @@ Direct Typed fetch Approach:
   ```ts
   const snap = new midtransClient.Snap({
     isProduction: false,
-    serverKey: '...',
-    clientKey: '...',
+    serverKey: "...",
+    clientKey: "...",
   });
   ```
   In a multi-tenant BYOK architecture, the server cannot maintain a singleton instance. It must instantiate new class objects with distinct options on every single HTTP request.
@@ -939,17 +979,17 @@ export async function createMidtransSnapSession(
   input: CreateSnapSessionInput
 ): Promise<SnapSessionResponse> {
   const baseUrl = credentials.isProduction
-    ? 'https://app.midtrans.com/snap/v1/transactions'
-    : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+    ? "https://app.midtrans.com/snap/v1/transactions"
+    : "https://app.sandbox.midtrans.com/snap/v1/transactions";
 
-  const authHeader = `Basic ${Buffer.from(`${credentials.serverKey}:`).toString('base64')}`;
+  const authHeader = `Basic ${Buffer.from(`${credentials.serverKey}:`).toString("base64")}`;
 
   const response = await fetch(baseUrl, {
-    method: 'POST',
+    method: "POST",
     headers: {
       Authorization: authHeader,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify({
       transaction_details: {
@@ -1011,13 +1051,13 @@ export async function createXenditInvoice(
   credentials: XenditCredentials,
   input: CreateXenditInvoiceInput
 ): Promise<XenditInvoiceResponse> {
-  const authHeader = `Basic ${Buffer.from(`${credentials.secretKey}:`).toString('base64')}`;
+  const authHeader = `Basic ${Buffer.from(`${credentials.secretKey}:`).toString("base64")}`;
 
-  const response = await fetch('https://api.xendit.co/v2/invoices', {
-    method: 'POST',
+  const response = await fetch("https://api.xendit.co/v2/invoices", {
+    method: "POST",
     headers: {
       Authorization: authHeader,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       external_id: input.externalId,
@@ -1043,14 +1083,14 @@ export async function createXenditInvoice(
 ```ts
 export interface RajaOngkirCredentials {
   apiKey: string;
-  accountType: 'starter' | 'basic' | 'pro';
+  accountType: "starter" | "basic" | "pro";
 }
 
 export interface ShippingCostQueryInput {
   origin: number;
-  originType?: 'city' | 'subdistrict';
+  originType?: "city" | "subdistrict";
   destination: number;
-  destinationType?: 'city' | 'subdistrict';
+  destinationType?: "city" | "subdistrict";
   weightInGrams: number;
   couriers: string[]; // ['jne', 'sicepat', 'jnt']
 }
@@ -1085,27 +1125,33 @@ export async function queryRajaOngkirCost(
   credentials: RajaOngkirCredentials,
   input: ShippingCostQueryInput
 ): Promise<CourierCostResult[]> {
-  const isPro = credentials.accountType === 'pro';
+  const isPro = credentials.accountType === "pro";
   const url = isPro
-    ? 'https://pro.rajaongkir.com/api/cost'
-    : 'https://api.rajaongkir.com/starter/cost';
+    ? "https://pro.rajaongkir.com/api/cost"
+    : "https://api.rajaongkir.com/starter/cost";
 
   const bodyParams = new URLSearchParams();
-  bodyParams.append('origin', String(input.origin));
-  bodyParams.append('destination', String(input.destination));
-  bodyParams.append('weight', String(Math.max(1, Math.round(input.weightInGrams))));
-  bodyParams.append('courier', input.couriers.join(':'));
+  bodyParams.append("origin", String(input.origin));
+  bodyParams.append("destination", String(input.destination));
+  bodyParams.append(
+    "weight",
+    String(Math.max(1, Math.round(input.weightInGrams)))
+  );
+  bodyParams.append("courier", input.couriers.join(":"));
 
   if (isPro) {
-    bodyParams.append('originType', input.originType ?? 'subdistrict');
-    bodyParams.append('destinationType', input.destinationType ?? 'subdistrict');
+    bodyParams.append("originType", input.originType ?? "subdistrict");
+    bodyParams.append(
+      "destinationType",
+      input.destinationType ?? "subdistrict"
+    );
   }
 
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
       key: credentials.apiKey,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: bodyParams.toString(),
   });
@@ -1127,7 +1173,7 @@ export async function queryRajaOngkirCost(
 ### 6.3 Architectural comparison matrix
 
 | Metric | Vendor npm SDKs (`midtrans-client`, `xendit-node`) | Direct Typed `fetch` Wrappers |
-| :--- | :--- | :--- |
+| :-- | :-- | :-- |
 | **Bundle Weight** | **Heavy:** 2.5 MB to 6 MB combined across dependencies (`axios`, `lodash`, OpenAPI code-gen trees). | **Zero:** 0 kB external dependencies. Uses native Node 18+ and Next.js `fetch`. |
 | **Serverless Cold Start** | **Slow:** Node runtime must parse, evaluate, and link thousands of generated classes and deep prototype chains. | **Instant:** Negligible script parse overhead; single lightweight function calls. |
 | **Type Precision** | **Variable:** `midtrans-client` has no types (requires community `@types`); `xendit-node` has overly verbose generated types. | **Exact:** Tailored TypeScript interfaces match only the exact payloads and fields Omset Digital uses. |

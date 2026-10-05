@@ -3,7 +3,7 @@
 **Author:** Technical Architecture Research  
 **Date:** October 2026  
 **Status:** Completed  
-**Target Repository:** Omset Digital (`@repo/commerce-adapters`, `@repo/payload-plugin-commerce`, `apps/app`)  
+**Target Repository:** Omset Digital (`@repo/commerce-adapters`, `@repo/payload-plugin-commerce`, `apps/app`)
 
 ---
 
@@ -12,6 +12,7 @@
 Omset Digital's Bring Your Own Key (BYOK) commerce infrastructure requires robust runtime validation for untrusted external payloads: inbound payment webhooks (Midtrans, Xendit), decrypted store credentials, and third-party shipping API responses (RajaOngkir). The current codebase relies on manual `JSON.parse` wrappers, duct-tape `if (!body.field)` assertions, and unchecked TypeScript type assertions (`as RajaOngkirCostResponse`, `as SnapSessionResponse`).
 
 This document evaluates four primary schema validation libraries—**Zod v4**, **Valibot v1.5**, **ArkType v2.2**, and **TypeBox v0.34/v1.3**—against strict architecture constraints:
+
 1. **Runtime:** Pure Node.js (>=20) and React Server Components (zero client-side JavaScript, zero DOM dependencies).
 2. **Typing:** Strict TypeScript 5/7 support with zero `any` leaks.
 3. **Performance:** Low CPU overhead during server-side rendering, instant serverless cold starts, and minimal bundle impact.
@@ -20,7 +21,7 @@ This document evaluates four primary schema validation libraries—**Zod v4**, *
 ### Key findings
 
 | Library | Primary Tradeoff | Recommendation |
-| :--- | :--- | :--- |
+| :-- | :-- | :-- |
 | **Valibot (v1.5)** | Ultra-lightweight modular functional design (~1.3–2.2 kB gzipped), zero dependencies, zero `eval`/`new Function`, native `~standard` compliance. | **Winner for internal adapter validation** in `@repo/commerce-adapters` and RSC routes. |
 | **Zod v4 (v4.6.5)** | Industry standard, already present in repo catalog (`core`), ergonomic chainable API, native `~standard` support; baseline bundle footprint ~12–14 kB (`zod`) or ~3–4 kB (`zod/mini`). | **Recommended secondary standard** for shared application schemas and public API contracts. |
 | **ArkType (v2.2)** | Highly concise in-editor TypeScript string syntax; heavy baseline bundle (~45 kB gzipped) due to bundled runtime TS parser; higher cold-start overhead. | Not recommended for lightweight adapter packages. |
@@ -63,7 +64,9 @@ The findings in this report are verified against first-party documentation, npm 
 Omset Digital's architecture review revealed four distinct friction points where manual validation compromises type safety and maintainability:
 
 ### 3.1. Fragile manual JSON parsing in webhook routes
+
 In `apps/app/src/app/api/webhooks/midtrans/[storeSlug]/route.ts` and `apps/app/src/app/api/webhooks/xendit/[storeSlug]/route.ts`:
+
 ```typescript
 const parseAndValidateWebhookBody = (rawBody: string): ValidatedBodyResult => {
   let body: MidtransWebhookPayload;
@@ -84,17 +87,22 @@ const parseAndValidateWebhookBody = (rawBody: string): ValidatedBodyResult => {
   return { body };
 };
 ```
+
 - **Flaw:** Manual field extraction fails if a field is `0`, `false`, or an unexpected type. If Midtrans sends `gross_amount` as a number instead of a string, or omits optional fields, runtime crashes occur later during database writes.
 
 ### 3.2. Unchecked type assertions across network boundaries
+
 In `packages/commerce-adapters/src/shipping/client.ts` and `payments/xendit/client.ts`:
+
 ```typescript
 // SAFETY: RajaOngkir API envelope conforming to RajaOngkirCostResponse schema.
 const data = (await response.json()) as RajaOngkirCostResponse;
 ```
+
 - **Flaw:** Violates the monorepo's strict zero-`any` rule (`CODING_STANDARDS.md`). Upstream API changes, rate limit HTML error pages, or malformed JSON silently pass into business logic as valid typed data.
 
 ### 3.3. Payment provider field leakage across seams
+
 External snake_case provider fields (`transaction_status`, `fraud_status`, `gross_amount`, `payment_channel`) leak directly into database update calls and route handlers rather than being parsed and mapped at the boundary.
 
 ---
@@ -102,7 +110,7 @@ External snake_case provider fields (`transaction_status`, `fraud_status`, `gros
 ## 4. Comprehensive candidate evaluation matrix
 
 | Feature / Metric | Zod v4 (`zod`) | Valibot (`valibot`) | ArkType (`arktype`) | TypeBox (`@sinclair/typebox`) |
-| :--- | :--- | :--- | :--- | :--- |
+| :-- | :-- | :-- | :-- | :-- |
 | **Latest Stable Version** | `4.6.5` | `1.5.0` | `2.2.6` | `0.34.52` / `1.3.34` |
 | **Bundle Size (Gzipped, Webhook Schema)** | ~12.4 KB (root), ~3.2 KB (`zod/mini`) | **~1.45 KB** (pure tree-shaken) | ~44.8 KB (bundled TS engine) | ~5.8 KB (`TypeCompiler`) |
 | **Runtime Dependencies** | **0 direct** | **0 direct** | 3 (`@ark/util`, `@ark/schema`, `arkregex`) | **0 direct** |
@@ -121,9 +129,11 @@ External snake_case provider fields (`transaction_status`, `fraud_status`, `gros
 ### 5.1. Valibot v1.5.0
 
 #### Architectural design
+
 Valibot is engineered around functional programming principles rather than object-oriented class hierarchies. Every schema, validation rule, transformation, and action is an isolated, tree-shakable pure function annotated with `/* @__NO_SIDE_EFFECTS__ */`.
 
 #### API ergonomics for payment adapters
+
 Valibot's pipeline architecture (`v.pipe`) allows schema validation, sanitization, coercion, and mapping into domain models in a single step:
 
 ```typescript
@@ -155,7 +165,10 @@ export const MidtransWebhookSchema = v.pipe(
     statusCode: raw.status_code,
     grossAmount: raw.gross_amount,
     signatureKey: raw.signature_key,
-    paymentStatus: mapTransactionStatus(raw.transaction_status, raw.fraud_status),
+    paymentStatus: mapTransactionStatus(
+      raw.transaction_status,
+      raw.fraud_status
+    ),
     metadata: {
       paymentType: raw.payment_type,
       settlementTime: raw.settlement_time,
@@ -168,11 +181,13 @@ export type ParsedMidtransEvent = v.InferOutput<typeof MidtransWebhookSchema>;
 ```
 
 #### Bundle weight and dependencies
+
 - **Dependencies:** 0 runtime dependencies. Peer dependency on `typescript >= 5`.
 - **Bundle Footprint:** Importing `v.object`, `v.string`, `v.pipe`, `v.picklist`, and `v.safeParse` compiles to **1.45 KB gzipped** (3.8 KB minified).
 - **Execution Model:** Zero dynamic code generation (`new Function` or `eval`). Fully compatible with Node.js 20+, Cloudflare Workers, Next.js Edge Runtime, and React Server Components.
 
 #### Known limitations & issue tracker edge cases
+
 - **Issue #1408:** `v.safeParse` on valid data is approximately 1.3x–1.8x slower than precompiled JIT validators (like TypeBox or Typia). In webhook processing and SSR (where network latency is 50–500 ms and JSON payload validation takes 3–6 µs), this difference is unmeasurable.
 - **Error Formatting:** Does not provide human-friendly localized error sentences out of the box like Zod; requires `v.flatten` or custom formatters if customer-facing error messages are needed.
 
@@ -181,11 +196,14 @@ export type ParsedMidtransEvent = v.InferOutput<typeof MidtransWebhookSchema>;
 ### 5.2. Zod v4.6.5
 
 #### Architectural design
+
 Zod v4 represents a major ground-up rewrite of Zod by Colin McDonnell. It addresses Zod v3's long-standing pain points: sluggish TypeScript compiler performance, heavy bundle size, and complex `_def` class hierarchies. Zod v4 splits into two entry points:
+
 1. `zod`: Traditional chainable object syntax with unified error handling.
 2. `zod/mini` (or `@zod/mini`): Functional, tree-shakable entry point for size-critical applications.
 
 #### API ergonomics for payment adapters
+
 Zod v4 provides clean chainable declarations and built-in type coercion:
 
 ```typescript
@@ -216,7 +234,10 @@ export const MidtransWebhookSchema = z
     statusCode: raw.status_code,
     grossAmount: raw.gross_amount,
     signatureKey: raw.signature_key,
-    paymentStatus: mapTransactionStatus(raw.transaction_status, raw.fraud_status),
+    paymentStatus: mapTransactionStatus(
+      raw.transaction_status,
+      raw.fraud_status
+    ),
     metadata: {
       paymentType: raw.payment_type,
       settlementTime: raw.settlement_time,
@@ -228,6 +249,7 @@ export type ParsedMidtransEvent = z.infer<typeof MidtransWebhookSchema>;
 ```
 
 #### Bundle weight and dependencies
+
 - **Dependencies:** 0 runtime dependencies.
 - **Bundle Footprint:** Full `zod` imports bundle at **~12.4 KB gzipped** (~48 KB minified). `zod/mini` tree-shakes down to **~3.2 KB gzipped**.
 - **Catalogs Alignment:** Already declared in the monorepo root catalog:
@@ -241,6 +263,7 @@ export type ParsedMidtransEvent = z.infer<typeof MidtransWebhookSchema>;
   Adding Zod to `@repo/commerce-adapters` introduces zero new catalog entries.
 
 #### Breaking changes & edge cases in Zod v4
+
 - **Error Map Unification:** `errorMap` and `invalid_type_error` / `required_error` are replaced by a single `error` parameter.
 - **Error Formatting:** `ZodError.format()` is deprecated in favor of `z.treeifyError()`.
 - **Non-finite numbers:** `z.number()` strictly rejects `NaN`, `Infinity`, and `-Infinity` by default.
@@ -251,9 +274,11 @@ export type ParsedMidtransEvent = z.infer<typeof MidtransWebhookSchema>;
 ### 5.3. ArkType v2.2.6
 
 #### Architectural design
+
 ArkType compiles 1:1 runtime validators from standard TypeScript string syntax (`type({ "name": "string", "amount": "number >= 0" })`). It executes an in-memory compiler that parses TS syntax strings into optimized AST nodes.
 
 #### API ergonomics
+
 ```typescript
 import { type } from "arktype";
 
@@ -262,7 +287,8 @@ export const MidtransWebhookSchema = type({
   status_code: "string",
   gross_amount: "string",
   signature_key: "string",
-  transaction_status: "'capture' | 'settlement' | 'pending' | 'deny' | 'cancel' | 'expire' | 'refund'",
+  transaction_status:
+    "'capture' | 'settlement' | 'pending' | 'deny' | 'cancel' | 'expire' | 'refund'",
   "fraud_status?": "'accept' | 'challenge' | 'deny'",
   "payment_type?": "string",
   "settlement_time?": "string",
@@ -271,6 +297,7 @@ export const MidtransWebhookSchema = type({
 ```
 
 #### Bundle weight and execution constraints
+
 - **Bundle Footprint:** **44.8 KB gzipped** (148 KB minified). ArkType bundles a comprehensive parser for TypeScript type grammar.
 - **Dependencies:** Relies on 3 internal subpackages (`@ark/util`, `@ark/schema`, `arkregex`).
 - **Cold-Start Latency:** In serverless or ephemeral edge environments (e.g. Next.js Route Handlers on Vercel or Cloudflare), initializing ArkType strings on cold start introduces measurable CPU overhead (~10–25 ms).
@@ -281,9 +308,11 @@ export const MidtransWebhookSchema = type({
 ### 5.4. TypeBox v0.34.52 / v1.3.34
 
 #### Architectural design
+
 TypeBox is a pure JSON Schema builder with static type resolution. It generates valid Draft 2020-12 / Draft 7 JSON Schema objects.
 
 #### Critical limitations for Omset Digital
+
 1. **No Standard Schema Support (Issue #1127):** Author Sinclairzx81 deliberately opted out of decorating schema objects with the `~standard` symbol to maintain pure JSON Schema compatibility. Consuming TypeBox in Standard Schema pipelines requires manual wrapper classes.
 2. **Dynamic Code Generation (`new Function`):** While `TypeCompiler.Compile(schema)` produces the fastest execution in benchmark suites, it generates JavaScript code strings evaluated via `new Function()`. In strict environments (Cloudflare Workers without `unsafe-eval`, or secure enterprise Next.js CSP configurations), this throws an immediate security error.
 3. **External Transforms:** Transformations and coercions cannot be encapsulated within the schema definition itself.
@@ -303,7 +332,9 @@ export interface StandardSchemaV1<Input = unknown, Output = Input> {
     readonly validate: (
       value: unknown,
       options?: StandardSchemaV1.Options
-    ) => StandardSchemaV1.Result<Output> | Promise<StandardSchemaV1.Result<Output>>;
+    ) =>
+      | StandardSchemaV1.Result<Output>
+      | Promise<StandardSchemaV1.Result<Output>>;
     readonly types?: {
       readonly input: Input;
       readonly output: Output;
@@ -313,7 +344,9 @@ export interface StandardSchemaV1<Input = unknown, Output = Input> {
 ```
 
 ### Architectural leverage for Omset Digital
+
 By typing the adapter interfaces in `@repo/commerce-adapters` against `StandardSchemaV1`:
+
 1. **Zero Library Lock-in:** Internal adapter implementations use **Valibot** for minimal bundle weight and fast cold starts.
 2. **Consumer Flexibility:** Application route handlers and server actions can pass schemas authored in **Zod v4**, **Valibot**, or any Standard Schema-compliant library without adapter modification.
 3. **Unified Validation Helper:** A single 10-line helper handles validation across all packages:

@@ -5,8 +5,11 @@ export default defineConfig({
   ...ultracite,
   ignorePatterns: [
     ...(ultracite.ignorePatterns ?? []),
-    "apps/app/src/app/(payload)/**/*",
+    "**/.agents/**",
+    "apps/app/src/app/(payload)/**",
+    "apps/app/src/migrations/**",
     "packages/types/src/payload/generated.ts",
-    "**/*.md",
+    "packages/ui/src/components/ui/**",
+    "**/CONTEXT.md",
   ],
 });
