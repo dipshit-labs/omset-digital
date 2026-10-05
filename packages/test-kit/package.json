@@ -25,20 +25,22 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@electric-sql/pglite": "catalog:payload",
-    "@payloadcms/db-postgres": "catalog:payload",
-    "@payloadcms/drizzle": "3.90.2",
-    "drizzle-orm": "0.45.2",
-    "msw": "catalog:test",
-    "payload": "catalog:payload",
-    "pg": "^8.20.0"
+    "pg": "catalog:payload"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:types",
-    "@types/pg": "^8.20.0",
+    "@types/pg": "catalog:types",
     "@vitest/coverage-v8": "catalog:test",
     "typescript": "catalog:types",
     "vitest": "catalog:test"
+  },
+  "peerDependencies": {
+    "@electric-sql/pglite": "catalog:payload",
+    "@payloadcms/db-postgres": "catalog:payload",
+    "@payloadcms/drizzle": "catalog:payload",
+    "drizzle-orm": "catalog:core",
+    "msw": "catalog:test",
+    "payload": "catalog:payload"
   }
 }

@@ -1,39 +1,66 @@
 import type { SuiteAPI, TestAPI } from "vitest";
-import type { TestPayloadConfigOverrides } from "../payload/createTestPayload";
-import type { TestKitFixtures } from "./integrationTest";
+import type {
+  IntegrationTestFixtures,
+  TestPayloadConfig,
+} from "./integrationTest";
 
 import { describe } from "vitest";
 
-import {
-  buildIntegrationTestRunner,
-  setFilePayloadConfig,
-} from "./integrationTest";
+import { createIntegrationTest } from "./integrationTest";
 
-export { describe } from "vitest";
+type SuiteCleanup = () => unknown;
 
-export type IntegrationSuiteOptions = TestPayloadConfigOverrides;
+export interface IntegrationSuiteOptions {
+  setup: (
+    context: Pick<IntegrationTestFixtures, "payload">
+  ) => Promise<SuiteCleanup | undefined> | SuiteCleanup | undefined;
+}
 
 export interface IntegrationSuite {
   describe: SuiteAPI;
-  it: TestAPI<TestKitFixtures>;
-  test: TestAPI<TestKitFixtures>;
+  it: TestAPI<IntegrationTestFixtures>;
+  test: TestAPI<IntegrationTestFixtures>;
 }
 
-export const setTestPayloadConfig = (
-  overrides: TestPayloadConfigOverrides
-): void => {
-  setFilePayloadConfig(overrides);
+export interface CreateIntegrationSuiteConfig extends TestPayloadConfig {
+  cacheKey?: string;
+}
+
+export const createIntegrationSuite = (
+  config: CreateIntegrationSuiteConfig = {}
+) => {
+  const { cacheKey, ...payloadConfig } = config;
+  const configuredTest = createIntegrationTest({
+    cacheKey,
+    payload: payloadConfig,
+  });
+
+  // SAFETY: Extending the configured test with an auto-use suiteLifecycle fixture keeps the IntegrationTestFixtures contract; the extra fixture is internal.
+  return (options: IntegrationSuiteOptions): TestAPI<IntegrationTestFixtures> =>
+    configuredTest.extend<{ suiteLifecycle: undefined }>({
+      suiteLifecycle: [
+        async ({ payload }, use) => {
+          const cleanup = await options.setup({ payload });
+
+          try {
+            // oxlint-disable-next-line react-hooks/rules-of-hooks unicorn/no-useless-undefined
+            await use(undefined);
+          } finally {
+            await cleanup?.();
+          }
+        },
+        {
+          auto: true,
+          scope: "file",
+        },
+      ],
+    }) as TestAPI<IntegrationTestFixtures>;
 };
 
 export const integrationSuite = (
-  overrides?: IntegrationSuiteOptions
+  config: CreateIntegrationSuiteConfig = {}
 ): IntegrationSuite => {
-  const runner = buildIntegrationTestRunner(overrides);
-  return {
-    describe,
-    it: runner,
-    test: runner,
-  };
+  const { cacheKey, ...payloadConfig } = config;
+  const runner = createIntegrationTest({ cacheKey, payload: payloadConfig });
+  return { describe, it: runner, test: runner };
 };
-
-export const defineIntegrationSuite = integrationSuite;

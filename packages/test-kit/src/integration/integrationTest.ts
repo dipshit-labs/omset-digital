@@ -1,74 +1,82 @@
-import type { Payload, PayloadRequest } from "payload";
+import type { Config, PayloadRequest } from "payload";
 import type { TestAPI } from "vitest";
-import type { TestPayloadConfigOverrides } from "../payload/createTestPayload";
+import type { TestPayload } from "../payload/createTestPayload";
 import type { CreateReqFn } from "../payload/createTestReq";
 
-import { test } from "vitest";
+import { test as base } from "vitest";
 
 import { createTestPayload } from "../payload/createTestPayload";
 import { createTestReq } from "../payload/createTestReq";
-import { resetDatabase } from "../payload/resetDatabase";
+import { createTestDatabase } from "../payload/database/createTestDatabase";
 
-export interface TestKitFixtures {
-  createReq: CreateReqFn;
-  payload: Payload;
-  req: PayloadRequest;
+export type TestPayloadConfig = Omit<Partial<Config>, "db" | "secret">;
+
+export interface CreateIntegrationTestOptions {
+  payload?: TestPayloadConfig;
+  cacheKey?: string;
 }
 
-let ambientFilePayloadConfig: TestPayloadConfigOverrides | undefined;
+export interface IntegrationTestFixtures {
+  createReq: CreateReqFn;
+  payload: TestPayload;
+  req: PayloadRequest;
+  databaseReset: null;
+}
 
-export const setFilePayloadConfig = (
-  overrides: TestPayloadConfigOverrides
-): void => {
-  ambientFilePayloadConfig = overrides;
-};
-
-export const buildIntegrationTestRunner = (
-  overrides?: TestPayloadConfigOverrides
-): TestAPI<TestKitFixtures> => {
-  const runner = test.extend<{
-    _reset: null;
-    createReq: CreateReqFn;
-    payload: unknown;
-    req: unknown;
-  }>({
-    _reset: [
-      async ({ payload }, provide) => {
-        // SAFETY: Injected fixture passes initialized Payload instance into teardown reset.
-        await resetDatabase(payload as never);
-        await provide(null);
+export const createIntegrationTest = ({
+  payload: payloadConfig = {},
+  cacheKey,
+}: CreateIntegrationTestOptions = {}): TestAPI<IntegrationTestFixtures> => {
+  const runner = base.extend<IntegrationTestFixtures>({
+    databaseReset: [
+      async ({ payload }, use) => {
+        await payload.resetDatabase();
+        await use(null);
       },
-      { auto: true },
+      {
+        auto: true,
+        scope: "test",
+      },
     ],
+
     createReq: [
-      async ({ task: _task }, provide) => {
-        await provide((opts) => createTestReq(opts));
+      async ({ task: _task }, use) => {
+        await use((opts) => createTestReq(opts));
       },
       { scope: "file" },
     ],
+
     payload: [
-      async ({ task: _task }, provide) => {
-        const payloadInstance = await createTestPayload(
-          overrides ?? ambientFilePayloadConfig,
-          overrides?.cacheKey
-        );
-        await provide(payloadInstance);
-        await payloadInstance.destroy();
+      async ({ task: _task }, use) => {
+        const database = await createTestDatabase();
+
+        const payload = await createTestPayload({
+          ...payloadConfig,
+          key: cacheKey,
+          database,
+        });
+
+        try {
+          // oxlint-disable-next-line react-hooks/rules-of-hooks
+          await use(payload);
+        } finally {
+          await payload.destroy();
+        }
       },
       { scope: "file" },
     ],
+
     req: [
-      async ({ createReq }, provide) => {
-        await provide(createReq());
+      async ({ createReq }, use) => {
+        await use(createReq());
       },
       { scope: "test" },
     ],
   });
 
-  // SAFETY: Extended runner satisfies TestKitFixtures test API for integration consumers.
-  return runner as TestAPI<TestKitFixtures>;
+  // SAFETY: Extended runner satisfies IntegrationTestFixtures test API for integration consumers.
+  return runner as TestAPI<IntegrationTestFixtures>;
 };
 
-export const integrationTest: TestAPI<TestKitFixtures> =
-  buildIntegrationTestRunner();
-export { integrationTest as it, integrationTest as test };
+export const integrationTest: TestAPI<IntegrationTestFixtures> =
+  createIntegrationTest();

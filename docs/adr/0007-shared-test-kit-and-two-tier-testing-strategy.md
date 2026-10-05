@@ -81,18 +81,18 @@ File-level `// @vitest-environment` docblocks remain permitted when an explicit 
 
 Integration tests run against PostgreSQL dialect across all packages and apps, eliminating SQLite dialect divergence. The database driver isolates state by execution scope:
 
-- **PGlite in-memory engine (default fallback):** When `TEST_DATABASE_URL` is unset, `@repo/test-kit` boots an in-tree PGlite adapter powered by `@electric-sql/pglite` and `@payloadcms/drizzle` with in-memory storage (`memory://`). Schema push runs via Drizzle `pushDevSchema` with transactions disabled to avoid single-connection deadlocks. Table truncation wipes state between tests, and `destroyTestPayload` closes the instance on file completion.
-- **Worker-scoped PostgreSQL schemas (`TEST_DATABASE_URL`):** When `TEST_DATABASE_URL` is set, `@repo/test-kit` connects to real PostgreSQL. The driver derives a worker-scoped schema name (`test_worker_${VITEST_POOL_ID ?? 0}`). On startup, the driver drops and recreates the schema to clear dirty state from prior aborted runs. Between tests, it truncates all tables using `TRUNCATE TABLE ... RESTART IDENTITY CASCADE`. On teardown, it drops the schema.
+- **PGlite in-memory engine (default fallback):** When `TEST_DATABASE_URL` is unset, `@repo/test-kit` boots an in-tree PGlite adapter powered by `@electric-sql/pglite` and `@payloadcms/drizzle` with in-memory storage (`memory://test-payload-${workerId}`). Schema push runs via Drizzle `pushDevSchema` with transactions disabled to avoid single-connection deadlocks. Table truncation wipes state between tests, and `payload.destroy()` closes the PGlite instance on file completion.
+- **Worker-scoped PostgreSQL schemas (`TEST_DATABASE_URL`):** When `TEST_DATABASE_URL` is set, `@repo/test-kit` connects to real PostgreSQL. The driver derives a worker-scoped schema name (`test_worker_${VITEST_POOL_ID ?? 0}`) and creates it if missing. Between tests, it truncates all tables using `TRUNCATE TABLE ... RESTART IDENTITY CASCADE`. `payload.destroy()` drops the schema and closes the pool.
 - **Environment isolation:** `TEST_DATABASE_URL` is dedicated strictly to integration testing. Tests never read or mutate `DATABASE_URL`, preventing accidental modification of local development databases.
 
 ### 5. Test kit harness architecture and Vitest runner integration
 
 `@repo/test-kit` structures integration test execution around native Vitest fixtures:
 
-- **Suite-scoped configuration (`integrationSuite`):** Test files configure Payload through `integrationSuite({ collections, plugins, database, cacheKey })`. The factory returns scoped `{ describe, it, test }` test runners built on `test.extend<TestKitFixtures>()`. It eliminates mutable module-level state.
-- **Lifecycle and reset:** Payload boots once per test file. Between individual tests, `resetDatabase` runs table truncation across all tracked Drizzle tables in under 5 ms without re-running schema push.
+- **Suite-scoped configuration (`integrationSuite`):** Test files configure Payload through `integrationSuite({ collections, plugins, cacheKey })`. The factory returns scoped `{ describe, it, test }` test runners built on `test.extend<IntegrationTestFixtures>()`. It eliminates mutable module-level state.
+- **Lifecycle and reset:** Payload boots once per test file. An auto-use fixture calls `payload.resetDatabase()` before every test, truncating all tracked tables without re-running schema push.
 - **Tier 1 unit test request helper (`createTestReq`):** A lightweight helper returns typed `PayloadRequest` stubs with mock tenant headers and user objects for pure access-control and lifecycle unit tests in `src/`.
-- **Global Payload cache binding:** When testing Next.js route handlers that invoke `getPayload({ config })`, suites pass `cacheKey: "default"`. `createTestPayload` registers the instance in `global._payload`, allowing route handlers to resolve the active test instance without ad-hoc mocks.
+- **Global Payload cache binding:** When testing Next.js route handlers that invoke `getPayload({ config })`, suites pass `cacheKey: "default"`. `createTestPayload` registers the instance in `global._payload` under that key, allowing route handlers to resolve the active test instance without ad-hoc mocks.
 - **Deep modules without dead weight:** Types colocate within their implementation files. Generic hardware-lifecycle scaffolding (`ResourceTracker`, diagnostics recorders, custom error classes) is omitted in favor of native Vitest error propagation and teardown.
 
 ### 6. Outbound network mocking with MSW

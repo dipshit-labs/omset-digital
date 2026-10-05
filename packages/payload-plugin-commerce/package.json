@@ -44,7 +44,7 @@
     "@repo/commerce-adapters": "workspace:*"
   },
   "devDependencies": {
-    "@libsql/client": "catalog:payload",
+    "@electric-sql/pglite": "catalog:payload",
     "@payloadcms/db-postgres": "catalog:payload",
     "@payloadcms/ui": "catalog:payload",
     "@repo/test-kit": "workspace:*",

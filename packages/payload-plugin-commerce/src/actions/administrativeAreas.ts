@@ -33,11 +33,6 @@ interface DrizzleSqlQueryLike {
   }) => { params?: unknown[]; sql: string };
 }
 
-interface LibSqlClientLike {
-  batch?: (stmts: unknown[], mode?: string) => Promise<unknown>;
-  execute?: (stmt: unknown) => Promise<unknown>;
-}
-
 let defaultAdministrativeAreasDb: DrizzleDatabaseLike | null = null;
 
 export const setAdministrativeAreasDb = (db: unknown): void => {
@@ -79,33 +74,6 @@ const resolveDrizzleExecutor = (
     throw new Error(
       "No database instance provided or configured for administrative areas query. Pass db to the helper or configure it via setAdministrativeAreasDb."
     );
-  }
-
-  // Detect LibSQL in-process client passed directly as db
-  // SAFETY: Target is checked for LibSQL Client properties batch and execute without drizzle property.
-  const libSqlClient = target as LibSqlClientLike;
-  const executeFn = libSqlClient.execute;
-  if (
-    typeof libSqlClient.batch === "function" &&
-    typeof executeFn === "function" &&
-    !("drizzle" in target)
-  ) {
-    return async (query: unknown) => {
-      const compiled = compileDrizzleQuery(query);
-      // SAFETY: LibSQL client execute method accepts statement object with sql and args.
-      const res = compiled
-        ? await executeFn.call(libSqlClient, {
-            args: compiled.params,
-            sql: compiled.sql,
-          })
-        : await executeFn.call(libSqlClient, query);
-
-      // SAFETY: LibSQL query execution returns array of rows or result object with rows.
-      const rows = Array.isArray(res)
-        ? (res as RawAdministrativeAreaRow[])
-        : ((res as { rows?: RawAdministrativeAreaRow[] })?.rows ?? []);
-      return { rows };
-    };
   }
 
   const drizzleExecute =

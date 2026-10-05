@@ -8,7 +8,7 @@ Every test file in this monorepo belongs to one of two tiers.
 
 **Tier 1, unit and UI tests (`src/**/*.test.{ts,tsx}`).** Pure functions, access predicates, calculations, and React components colocated directly beside their implementation file. Pure TypeScript tests (`.test.ts`) run on Node in under 1 ms via the `unit` project. Component tests (`.test.tsx`) render in JSDOM via the `ui` project. No database, no Payload boot.
 
-**Tier 2, integration tests (`test/integrations/*.integration.test.ts`).** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root, dispatched via the `integration` project (`environment: "node"`, `fileParallelism: false`). Packages run against in-memory SQLite (`mode=memory&cache=shared`). `apps/app` runs against worker-scoped PostgreSQL schemas.
+**Tier 2, integration tests (`test/integrations/*.integration.test.ts`).** Tests verifying collection hooks, field validation, relational queries, and round-trip persistence through the real Payload Local API. Located in a flat `test/integrations/` directory at the package or app root, dispatched via the `integration` project (`environment: "node"`, `fileParallelism: false`). Packages run against in-memory PGlite. `apps/app` runs against worker-scoped PostgreSQL schemas.
 
 When a feature needs both unit and relational verification, split test files: pure logic to colocated `src/`, Payload-backed tests to `test/integrations/`.
 
@@ -100,12 +100,16 @@ All integration test infrastructure lives in `@repo/test-kit`. Never copy-paste 
 
 ### Fixture API (preferred)
 
-Import `it` and `describe` from `@repo/test-kit` to get a `payload` fixture injected per test file with automatic teardown:
+Call `integrationSuite(config)` at the top of a test file. It returns scoped `describe`, `it`, and `test` runners that inject `payload`, `req`, and `createReq` fixtures:
 
 ```typescript
-import { describe, it } from "@repo/test-kit";
+import { integrationSuite } from "@repo/test-kit";
 import { expect } from "vitest";
 import { createPackagesCollection } from "./packages";
+
+const { describe, it } = integrationSuite({
+  collections: [storesCollection, createPackagesCollection()],
+});
 
 describe("packages collection", () => {
   it("marks first package as default when store has no existing packages", async ({
@@ -127,36 +131,42 @@ describe("packages collection", () => {
 });
 ```
 
-The fixture boots one Payload instance per file with ephemeral database isolation. Packages use named in-memory SQLite (`file:test_mem_${workerId}?mode=memory&cache=shared`). `apps/app` uses worker-scoped PostgreSQL schemas (`test_worker_${workerId}`) using `DATABASE_URL`. It calls `resetDatabase` between every test automatically.
+The fixture boots one Payload instance per file and destroys it, and its database, when the file finishes. Packages use in-memory PGlite (`memory://`). `apps/app` uses worker-scoped PostgreSQL schemas (`test_worker_${workerId}`) when `TEST_DATABASE_URL` is set. An auto-use fixture calls `payload.resetDatabase()` before every test, so tests never share rows.
+
+`integrationSuite` accepts any Payload config field except `db` and `secret`, plus `cacheKey`. Set `cacheKey: "default"` when a route handler under test calls `getPayload({ config })`, so it resolves the test instance from `global._payload`.
+
+`integrationTest` is the same runner with an empty config. Use `createIntegrationTest({ payload, cacheKey })` when you need the runner without the `describe` wrapper.
 
 ```typescript
 import {
+  createTestDatabase,
   createTestPayload,
-  resetDatabase,
   createTestReq,
 } from "@repo/test-kit";
 ```
 
-### `createTestPayload(overrides)`
+### `createTestPayload(options)`
 
-Boots a Payload instance with `@payloadcms/db-sqlite` and a fixed test secret. Pass any subset of `BuildConfig` fields:
+Lower-level boot for tests that manage their own lifecycle. `database` is required and comes from `createTestDatabase()`. Pass any other Payload config field, except `db`:
 
 ```typescript
+const database = await createTestDatabase();
 const payload = await createTestPayload({
   collections: [StoresCollection, PackagesCollection],
+  database,
   plugins: [payloadPluginCommerce()],
 });
 ```
 
-Call `payload.destroy()` in `afterAll`. The adapter and worker-scoped DB path are set automatically; do not pass `db` or `secret`.
+Call `payload.destroy()` when done. It closes Payload and the database, and a second call is a no-op.
 
-### `resetDatabase(payload)`
+### `payload.resetDatabase()`
 
-Deletes all rows from every Drizzle-tracked table. Call in `beforeEach` for a clean slate without re-running schema push:
+Deletes all rows from every table except `payload_migrations`, without re-running schema push. The fixture calls it for you. In a manual setup, call it in `beforeEach`:
 
 ```typescript
 beforeEach(async () => {
-  await resetDatabase(payload);
+  await payload.resetDatabase();
 });
 ```
 
@@ -211,7 +221,7 @@ In unit tests use `factory.build()` (synchronous, no DB). In integration tests u
 
 Mock at system boundaries only: external network APIs, system time, and randomness. Internal code runs real.
 
-- **Real Payload execution.** Run integration tests against the real Local API via `@repo/test-kit`, backed by in-memory SQLite in packages or PostgreSQL worker schemas in `apps/app`. Hand-rolled Payload simulators are banned.
+- **Real Payload execution.** Run integration tests against the real Local API via `@repo/test-kit`, backed by in-memory PGlite in packages or PostgreSQL worker schemas in `apps/app`. Hand-rolled Payload simulators are banned.
 - **MSW for third-party network boundaries.** Intercept external HTTP calls (payment gateways, shipping APIs, transactional emails) using Mock Service Worker handlers in `@repo/test-kit/src/msw/handlers/`. Customize behavior per test with `server.use(...)`.
 - **SDK-style interface mocking.** Mock typed SDK or provider methods rather than raw HTTP fetchers. Each method provides a single return shape without conditional URL or header branching in test setup.
 - **System time and randomness.** Control time-sensitive expirations and billing schedules with `vi.useFakeTimers()`.

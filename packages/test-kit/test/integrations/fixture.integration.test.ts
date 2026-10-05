@@ -1,18 +1,13 @@
-import { expect } from "vitest";
+import { describe, expect } from "vitest";
 
-import {
-  defineIntegrationSuite,
-  describe,
-  integrationSuite,
-  it,
-} from "@repo/test-kit";
+import { integrationSuite, integrationTest } from "../../src/index";
 
-describe("@repo/test-kit fixture", () => {
-  it("provides usable injected payload fixture", async ({ payload }) => {
+describe("@repo/test-kit default fixture", () => {
+  integrationTest("injects a working payload instance", async ({ payload }) => {
     expect(payload).toBeDefined();
     expect(payload.find).toBeTypeOf("function");
 
-    await payload.create({
+    const user = await payload.create({
       collection: "users",
       data: {
         email: "fixture-test@example.com",
@@ -20,19 +15,19 @@ describe("@repo/test-kit fixture", () => {
       },
     });
 
+    expect(user.id).toBeDefined();
+
     const found = await payload.find({ collection: "users" });
     expect(found.totalDocs).toBe(1);
   });
 
-  it("automatically resets database between fixture tests", async ({
-    payload,
-  }) => {
+  integrationTest("ensures a clean database state", async ({ payload }) => {
     const found = await payload.find({ collection: "users" });
     expect(found.totalDocs).toBe(0);
   });
 });
 
-const customSuite = defineIntegrationSuite({
+const customSuite = integrationSuite({
   collections: [
     {
       fields: [{ name: "title", type: "text" }],
@@ -41,14 +36,15 @@ const customSuite = defineIntegrationSuite({
   ],
 });
 
-customSuite.describe("defineIntegrationSuite runner", () => {
+customSuite.describe("integrationSuite custom runner", () => {
   customSuite.it(
-    "injects payload and default req fixture",
-    ({ createReq: _createReq, payload, req }) => {
+    "injects payload, req, and createReq fixtures",
+    ({ createReq, payload, req }) => {
       expect(payload).toBeDefined();
       expect(req).toBeDefined();
       expect(req.headers).toBeInstanceOf(Headers);
       expect(req.user).toBeNull();
+      expect(createReq).toBeTypeOf("function");
     }
   );
 
@@ -59,14 +55,17 @@ customSuite.describe("defineIntegrationSuite runner", () => {
         headers: new Headers({ "x-tenant-id": "tenant-99" }),
         user: { id: "user-1", email: "admin@example.com" },
       });
+
       expect(customReq.headers.get("x-tenant-id")).toBe("tenant-99");
       expect(customReq.user?.email).toBe("admin@example.com");
 
-      await payload.create({
+      const article = await payload.create({
         collection: "articles",
         data: { title: "First Post" },
         req: customReq,
       });
+
+      expect(article.title).toBe("First Post");
 
       const found = await payload.find({ collection: "articles" });
       expect(found.totalDocs).toBe(1);
@@ -74,45 +73,10 @@ customSuite.describe("defineIntegrationSuite runner", () => {
   );
 
   customSuite.it(
-    "automatically resets collection data between tests in custom suite",
+    "resets collection data across test runs",
     async ({ payload }) => {
       const found = await payload.find({ collection: "articles" });
       expect(found.totalDocs).toBe(0);
     }
   );
 });
-
-const newSuite = integrationSuite({
-  collections: [
-    {
-      fields: [{ name: "name", type: "text" }],
-      slug: "tags",
-    },
-  ],
-});
-
-newSuite.describe(
-  "integrationSuite runner with integrationTest fixtures",
-  () => {
-    newSuite.it(
-      "injects payload and req fixtures in newSuite",
-      async ({ payload, req }) => {
-        expect(payload).toBeDefined();
-        expect(req).toBeDefined();
-        const tag = await payload.create({
-          collection: "tags",
-          data: { name: "typescript" },
-        });
-        expect(tag.name).toBe("typescript");
-      }
-    );
-
-    newSuite.test(
-      "resets database between test cases in newSuite",
-      async ({ payload }) => {
-        const found = await payload.find({ collection: "tags" });
-        expect(found.totalDocs).toBe(0);
-      }
-    );
-  }
-);

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestPayload, resetDatabase } from "@repo/test-kit";
+import { createTestPayload } from "../../src/payload/createTestPayload";
+import { createTestDatabase } from "../../src/payload/database/createTestDatabase";
 
 describe("@repo/test-kit lifecycle integration helpers", () => {
   it("boots a real Payload instance with in-tree in-memory PGlite adapter and relations", async () => {
+    const database = await createTestDatabase();
     const payload = await createTestPayload({
+      database,
       collections: [
         {
           fields: [{ name: "name", type: "text" }],
@@ -25,7 +28,6 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
     });
 
     try {
-      await resetDatabase(payload);
       expect(payload.db.name).toBe("postgres");
       expect(payload.collections.widgets).toBeDefined();
 
@@ -50,7 +52,9 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
   });
 
   it("persists and queries documents through the local API", async () => {
+    const database = await createTestDatabase();
     const payload = await createTestPayload({
+      database,
       collections: [
         {
           fields: [{ name: "title", type: "text" }],
@@ -60,7 +64,6 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
     });
 
     try {
-      await resetDatabase(payload);
       const doc = await payload.create({
         collection: "widgets",
         data: { title: "Widget Alpha" },
@@ -76,7 +79,9 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
   });
 
   it("deletes all rows from database tables without re-running schema push", async () => {
+    const database = await createTestDatabase();
     const payload = await createTestPayload({
+      database,
       collections: [
         {
           fields: [{ name: "title", type: "text" }],
@@ -86,7 +91,6 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
     });
 
     try {
-      await resetDatabase(payload);
       await payload.create({
         collection: "widgets",
         data: { title: "Widget to be deleted" },
@@ -95,7 +99,7 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
       const beforeReset = await payload.find({ collection: "widgets" });
       expect(beforeReset.totalDocs).toBe(1);
 
-      await resetDatabase(payload);
+      await payload.resetDatabase();
 
       const afterReset = await payload.find({ collection: "widgets" });
       expect(afterReset.totalDocs).toBe(0);

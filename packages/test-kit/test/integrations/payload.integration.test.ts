@@ -1,78 +1,82 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestPayload, destroyTestPayload } from "@repo/test-kit";
+import { createTestPayload } from "../../src/payload/createTestPayload";
+import { createTestDatabase } from "../../src/payload/database/createTestDatabase";
 
 describe(
-  "@repo/test-kit createTestPayload cacheKey lifecycle",
+  "@repo/test-kit createTestPayload lifecycle",
   { timeout: 15_000 },
   () => {
-    it("registers in global._payload under explicit cacheKey and deletes on destroy", async () => {
-      const testKey = "custom-test-cache-key";
+    it("boots a Payload instance and tears it down without error", async () => {
+      const database = await createTestDatabase();
+      const payload = await createTestPayload({
+        database,
+        collections: [
+          {
+            fields: [{ name: "name", type: "text" }],
+            slug: "test_items",
+          },
+        ],
+      });
 
-      const payload = await createTestPayload(
-        {
-          collections: [
-            {
-              fields: [{ name: "name", type: "text" }],
-              slug: "test_items",
-            },
-          ],
-        },
-        testKey
-      );
+      expect(payload.find).toBeTypeOf("function");
+      await payload.destroy();
+    });
+
+    it("exposes resetDatabase that clears rows without re-running schema push", async () => {
+      const database = await createTestDatabase();
+      const payload = await createTestPayload({
+        database,
+        collections: [
+          {
+            fields: [{ name: "name", type: "text" }],
+            slug: "test_items",
+          },
+        ],
+      });
 
       try {
-        expect(global._payload).toBeDefined();
-        expect(global._payload?.has(testKey)).toBeTruthy();
+        await payload.create({ collection: "test_items", data: { name: "a" } });
+        await payload.create({ collection: "test_items", data: { name: "b" } });
+
+        const before = await payload.find({ collection: "test_items" });
+        expect(before.totalDocs).toBe(2);
+
+        await payload.resetDatabase();
+
+        const after = await payload.find({ collection: "test_items" });
+        expect(after.totalDocs).toBe(0);
       } finally {
         await payload.destroy();
       }
-
-      expect(global._payload?.has(testKey)).toBeFalsy();
     });
 
-    it("accepts cacheKey inside options object", async () => {
-      const testKey = "options-cache-key";
+    it("calling destroy twice does not throw", async () => {
+      const database = await createTestDatabase();
+      const payload = await createTestPayload({
+        collections: [],
+        database,
+      });
 
-      const payload = await createTestPayload(
-        {
-          collections: [
-            {
-              fields: [{ name: "name", type: "text" }],
-              slug: "test_items_opt",
-            },
-          ],
-        },
-        { cacheKey: testKey }
-      );
+      await payload.destroy();
 
-      try {
-        expect(global._payload?.has(testKey)).toBeTruthy();
-      } finally {
-        await payload.destroy();
-      }
-
-      expect(global._payload?.has(testKey)).toBeFalsy();
+      await expect(payload.destroy()).resolves.toBeUndefined();
     });
 
-    it("deletes from global._payload when destroyTestPayload is called directly", async () => {
-      const testKey = "direct-destroy-cache-key";
+    it("removes the instance from Payload's global cache on destroy", async () => {
+      const key = "test-kit-cache-cleanup";
+      const database = await createTestDatabase();
+      const payload = await createTestPayload({
+        key,
+        collections: [],
+        database,
+      });
 
-      const payload = await createTestPayload(
-        {
-          collections: [
-            {
-              fields: [{ name: "name", type: "text" }],
-              slug: "test_items_direct",
-            },
-          ],
-        },
-        testKey
-      );
+      expect(global._payload?.has(key)).toBeTruthy();
 
-      expect(global._payload?.has(testKey)).toBeTruthy();
-      await destroyTestPayload(payload);
-      expect(global._payload?.has(testKey)).toBeFalsy();
+      await payload.destroy();
+
+      expect(global._payload?.has(key)).toBeFalsy();
     });
   }
 );
