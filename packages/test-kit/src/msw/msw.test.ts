@@ -1,28 +1,15 @@
 import { http, HttpResponse } from "msw";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
-  handlers,
   midtransHandlers,
   rajaongkirHandlers,
   resendHandlers,
-  server,
   xenditHandlers,
-} from "./index";
+} from "./handlers";
+import { handlers, server } from "./index";
 
 describe("@repo/test-kit MSW centralized handlers", () => {
-  beforeAll(() => {
-    server.listen();
-  });
-
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   it("exports handler arrays for each provider", () => {
     expect(Array.isArray(midtransHandlers)).toBeTruthy();
     expect(Array.isArray(xenditHandlers)).toBeTruthy();

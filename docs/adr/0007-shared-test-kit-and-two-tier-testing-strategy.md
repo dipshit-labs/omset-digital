@@ -89,7 +89,7 @@ Local databases isolate by execution scope:
 Mock Service Worker handles external network boundaries:
 
 - Shared request handlers for third-party gateways (Midtrans, Xendit, RajaOngkir, Resend) live in `@repo/test-kit/src/msw/handlers/`.
-- Global Vitest setup in `@repo/test-kit/src/msw/setup.ts` starts the interceptor before all tests, resets runtime overrides after each test, and closes the server after all tests complete.
+- Global Vitest setup in `@repo/test-kit/msw` starts the interceptor before all tests, resets runtime overrides after each test, and closes the server after all tests complete.
 - Tests override specific response codes or network failures using `server.use(...)`.
 
 ### 6. Centralized V8 code coverage

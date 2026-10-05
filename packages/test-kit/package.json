@@ -8,10 +8,6 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./helpers": {
-      "types": "./src/helpers.ts",
-      "default": "./src/helpers.ts"
-    },
     "./msw": {
       "types": "./src/msw/index.ts",
       "default": "./src/msw/index.ts"
@@ -19,10 +15,6 @@
     "./msw/setup": {
       "types": "./src/msw/setup.ts",
       "default": "./src/msw/setup.ts"
-    },
-    "./msw/handlers": {
-      "types": "./src/msw/handlers/index.ts",
-      "default": "./src/msw/handlers/index.ts"
     }
   },
   "scripts": {

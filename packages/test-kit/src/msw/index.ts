@@ -1,8 +1,2 @@
-export {
-  handlers,
-  midtransHandlers,
-  rajaongkirHandlers,
-  resendHandlers,
-  xenditHandlers,
-} from "./handlers";
+export { handlers } from "./handlers";
 export { server } from "./server";

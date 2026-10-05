@@ -1,3 +1,7 @@
+export { createAppTestPayload, createTestPayload } from "./lib/payload";
+export { resetDatabase } from "./lib/reset";
+export { createTestReq } from "./lib/request";
+
 export {
   defineIntegrationSuite,
   describe,
@@ -5,23 +9,6 @@ export {
   setTestPayloadConfig,
   test,
 } from "./fixture";
-
-export {
-  createAppTestPayload,
-  createTestPayload,
-  resetDatabase,
-} from "./helpers";
-
-export { createTestReq } from "./lib/request";
-
-export {
-  handlers,
-  midtransHandlers,
-  rajaongkirHandlers,
-  resendHandlers,
-  server,
-  xenditHandlers,
-} from "./msw";
 
 export type {
   CreateReqFn,

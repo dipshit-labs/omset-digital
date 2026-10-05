@@ -1,13 +1,13 @@
 import type { Payload } from "payload";
 import { describe, expect, it, vi } from "vitest";
 
+import { createAppTestPayload } from "./payload";
 import {
-  createAppTestPayload,
   dropPostgresWorkerSchema,
   getPostgresWorkerSchemaName,
   provisionPostgresWorkerSchema,
-  resetDatabase,
-} from "./helpers";
+} from "./postgres";
+import { resetDatabase } from "./reset";
 
 describe("@repo/test-kit PostgreSQL worker schema utilities", () => {
   it("derives worker-scoped schema name from given pool id", () => {

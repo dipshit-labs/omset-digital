@@ -3,18 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   createAppTestPayload,
   createTestPayload,
-  getSqliteMemoryUri,
-} from "./helpers";
-import {
   createTestReq,
   defineIntegrationSuite,
   describe as fixtureDescribe,
-  handlers,
   it as fixtureIt,
-  server,
-  setTestPayloadConfig,
   test as fixtureTest,
+  setTestPayloadConfig,
 } from "./index";
+import { getSqliteMemoryUri } from "./lib/sqlite";
+import { handlers, server } from "./msw";
 
 describe("@repo/test-kit public interface exports", () => {
   it("provides test suite and test case runners", () => {

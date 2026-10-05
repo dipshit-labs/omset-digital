@@ -2,10 +2,13 @@ import { afterAll, afterEach, beforeAll } from "vitest";
 
 import { server } from "./server";
 
-export { server } from "./server";
+let isListening = false;
 
 beforeAll(() => {
-  server.listen();
+  if (!isListening) {
+    server.listen();
+    isListening = true;
+  }
 });
 
 afterEach(() => {
@@ -13,5 +16,8 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  server.close();
+  if (isListening) {
+    server.close();
+    isListening = false;
+  }
 });

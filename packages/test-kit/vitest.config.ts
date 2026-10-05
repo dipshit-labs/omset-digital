@@ -12,6 +12,7 @@ export default defineProject({
           environment: "node",
           include: ["src/**/*.test.ts"],
           name: "unit",
+          setupFiles: ["@repo/test-kit/msw/setup"],
         },
       },
       {

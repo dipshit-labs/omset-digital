@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
 
-import { server } from "@repo/test-kit";
+import { server } from "@repo/test-kit/msw";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
