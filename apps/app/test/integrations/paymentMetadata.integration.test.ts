@@ -1,9 +1,9 @@
 import { expect } from "vitest";
 
 import { Orders } from "@/payload/collections/orders";
-import { defineIntegrationSuite } from "@repo/test-kit";
+import { integrationSuite } from "@repo/test-kit";
 
-const { describe, it } = defineIntegrationSuite({
+const { describe, it } = integrationSuite({
   collections: [Orders],
 });
 

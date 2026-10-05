@@ -16,18 +16,13 @@ import {
 import { Stores } from "@/payload/collections/stores";
 import { Users } from "@/payload/collections/users";
 import { createPackagesCollection } from "@repo/payload-plugin-commerce";
-import {
-  createTestReq,
-  describe,
-  it,
-  setTestPayloadConfig,
-} from "@repo/test-kit";
+import { createTestReq, integrationSuite } from "@repo/test-kit";
 import { productFactory } from "../factories/productFactory";
 import { variantFactory } from "../factories/variantFactory";
 
 const packagesCollection = createPackagesCollection();
 
-setTestPayloadConfig({
+const { describe, it } = integrationSuite({
   editor: lexicalEditor(),
   collections: [
     Users,

@@ -12,24 +12,11 @@ import { Users } from "@/payload/collections/users";
 import { generateMidtransSignature } from "@repo/commerce-adapters/payments";
 import { encryptCredential } from "@repo/commerce-adapters/utils";
 import { commercePlugin } from "@repo/payload-plugin-commerce";
-import { describe, it, setTestPayloadConfig } from "@repo/test-kit";
+import { integrationSuite } from "@repo/test-kit";
 
 const MIDTRANS_SERVER_KEY = "SB-Mid-server-TEST12345";
 const XENDIT_SECRET_KEY = "xnd_development_secret_12345";
 const XENDIT_WEBHOOK_TOKEN = "xnd_webhook_token_secret_54321";
-
-const registerPayloadInstance = (payload: Payload): void => {
-  if (!global._payload) {
-    global._payload = new Map();
-  }
-  global._payload.set("default", {
-    initializedCrons: true,
-    payload,
-    promise: null,
-    reload: false,
-    ws: null,
-  });
-};
 
 interface SeedMidtransParams {
   orderNumber: string;
@@ -149,7 +136,8 @@ const seedXenditFixture = async ({
   return { order, store };
 };
 
-setTestPayloadConfig({
+const { describe, it } = integrationSuite({
+  cacheKey: "default",
   collections: [Users, Stores, Orders],
   plugins: [
     commercePlugin({
@@ -203,8 +191,6 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
   it("resolves case-insensitive provider matching (e.g. Midtrans, Xendit) successfully", async ({
     payload,
   }) => {
-    registerPayloadInstance(payload);
-
     await seedMidtransFixture({
       orderNumber: "ORDER-CASE-MIDTRANS",
       payload,
@@ -284,11 +270,7 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
     expect(xenditRes.status).toBe(200);
   });
 
-  it("returns HTTP 404 Not Found for unknown store slug", async ({
-    payload,
-  }) => {
-    registerPayloadInstance(payload);
-
+  it("returns HTTP 404 Not Found for unknown store slug", async () => {
     const req = new NextRequest(
       "http://localhost:3000/api/webhooks/midtrans/unknown-store",
       {
@@ -314,8 +296,6 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
   it("returns HTTP 400 Bad Request for mismatched active payment provider on Store", async ({
     payload,
   }) => {
-    registerPayloadInstance(payload);
-
     // SAFETY: Stores collection create with valid data returns Store document.
     const store = (await payload.create({
       collection: "stores",
@@ -355,8 +335,6 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
   it("transitions Order from pending to paid and persists payment metadata in SQLite for valid Midtrans webhook", async ({
     payload,
   }) => {
-    registerPayloadInstance(payload);
-
     const { order, store } = await seedMidtransFixture({
       orderNumber: "ORDER-MIDTRANS-SETTLE",
       payload,
@@ -429,8 +407,6 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
   it("transitions Order from pending to paid and persists payment metadata in SQLite for valid Xendit invoice webhook", async ({
     payload,
   }) => {
-    registerPayloadInstance(payload);
-
     const { order, store } = await seedXenditFixture({
       orderNumber: "ORDER-XENDIT-SETTLE",
       payload,
