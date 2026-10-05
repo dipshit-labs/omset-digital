@@ -1,5 +1,6 @@
-import NextLink from "next/link";
 import type { AnchorHTMLAttributes, ReactElement } from "react";
+
+import NextLink from "next/link";
 
 import { cn } from "../utils/cn";
 import { isNextJsEnvironment } from "../utils/isNextJs";

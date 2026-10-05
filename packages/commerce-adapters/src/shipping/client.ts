@@ -46,9 +46,9 @@ export class RajaOngkirClient {
         method: "POST",
         signal: controller.signal,
         headers: {
+          key: this.apiKey,
           Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
-          key: this.apiKey,
         },
       });
 

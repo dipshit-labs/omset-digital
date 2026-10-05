@@ -17,8 +17,8 @@ export const Media: CollectionConfig = {
   fields: [
     {
       name: "alt",
-      required: false,
       type: "text",
+      required: false,
     },
   ],
   hooks: {

@@ -1,6 +1,5 @@
 export { brandingSettings } from "./branding";
-export { minimalTheme, minimalTheme as default } from "./manifest";
-export { homePreset, homeTemplate } from "./templates/home";
+export { minimalTheme as default, minimalTheme } from "./manifest";
 export {
   Hero,
   HeroCtaClient,
@@ -12,3 +11,4 @@ export type {
   HeroSettings,
   HeroTagBlock,
 } from "./sections/hero";
+export { homePreset, homeTemplate } from "./templates/home";

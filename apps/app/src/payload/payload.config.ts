@@ -1,7 +1,8 @@
+import type { Config } from "@repo/types";
+
 // oxlint-disable unicorn/prefer-import-meta-properties
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
@@ -15,16 +16,14 @@ import {
   StrikethroughFeature,
   UnderlineFeature,
 } from "@payloadcms/richtext-lexical";
-import { commercePlugin } from "@repo/payload-plugin-commerce";
-import { themesPlugin } from "@repo/payload-plugin-themes";
-import { defaultTheme } from "@repo/theme-default";
-import { minimalTheme } from "@repo/theme-minimal";
-import type { Config } from "@repo/types";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
 import { env } from "@/env";
-
+import { commercePlugin } from "@repo/payload-plugin-commerce";
+import { themesPlugin } from "@repo/payload-plugin-themes";
+import { defaultTheme } from "@repo/theme-default";
+import { minimalTheme } from "@repo/theme-minimal";
 import { isSuperAdmin } from "./access/isSuperAdmin";
 import { Categories } from "./collections/categories";
 import { Media } from "./collections/media";
@@ -60,21 +59,21 @@ export default buildConfig({
     livePreview: {
       breakpoints: [
         {
+          name: "mobile",
           height: 667,
           label: "Mobile",
-          name: "mobile",
           width: 375,
         },
         {
+          name: "tablet",
           height: 1024,
           label: "Tablet",
-          name: "tablet",
           width: 768,
         },
         {
+          name: "desktop",
           height: 900,
           label: "Desktop",
-          name: "desktop",
           width: 1440,
         },
       ],

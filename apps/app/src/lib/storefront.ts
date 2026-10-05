@@ -1,4 +1,4 @@
-import { DEFAULT_THEME_TOKENS, evaluateThemeCssVars } from "@repo/theme-core";
+import type { Payload } from "payload";
 import type {
   TemplateSectionInstance,
   TemplateType,
@@ -6,10 +6,10 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingsRecord,
 } from "@repo/theme-core/types";
-import { defaultTheme } from "@repo/theme-default";
 import type { Page, Store, Template, Theme } from "@repo/types";
-import type { Payload } from "payload";
 
+import { DEFAULT_THEME_TOKENS, evaluateThemeCssVars } from "@repo/theme-core";
+import { defaultTheme } from "@repo/theme-default";
 import { getThemeManifest } from "./themes";
 
 export type StorefrontPayloadClient = Pick<Payload, "find">;

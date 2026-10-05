@@ -1,12 +1,14 @@
+import type { NextRequest } from "next/server";
+
 import config from "@payload-config";
+import { NextResponse } from "next/server";
+import { getPayload } from "payload";
+
 import {
   getCities,
   getProvinces,
   getSubdistricts,
 } from "@repo/payload-plugin-commerce/actions";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getPayload } from "payload";
 
 export interface AdministrativeAreasPayloadClient {
   db: {

@@ -1,4 +1,5 @@
 import type { Payload } from "payload";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { createAppTestPayload } from "../createTestPayload";

@@ -1,10 +1,10 @@
-import { FieldError, FieldLabel } from "@payloadcms/ui";
-import type { Product, VariantOption, VariantType } from "@repo/types";
 import type { RelationshipFieldServerProps } from "payload";
+import type { Product, VariantOption, VariantType } from "@repo/types";
+
+import { FieldError, FieldLabel } from "@payloadcms/ui";
 import { extractID } from "payload/shared";
 
 import { OptionsSelect } from "./OptionsSelect";
-
 import styles from "./VariantOptionsSelector.module.css";
 
 export const VariantOptionsSelector = async ({
@@ -34,10 +34,10 @@ export const VariantOptionsSelector = async ({
   }
 
   const product = await req.payload.findByID({
+    id: productId,
     collection: "products",
     depth: 0,
     draft: true,
-    id: productId,
     overrideAccess: false,
     select: { variantTypes: true },
     user,
@@ -53,13 +53,13 @@ export const VariantOptionsSelector = async ({
   const variantTypes = await Promise.all(
     variantTypeIDs.map((id) =>
       req.payload.findByID({
+        id,
         collection: "variantTypes",
         depth: 1,
-        id,
         joins: { options: { sort: "label" } },
         overrideAccess: false,
         populate: { variantOptions: { label: true } },
-        select: { label: true, name: true, options: true },
+        select: { name: true, label: true, options: true },
         user,
       })
     )

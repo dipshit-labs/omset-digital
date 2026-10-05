@@ -1,8 +1,9 @@
+import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
+import type { ResolvedAddress } from "./useAdministrativeAreas";
+
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
-import type { ResolvedAddress } from "./useAdministrativeAreas";
 import { useAdministrativeAreas } from "./useAdministrativeAreas";
 
 const mockProvinces: ProvinceItem[] = [

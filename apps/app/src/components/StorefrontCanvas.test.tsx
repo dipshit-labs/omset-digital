@@ -1,23 +1,23 @@
-import { THEME_CSS_VARIABLES } from "@repo/theme-core";
+import type { ReactElement } from "react";
+import type { StorefrontContext } from "@/lib/storefront";
 import type {
   SectionProps,
   ThemeManifestDefinition,
 } from "@repo/theme-core/types";
-import { defaultTheme } from "@repo/theme-default";
-import { minimalTheme } from "@repo/theme-minimal";
 import type { Store } from "@repo/types";
+
 import { cleanup, render, screen } from "@testing-library/react";
-import type { ReactElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { StorefrontContext } from "@/lib/storefront";
-
+import { THEME_CSS_VARIABLES } from "@repo/theme-core";
+import { defaultTheme } from "@repo/theme-default";
+import { minimalTheme } from "@repo/theme-minimal";
 import { StorefrontCanvas } from "./StorefrontCanvas";
 
 const mockStore: Store = {
-  createdAt: "",
   id: 1,
   name: "Toko Test",
+  createdAt: "",
   slug: "test",
   theme: "default",
   updatedAt: "",
@@ -46,8 +46,8 @@ const customTheme: ThemeManifestDefinition = {
   version: "1.0.0",
   sections: [
     {
-      Component: MockCustomSection,
       name: "Custom",
+      Component: MockCustomSection,
       slug: "custom",
     },
   ],
@@ -100,8 +100,8 @@ describe(StorefrontCanvas, () => {
       themeCssVars: {},
       sections: [
         {
-          blockType: "default_hero",
           id: "sec-1",
+          blockType: "default_hero",
           settings: {
             heading: "Empower Your Business",
             subheading: "Curated products for you",
@@ -126,9 +126,9 @@ describe(StorefrontCanvas, () => {
       themeCssVars: {},
       sections: [
         {
+          id: "sec-flat",
           blockType: "default_hero",
           heading: "Direct Heading",
-          id: "sec-flat",
           subheading: "Direct Subheading",
         },
       ],
@@ -149,9 +149,9 @@ describe(StorefrontCanvas, () => {
       themeCssVars: {},
       sections: [
         {
+          id: "sec-other",
           blockType: "custom_hero",
           heading: "Should Not Render",
-          id: "sec-other",
         },
       ],
     };
@@ -171,8 +171,8 @@ describe(StorefrontCanvas, () => {
       themeCssVars: {},
       sections: [
         {
-          blockType: "custom_nonexistent",
           id: "sec-missing",
+          blockType: "custom_nonexistent",
         },
       ],
     };
@@ -192,11 +192,11 @@ describe(StorefrontCanvas, () => {
       theme: null,
       sections: [
         {
+          id: "sec-min-1",
           blocks: [{ blockType: "tag", label: "Handcrafted" }],
           blockType: "minimal_hero",
           eyebrow: "Limited Edition",
           heading: "Minimal Collection",
-          id: "sec-min-1",
           subheading: "Minimalist design philosophy",
         },
       ],
@@ -220,10 +220,10 @@ describe(StorefrontCanvas, () => {
       theme: null,
       sections: [
         {
+          id: "sec-hero",
           blockType: "default_hero",
           cta: { url: "/explore" },
           heading: "Canvas Hero",
-          id: "sec-hero",
         },
       ],
       themeCssVars: {

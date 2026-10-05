@@ -2,6 +2,7 @@ import type {
   ThemeManifestDefinition,
   ThemeSettingValue,
 } from "@repo/theme-core";
+
 import { describe, expect, it } from "vitest";
 
 import { syncThemes } from "./onInit";
@@ -113,20 +114,20 @@ const mockManifest: ThemeManifestDefinition = {
       slug: "hero",
       settings: [
         {
-          defaultValue: "Hello World",
-          label: "Heading",
           name: "heading",
           type: "text",
+          defaultValue: "Hello World",
+          label: "Heading",
         },
       ],
     },
   ],
   settings: [
     {
-      defaultValue: "#0070f3",
-      label: "Primary Color",
       name: "primaryColor",
       type: "color",
+      defaultValue: "#0070f3",
+      label: "Primary Color",
     },
   ],
   templates: [
@@ -153,20 +154,20 @@ const mockMinimalManifest: ThemeManifestDefinition = {
       slug: "hero",
       settings: [
         {
-          defaultValue: "Minimal",
-          label: "Heading",
           name: "heading",
           type: "text",
+          defaultValue: "Minimal",
+          label: "Heading",
         },
       ],
     },
   ],
   settings: [
     {
-      defaultValue: "#171717",
-      label: "Primary Color",
       name: "primaryColor",
       type: "color",
+      defaultValue: "#171717",
+      label: "Primary Color",
     },
   ],
   templates: [
@@ -233,9 +234,9 @@ describe(syncThemes, () => {
     expect(collections.templates).toStrictEqual([
       expect.objectContaining({
         name: "Home",
+        type: "home",
         store: "store-123",
         theme: collections.themes[0]?.id,
-        type: "home",
       }),
     ]);
   });
@@ -358,8 +359,8 @@ describe(syncThemes, () => {
 
     collections.themes.push({
       id: "existing-default-theme",
-      isLive: true,
       name: "Customized Theme",
+      isLive: true,
       slug: "default",
       store: "store-123",
       settings: {
@@ -403,17 +404,17 @@ describe(syncThemes, () => {
 
     collections.themes.push({
       id: "existing-default-theme",
-      isLive: true,
       name: "Customized Theme",
+      isLive: true,
       slug: "default",
       store: "store-123",
     });
     collections.templates.push({
       id: "existing-template",
       name: "Customized Home",
+      type: "home",
       store: "store-123",
       theme: "existing-default-theme",
-      type: "home",
       sections: [
         {
           blockType: "default_hero",
@@ -452,15 +453,15 @@ describe(syncThemes, () => {
     collections.themes.push(
       {
         id: "default-theme-id",
-        isLive: false,
         name: "Default Theme",
+        isLive: false,
         slug: "default",
         store: "store-123",
       },
       {
         id: "minimal-theme-id",
-        isLive: true,
         name: "Minimal Theme",
+        isLive: true,
         slug: "minimal",
         store: "store-123",
       }
@@ -493,8 +494,8 @@ describe(syncThemes, () => {
 
     collections.themes.push({
       id: "minimal-theme-id",
-      isLive: true,
       name: "Minimal Theme",
+      isLive: true,
       slug: "minimal",
       store: "store-123",
     });

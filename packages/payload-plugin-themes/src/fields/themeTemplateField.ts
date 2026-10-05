@@ -7,8 +7,8 @@ export const themeTemplateField = (
 ): RelationshipField => {
   const field: RelationshipField = {
     name: "template",
-    relationTo: "templates",
     type: "relationship",
+    relationTo: "templates",
     admin: {
       description: "Layout template assigned to this document",
     },

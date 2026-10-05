@@ -1,3 +1,5 @@
+import type { SettingField, ThemeManifestDefinition } from "../types";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -6,7 +8,6 @@ import {
   FIXED_THEME_TOKENS,
   MERCHANT_THEME_VARIABLES,
 } from "../tokens";
-import type { SettingField, ThemeManifestDefinition } from "../types";
 import {
   evaluateFieldCssValue,
   evaluateThemeCssVars,
@@ -15,9 +16,9 @@ import {
 describe(evaluateFieldCssValue, () => {
   it("formats number values with attached unit", () => {
     const field: SettingField = {
-      label: "Corner Radius",
       name: "radius",
       type: "number",
+      label: "Corner Radius",
       unit: "px",
     };
     expect(evaluateFieldCssValue(field, 8)).toBe("8px");
@@ -25,25 +26,25 @@ describe(evaluateFieldCssValue, () => {
 
   it("converts boolean and string values to strings", () => {
     const textField: SettingField = {
-      label: "Heading Font",
       name: "fontHeading",
       type: "text",
+      label: "Heading Font",
     };
     expect(evaluateFieldCssValue(textField, "Inter")).toBe("Inter");
 
     const toggleField: SettingField = {
-      label: "Show Banner",
       name: "showBanner",
       type: "toggle",
+      label: "Show Banner",
     };
     expect(evaluateFieldCssValue(toggleField, true)).toBe("true");
   });
 
   it("returns null for empty, null, or undefined values", () => {
     const field: SettingField = {
-      label: "Background",
       name: "bg",
       type: "color",
+      label: "Background",
     };
     expect(evaluateFieldCssValue(field, null)).toBeNull();
     expect(evaluateFieldCssValue(field)).toBeNull();
@@ -74,25 +75,25 @@ describe(evaluateThemeCssVars, () => {
     const manifest: Pick<ThemeManifestDefinition, "settings"> = {
       settings: [
         {
+          name: "background",
+          type: "color",
           cssVar: "--theme-background",
           defaultValue: "#ffffff",
           label: "Page Background",
-          name: "background",
-          type: "color",
         },
         {
+          name: "brandColor",
+          type: "color",
           cssVar: "--theme-brand",
           defaultValue: "#0f172a",
           label: "Brand Color",
-          name: "brandColor",
-          type: "color",
         },
         {
+          name: "borderRadius",
+          type: "number",
           cssVar: "--theme-radius",
           defaultValue: 4,
           label: "Border Radius",
-          name: "borderRadius",
-          type: "number",
           unit: "px",
         },
       ],
@@ -117,18 +118,18 @@ describe(evaluateThemeCssVars, () => {
     const manifest: Pick<ThemeManifestDefinition, "settings"> = {
       settings: [
         {
+          name: "background",
+          type: "color",
           cssVar: "--theme-background",
           defaultValue: "#f8fafc",
           label: "Page Background",
-          name: "background",
-          type: "color",
         },
         {
+          name: "radius",
+          type: "number",
           cssVar: "--theme-radius",
           defaultValue: 12,
           label: "Radius",
-          name: "radius",
-          type: "number",
           unit: "px",
         },
       ],
@@ -150,10 +151,10 @@ describe(evaluateThemeCssVars, () => {
     const manifest: Pick<ThemeManifestDefinition, "settings"> = {
       settings: [
         {
-          cssVar: "--theme-border",
-          label: "Border Color",
           name: "border",
           type: "color",
+          cssVar: "--theme-border",
+          label: "Border Color",
         },
       ],
     };

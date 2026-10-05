@@ -1,12 +1,13 @@
-import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { afterEach, describe, expect, it } from "vitest";
-
 import type {
   SectionProps,
   TemplateSectionInstance,
   ThemeManifestDefinition,
 } from "../types";
+
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { renderThemeSections } from "./renderThemeSections";
 
 const MockHeroComponent = ({
@@ -30,8 +31,8 @@ const mockThemeManifest: ThemeManifestDefinition = {
   version: "1.0.0",
   sections: [
     {
-      Component: MockHeroComponent,
       name: "Hero Section",
+      Component: MockHeroComponent,
       slug: "hero",
     },
   ],
@@ -45,9 +46,9 @@ describe(renderThemeSections, () => {
   it("renders matching section component with explicit settings and blocks", () => {
     const sections: TemplateSectionInstance[] = [
       {
+        id: "hero-1",
         blocks: [{ blockType: "bullet", label: "Fast shipping" }],
         blockType: "mock_hero",
-        id: "hero-1",
         settings: {
           headline: "Welcome to Omset",
         },
@@ -67,9 +68,9 @@ describe(renderThemeSections, () => {
   it("handles flat settings on section document when explicit settings object is absent", () => {
     const sections: TemplateSectionInstance[] = [
       {
+        id: "hero-flat",
         blockType: "mock_hero",
         headline: "Direct Headline",
-        id: "hero-flat",
       },
     ];
 
@@ -83,8 +84,8 @@ describe(renderThemeSections, () => {
   it("skips blocks from a different theme prefix", () => {
     const sections: TemplateSectionInstance[] = [
       {
-        blockType: "foreign_hero",
         id: "foreign-1",
+        blockType: "foreign_hero",
         settings: {
           headline: "Foreign Theme",
         },
@@ -98,8 +99,8 @@ describe(renderThemeSections, () => {
   it("skips sections not defined in manifest", () => {
     const sections: TemplateSectionInstance[] = [
       {
-        blockType: "mock_nonexistent",
         id: "nonexistent-1",
+        blockType: "mock_nonexistent",
       },
     ];
 
@@ -110,9 +111,9 @@ describe(renderThemeSections, () => {
   it("honors explicitly empty settings without falling back to document properties", () => {
     const sections: TemplateSectionInstance[] = [
       {
+        id: "hero-empty-settings",
         blockType: "mock_hero",
         headline: "Leaked Document Headline",
-        id: "hero-empty-settings",
         settings: {},
       },
     ];

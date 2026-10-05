@@ -1,4 +1,5 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core/types";
+
 import { defaultTheme } from "@repo/theme-default";
 import { minimalTheme } from "@repo/theme-minimal";
 

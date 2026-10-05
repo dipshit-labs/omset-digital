@@ -1,7 +1,8 @@
-import { defineIntegrationSuite } from "@repo/test-kit";
 import type { CollectionConfig, Payload } from "payload";
+
 import { expect } from "vitest";
 
+import { defineIntegrationSuite } from "@repo/test-kit";
 import { createPackagesCollection } from "../../src/collections/packages";
 import { packageFactory } from "../factories/packageFactory";
 
@@ -10,13 +11,13 @@ const storesCollection: CollectionConfig = {
   fields: [
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
     },
     {
       name: "slug",
-      required: true,
       type: "text",
+      required: true,
     },
     {
       name: "theme",
@@ -187,24 +188,24 @@ describe("packages collection integration", () => {
     ]).toStrictEqual([true, false, true]);
 
     await payload.update({
-      collection: "packages",
       id: storeAPkg2.id,
+      collection: "packages",
       data: {
         isDefault: true,
       },
     });
 
     const refetchedAPkg1 = await payload.findByID({
-      collection: "packages",
       id: storeAPkg1.id,
+      collection: "packages",
     });
     const refetchedAPkg2 = await payload.findByID({
-      collection: "packages",
       id: storeAPkg2.id,
+      collection: "packages",
     });
     const refetchedBPkg1 = await payload.findByID({
-      collection: "packages",
       id: storeBPkg1.id,
+      collection: "packages",
     });
 
     expect([

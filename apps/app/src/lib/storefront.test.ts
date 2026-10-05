@@ -1,8 +1,9 @@
-import type { Page, Store, Template, Theme } from "@repo/types";
 import type { PaginatedDocs } from "payload";
+import type { StorefrontPayloadClient } from "./storefront";
+import type { Page, Store, Template, Theme } from "@repo/types";
+
 import { describe, expect, it } from "vitest";
 
-import type { StorefrontPayloadClient } from "./storefront";
 import {
   resolvePageStorefront,
   resolveStore,
@@ -231,9 +232,9 @@ const createMockPayload = () => {
 };
 
 const createMockStore = (overrides: Partial<Store> = {}): Store => ({
-  createdAt: "",
   id: 1,
   name: "Mock Store",
+  createdAt: "",
   slug: "mock",
   theme: "default",
   updatedAt: "",
@@ -244,8 +245,8 @@ const createMockStore = (overrides: Partial<Store> = {}): Store => ({
 });
 
 const createMockPage = (overrides: Partial<Page> = {}): Page => ({
-  createdAt: "",
   id: 1,
+  createdAt: "",
   slug: "about",
   store: 1,
   title: "About Us",
@@ -254,10 +255,10 @@ const createMockPage = (overrides: Partial<Page> = {}): Page => ({
 });
 
 const createMockTheme = (overrides: Partial<Theme> = {}): Theme => ({
-  createdAt: "",
   id: 10,
-  isLive: true,
   name: "Default Theme",
+  createdAt: "",
+  isLive: true,
   settings: {},
   slug: "default",
   store: 1,
@@ -270,9 +271,9 @@ describe(resolveStore, () => {
     const { client, stores } = createMockPayload();
     stores.push(
       createMockStore({
-        customDomain: "toko-kopi.com",
         id: 1,
         name: "Toko Kopi",
+        customDomain: "toko-kopi.com",
         slug: "kopi",
       })
     );
@@ -362,10 +363,10 @@ describe(resolveStorefront, () => {
     );
 
     themes.push({
-      createdAt: "",
       id: 10,
-      isLive: true,
       name: "Default Theme",
+      createdAt: "",
+      isLive: true,
       slug: "default",
       store: 1,
       updatedAt: "",
@@ -378,18 +379,18 @@ describe(resolveStorefront, () => {
     });
 
     templates.push({
-      createdAt: "",
       id: 100,
       name: "Home",
+      type: "home",
+      createdAt: "",
       store: 1,
       theme: 10,
-      type: "home",
       updatedAt: "",
       sections: [
         {
+          id: "hero-1",
           blockType: "default_hero",
           heading: "Hero Title",
-          id: "hero-1",
           cta: {
             label: "Test",
             url: "/",
@@ -422,23 +423,23 @@ describe(resolveStorefront, () => {
     );
 
     themes.push({
-      createdAt: "",
       id: 10,
-      isLive: true,
       name: "Default Theme",
+      createdAt: "",
+      isLive: true,
       slug: "default",
       store: 1,
       updatedAt: "",
     });
 
     templates.push({
-      createdAt: "",
       id: 100,
       name: "Home",
+      type: "home",
+      createdAt: "",
       sections: [],
       store: 1,
       theme: 10,
-      type: "home",
       updatedAt: "",
     });
 
@@ -472,23 +473,23 @@ describe(resolveStorefront, () => {
     );
 
     themes.push({
-      createdAt: "",
       id: 10,
-      isLive: true,
       name: "Default Theme",
+      createdAt: "",
+      isLive: true,
       slug: "default",
       store: 1,
       updatedAt: "",
     });
 
     templates.push({
-      createdAt: "",
       id: 100,
       name: "Home",
+      type: "home",
+      createdAt: "",
       sections: [],
       store: 1,
       theme: 10,
-      type: "home",
       updatedAt: "",
     });
 
@@ -522,10 +523,10 @@ describe(resolveStorefront, () => {
 
     themes.push(
       {
-        createdAt: "",
         id: 10,
-        isLive: false,
         name: "Default Theme",
+        createdAt: "",
+        isLive: false,
         slug: "default",
         store: 1,
         updatedAt: "",
@@ -534,10 +535,10 @@ describe(resolveStorefront, () => {
         },
       },
       {
-        createdAt: "",
         id: 20,
-        isLive: true,
         name: "Minimal Theme",
+        createdAt: "",
+        isLive: true,
         slug: "minimal",
         store: 1,
         updatedAt: "",
@@ -554,18 +555,18 @@ describe(resolveStorefront, () => {
 
     templates.push(
       {
-        createdAt: "",
         id: 100,
         name: "Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 10,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "def-1",
             blockType: "default_hero",
             heading: "Default Store Hero",
-            id: "def-1",
             cta: {
               label: "Shop",
               url: "/products",
@@ -574,18 +575,18 @@ describe(resolveStorefront, () => {
         ],
       },
       {
-        createdAt: "",
         id: 200,
         name: "Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 20,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "min-1",
             blockType: "minimal_hero",
             heading: "Minimal Store Hero",
-            id: "min-1",
           },
         ],
       }
@@ -614,10 +615,10 @@ describe(resolveStorefront, () => {
     );
 
     const defaultThemeDoc = {
-      createdAt: "",
       id: 10,
-      isLive: true,
       name: "Customized Default",
+      createdAt: "",
+      isLive: true,
       slug: "default",
       store: 1,
       updatedAt: "",
@@ -627,10 +628,10 @@ describe(resolveStorefront, () => {
     };
 
     const minimalThemeDoc = {
-      createdAt: "",
       id: 20,
-      isLive: false,
       name: "Customized Minimal",
+      createdAt: "",
+      isLive: false,
       slug: "minimal",
       store: 1,
       updatedAt: "",
@@ -643,18 +644,18 @@ describe(resolveStorefront, () => {
 
     templates.push(
       {
-        createdAt: "",
         id: 100,
         name: "Default Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 10,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "def-1",
             blockType: "default_hero",
             heading: "Preserved Default Content",
-            id: "def-1",
             cta: {
               label: "Shop",
               url: "/products",
@@ -663,18 +664,18 @@ describe(resolveStorefront, () => {
         ],
       },
       {
-        createdAt: "",
         id: 200,
         name: "Minimal Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 20,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "min-1",
             blockType: "minimal_hero",
             heading: "Preserved Minimal Content",
-            id: "min-1",
           },
         ],
       }
@@ -712,10 +713,10 @@ describe(resolveStorefront, () => {
     );
 
     const defaultThemeDoc = {
-      createdAt: "",
       id: 10,
-      isLive: false,
       name: "Customized Default",
+      createdAt: "",
+      isLive: false,
       slug: "default",
       store: 1,
       updatedAt: "",
@@ -725,10 +726,10 @@ describe(resolveStorefront, () => {
     };
 
     const minimalThemeDoc = {
-      createdAt: "",
       id: 20,
-      isLive: true,
       name: "Customized Minimal",
+      createdAt: "",
+      isLive: true,
       slug: "minimal",
       store: 1,
       updatedAt: "",
@@ -741,18 +742,18 @@ describe(resolveStorefront, () => {
 
     templates.push(
       {
-        createdAt: "",
         id: 100,
         name: "Default Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 10,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "def-1",
             blockType: "default_hero",
             heading: "Preserved Default Content",
-            id: "def-1",
             cta: {
               label: "Shop",
               url: "/products",
@@ -761,18 +762,18 @@ describe(resolveStorefront, () => {
         ],
       },
       {
-        createdAt: "",
         id: 200,
         name: "Minimal Home",
+        type: "home",
+        createdAt: "",
         store: 1,
         theme: 20,
-        type: "home",
         updatedAt: "",
         sections: [
           {
+            id: "min-1",
             blockType: "minimal_hero",
             heading: "Preserved Minimal Content",
-            id: "min-1",
           },
         ],
       }
@@ -800,19 +801,19 @@ describe(resolvePageStorefront, () => {
       createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
     );
     templates.push({
-      createdAt: "",
       id: 100,
       name: "About Page Layout",
+      type: "page",
+      createdAt: "",
       store: 1,
       theme: 10,
-      type: "page",
       updatedAt: "",
       sections: [
         {
+          id: "hero-1",
           blockType: "default_hero",
           cta: { url: "/about" },
           heading: "Our Story",
-          id: "hero-1",
         },
       ],
     });
@@ -848,19 +849,19 @@ describe(resolvePageStorefront, () => {
       createMockTheme({ id: 10, isLive: true, slug: "default", store: 1 })
     );
     const populatedTemplate: Template = {
-      createdAt: "",
       id: 200,
       name: "Populated Layout",
+      type: "page",
+      createdAt: "",
       store: 1,
       theme: 10,
-      type: "page",
       updatedAt: "",
       sections: [
         {
+          id: "hero-2",
           blockType: "default_hero",
           cta: { url: "/contact" },
           heading: "Populated Hero",
-          id: "hero-2",
         },
       ],
     };

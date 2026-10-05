@@ -1,15 +1,15 @@
-import { themeTemplateField } from "@repo/payload-plugin-themes/fields";
-import {
-  generateThemePreviewPath,
-  resolveTenantStoreSlug,
-} from "@repo/payload-plugin-themes/utilities";
 import type { CollectionConfig } from "payload";
+
 import { slugField } from "payload";
 
 import { env } from "@/env";
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
-
+import { themeTemplateField } from "@repo/payload-plugin-themes/fields";
+import {
+  generateThemePreviewPath,
+  resolveTenantStoreSlug,
+} from "@repo/payload-plugin-themes/utilities";
 import { readPageAccess } from "./access/read";
 
 export const Pages: CollectionConfig = {
@@ -45,14 +45,14 @@ export const Pages: CollectionConfig = {
   fields: [
     {
       name: "title",
-      required: true,
       type: "text",
+      required: true,
     },
     {
-      label: false,
       name: "content",
-      required: false,
       type: "richText",
+      label: false,
+      required: false,
     },
     // Sidebar
     slugField(),

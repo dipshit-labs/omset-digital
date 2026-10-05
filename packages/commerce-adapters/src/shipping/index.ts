@@ -1,6 +1,4 @@
 export { RajaOngkirClient } from "./client";
-export { calculateBillableWeight } from "./volumetric";
-
 export type {
   CalculateShippingCostInput,
   CourierCostResult,
@@ -15,3 +13,5 @@ export type {
   ShippingPackageInput,
   ShippingPackageTareWeight,
 } from "./types";
+
+export { calculateBillableWeight } from "./volumetric";

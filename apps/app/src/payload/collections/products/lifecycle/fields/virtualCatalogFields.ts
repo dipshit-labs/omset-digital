@@ -9,9 +9,9 @@ const isSingleVariantCondition = (data?: { variantTypes?: unknown }): boolean =>
 
 export const virtualCatalogFields: Field[] = [
   {
-    label: "Price",
     name: "pricing",
     type: "group",
+    label: "Price",
     virtual: true,
     admin: {
       condition: isSingleVariantCondition,
@@ -24,19 +24,19 @@ export const virtualCatalogFields: Field[] = [
     ],
   },
   {
-    fields: [...inventoryFields({ virtual: true })],
-    label: "Inventory",
     name: "inventory",
     type: "group",
+    fields: [...inventoryFields({ virtual: true })],
+    label: "Inventory",
     virtual: true,
     admin: {
       condition: isSingleVariantCondition,
     },
   },
   {
-    label: "Shipping",
     name: "shipping",
     type: "group",
+    label: "Shipping",
     virtual: true,
     admin: {
       condition: isSingleVariantCondition,

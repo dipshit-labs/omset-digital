@@ -4,9 +4,9 @@ import type {
   CollectionSlug,
   Field,
 } from "payload";
+import type { CreateStoreCredentialsCollectionOptions } from "../types";
 
 import { encryptedCredentialField } from "../fields/encrypted";
-import type { CreateStoreCredentialsCollectionOptions } from "../types";
 
 export const createStoreCredentialsCollection = (
   options: CreateStoreCredentialsCollectionOptions = {}
@@ -31,10 +31,10 @@ export const createStoreCredentialsCollection = (
 
     try {
       await req.payload.update({
+        id: storeId,
         // SAFETY: storesSlug dynamically resolves to configured stores CollectionSlug.
         collection: storesSlug as CollectionSlug,
         context: { skipSync: true },
-        id: storeId,
         req,
         data: {
           activePaymentProvider: doc.paymentProvider,
@@ -50,21 +50,21 @@ export const createStoreCredentialsCollection = (
 
   const fields: Field[] = [
     {
-      index: true,
       name: "store",
+      type: "relationship",
+      index: true,
       // SAFETY: storesSlug dynamically resolves to configured stores CollectionSlug.
       relationTo: storesSlug as CollectionSlug,
       required: true,
-      type: "relationship",
       unique: true,
       admin: {
         description: "Associated store document",
       },
     },
     {
-      defaultValue: "none",
       name: "paymentProvider",
       type: "select",
+      defaultValue: "none",
       admin: {
         description: "Active payment gateway",
       },
@@ -86,15 +86,15 @@ export const createStoreCredentialsCollection = (
           secretOrResolver,
         }),
         {
-          admin: { description: "Midtrans Client Key (public)" },
           name: "clientKey",
           type: "text",
+          admin: { description: "Midtrans Client Key (public)" },
         },
         {
-          admin: { description: "Use Midtrans production environment" },
-          defaultValue: false,
           name: "isProduction",
           type: "checkbox",
+          admin: { description: "Use Midtrans production environment" },
+          defaultValue: false,
         },
       ],
     },
@@ -117,17 +117,17 @@ export const createStoreCredentialsCollection = (
           },
         }),
         {
-          admin: { description: "Use Xendit production environment" },
-          defaultValue: false,
           name: "isProduction",
           type: "checkbox",
+          admin: { description: "Use Xendit production environment" },
+          defaultValue: false,
         },
       ],
     },
     {
-      defaultValue: "none",
       name: "shippingProvider",
       type: "select",
+      defaultValue: "none",
       admin: {
         description: "Active shipping provider",
       },
@@ -148,10 +148,10 @@ export const createStoreCredentialsCollection = (
           secretOrResolver,
         }),
         {
-          admin: { description: "RajaOngkir account tier" },
-          defaultValue: "starter",
           name: "accountType",
           type: "select",
+          admin: { description: "RajaOngkir account tier" },
+          defaultValue: "starter",
           options: [
             { label: "Starter", value: "starter" },
             { label: "Basic", value: "basic" },

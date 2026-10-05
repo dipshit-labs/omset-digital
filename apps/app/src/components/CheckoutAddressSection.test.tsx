@@ -8,7 +8,6 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getCities } from "@/actions/administrativeAreas";
-
 import { CheckoutAddressSection } from "./CheckoutAddressSection";
 
 vi.mock(import("@/actions/administrativeAreas"), () => ({

@@ -1,5 +1,6 @@
-import type { Variant } from "@repo/types";
 import type { CollectionAfterChangeHook } from "payload";
+import type { Variant } from "@repo/types";
+
 import { extractID } from "payload/shared";
 
 import { cleanupDefaultVariant } from "../variant";

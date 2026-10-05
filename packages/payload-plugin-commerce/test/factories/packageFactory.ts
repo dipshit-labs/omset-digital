@@ -1,6 +1,7 @@
-import type { Package } from "@repo/types";
-import { Factory } from "fishery";
 import type { Payload } from "payload";
+import type { Package } from "@repo/types";
+
+import { Factory } from "fishery";
 
 export interface PackageTransientParams {
   payload?: Payload;
@@ -27,8 +28,8 @@ export const packageFactory = Factory.define<Package, PackageTransientParams>(
     });
 
     return {
-      createdAt: new Date().toISOString(),
       id: sequence,
+      createdAt: new Date().toISOString(),
       isDefault: sequence === 1,
       store: 1,
       title: `Box ${sequence}`,

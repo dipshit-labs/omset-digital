@@ -1,5 +1,6 @@
-import NextImage from "next/image";
 import type { ImgHTMLAttributes, ReactElement } from "react";
+
+import NextImage from "next/image";
 
 import { cn } from "../utils/cn";
 import { isNextJsEnvironment } from "../utils/isNextJs";

@@ -32,13 +32,13 @@ export const xenditHandlers = [
 
     return HttpResponse.json(
       {
+        id,
         amount,
         created: new Date().toISOString(),
         currency: "IDR",
         description: description ?? `Invoice for ${resolvedExternalId}`,
         expiry_date: new Date(Date.now() + 86_400_000).toISOString(),
         external_id: resolvedExternalId,
-        id,
         invoice_url: `https://checkout-staging.xendit.co/web/${id}`,
         merchant_name: "Omset Digital Store",
         paid_amount: 0,
@@ -59,13 +59,13 @@ export const xenditHandlers = [
 
     return HttpResponse.json(
       {
+        id,
         amount: 100_000,
         created: new Date().toISOString(),
         currency: "IDR",
         description: `Invoice ${id}`,
         expiry_date: new Date(Date.now() + 86_400_000).toISOString(),
         external_id: `ext_${id}`,
-        id,
         invoice_url: `https://checkout-staging.xendit.co/web/${id}`,
         merchant_name: "Omset Digital Store",
         paid_amount: 100_000,
@@ -88,13 +88,13 @@ export const xenditHandlers = [
     return HttpResponse.json(
       [
         {
+          id,
           amount: 100_000,
           created: new Date().toISOString(),
           currency: "IDR",
           description: `Invoice for ${externalId}`,
           expiry_date: new Date(Date.now() + 86_400_000).toISOString(),
           external_id: externalId,
-          id,
           invoice_url: `https://checkout-staging.xendit.co/web/${id}`,
           merchant_name: "Omset Digital Store",
           paid_amount: 100_000,

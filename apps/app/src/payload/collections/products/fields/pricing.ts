@@ -19,10 +19,10 @@ const pricingFields = ({
   // SAFETY: Field definitions and spread overrides satisfy Payload Field union types.
   return [
     {
-      min: 0,
       name: "price",
-      required: true,
       type: "number",
+      min: 0,
+      required: true,
       ...priceOverrides,
       virtual,
       admin: {
@@ -32,16 +32,16 @@ const pricingFields = ({
       },
     },
     {
-      label: "Additional display prices",
       type: "collapsible",
+      label: "Additional display prices",
       admin: {
         initCollapsed: true,
       },
       fields: [
         {
-          min: 0,
           name: "compareAtPrice",
           type: "number",
+          min: 0,
           ...compareOverrides,
           virtual,
           admin: {

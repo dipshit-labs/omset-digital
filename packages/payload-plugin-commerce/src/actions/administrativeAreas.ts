@@ -1,6 +1,6 @@
-import { sql } from "@payloadcms/db-postgres";
-
 import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
+
+import { sql } from "@payloadcms/db-postgres";
 
 interface RawAdministrativeAreaRow {
   city_id?: number | string;

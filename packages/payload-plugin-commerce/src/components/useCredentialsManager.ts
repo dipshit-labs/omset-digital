@@ -1,7 +1,4 @@
-import { useDocumentInfo, useField } from "@payloadcms/ui";
 import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
-
 import type {
   TestConnectionInput,
   TestConnectionResult,
@@ -14,6 +11,9 @@ import type {
   StoreCredentials,
   XenditCredentials,
 } from "../types";
+
+import { useDocumentInfo, useField } from "@payloadcms/ui";
+import { useState } from "react";
 
 export interface TestStatusState {
   message: string;

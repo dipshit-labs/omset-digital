@@ -5,10 +5,10 @@ import type {
   GroupField,
   PayloadRequest,
 } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { env } from "@/env";
-
 import payloadConfig from "./payload.config";
 
 type LivePreviewUrlFunction = (args: {
@@ -215,8 +215,8 @@ describe("Theme Plugin Integration", () => {
       req: mockReq,
       data: {
         name: "Home Layout",
-        store: 10,
         type: "home",
+        store: 10,
       },
     });
     expect(homeUrl).toBe(
@@ -227,8 +227,8 @@ describe("Theme Plugin Integration", () => {
       req: mockReq,
       data: {
         name: "Product Layout",
-        store: 10,
         type: "product",
+        store: 10,
       },
     });
     expect(productUrl).toBe(
@@ -239,8 +239,8 @@ describe("Theme Plugin Integration", () => {
       req: mockReq,
       data: {
         name: "Collection Layout",
-        store: 10,
         type: "collection",
+        store: 10,
       },
     });
     expect(collectionUrl).toBe(
@@ -251,8 +251,8 @@ describe("Theme Plugin Integration", () => {
       req: mockReq,
       data: {
         name: "Page Layout",
-        store: 10,
         type: "page",
+        store: 10,
       },
     });
     expect(pageUrl).toBe(

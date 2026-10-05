@@ -1,3 +1,12 @@
+export type {
+  FixedThemeVariable,
+  MerchantThemeVariable,
+  ThemeCssVariable,
+  ThemeCssVars,
+  ThemeTokens,
+  ThemeVariable,
+} from "../tokens";
+
 export { defineSection, defineTheme } from "../types";
 
 export type {
@@ -22,8 +31,8 @@ export type {
   TemplatePresetDefinition,
   TemplateSectionInstance,
   TemplateType,
-  TextSettingField,
   TextareaSettingField,
+  TextSettingField,
   ThemeClientManifest,
   ThemeManifestDefinition,
   ThemeSettingsRecord,
@@ -31,12 +40,3 @@ export type {
   ToggleSettingField,
   UploadSettingField,
 } from "../types";
-
-export type {
-  FixedThemeVariable,
-  MerchantThemeVariable,
-  ThemeCssVars,
-  ThemeCssVariable,
-  ThemeTokens,
-  ThemeVariable,
-} from "../tokens";

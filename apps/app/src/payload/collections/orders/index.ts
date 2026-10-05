@@ -1,12 +1,12 @@
+import type { CollectionConfig } from "payload";
+
+import { canWrite } from "@/payload/access/canWrite";
+import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 import { paymentMetadataField } from "@repo/payload-plugin-commerce/fields";
 import {
   CANONICAL_PAYMENT_STATUSES,
   preventPaymentStatusReversion,
 } from "@repo/payload-plugin-commerce/hooks";
-import type { CollectionConfig } from "payload";
-
-import { canWrite } from "@/payload/access/canWrite";
-import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
 
 export const Orders: CollectionConfig = {
   slug: "orders",
@@ -23,18 +23,18 @@ export const Orders: CollectionConfig = {
   fields: [
     {
       name: "orderNumber",
-      required: true,
       type: "text",
+      required: true,
       unique: true,
       admin: {
         description: "Merchant order identifier (e.g. ORDER-1001)",
       },
     },
     {
-      defaultValue: "pending",
       name: "paymentStatus",
-      required: true,
       type: "select",
+      defaultValue: "pending",
+      required: true,
       admin: {
         description: "Payment status managed by payment gateway webhooks",
       },
@@ -44,19 +44,19 @@ export const Orders: CollectionConfig = {
       })),
     },
     {
-      min: 0,
       name: "total",
-      required: true,
       type: "number",
+      min: 0,
+      required: true,
       admin: {
         description: "Total order amount in IDR",
       },
     },
     {
-      defaultValue: "IDR",
       name: "currency",
-      required: true,
       type: "text",
+      defaultValue: "IDR",
+      required: true,
       admin: {
         description: "Currency code",
       },
@@ -95,19 +95,19 @@ export const Orders: CollectionConfig = {
       fields: [
         {
           name: "title",
-          required: true,
           type: "text",
+          required: true,
         },
         {
           name: "price",
-          required: true,
           type: "number",
+          required: true,
         },
         {
-          min: 1,
           name: "quantity",
-          required: true,
           type: "number",
+          min: 1,
+          required: true,
         },
       ],
     },

@@ -1,7 +1,7 @@
-import { defineIntegrationSuite } from "@repo/test-kit";
 import { expect } from "vitest";
 
 import { Orders } from "@/payload/collections/orders";
+import { defineIntegrationSuite } from "@repo/test-kit";
 
 const { describe, it } = defineIntegrationSuite({
   collections: [Orders],
@@ -32,8 +32,8 @@ describe("Orders Collection paymentMetadata Integration", () => {
     });
 
     const retrieved = await payload.findByID({
-      collection: "orders",
       id: created.id,
+      collection: "orders",
     });
     expect(retrieved).toBeDefined();
     expect(retrieved.paymentMetadata).toStrictEqual(midtransMetadata);
@@ -66,8 +66,8 @@ describe("Orders Collection paymentMetadata Integration", () => {
     });
 
     const retrieved = await payload.findByID({
-      collection: "orders",
       id: created.id,
+      collection: "orders",
     });
     expect(retrieved).toBeDefined();
     expect(retrieved.paymentMetadata).toStrictEqual(xenditMetadata);
@@ -100,8 +100,8 @@ describe("Orders Collection paymentMetadata Integration", () => {
     });
 
     const retrieved = await payload.findByID({
-      collection: "orders",
       id: created.id,
+      collection: "orders",
     });
     expect(retrieved).toBeDefined();
     expect(retrieved.paymentMetadata).toStrictEqual(customGatewayMetadata);
@@ -131,8 +131,8 @@ describe("Orders Collection paymentMetadata Integration", () => {
     };
 
     await payload.update({
-      collection: "orders",
       id: created.id,
+      collection: "orders",
       data: {
         paymentMetadata: updatedMetadata,
         paymentStatus: "paid",
@@ -140,8 +140,8 @@ describe("Orders Collection paymentMetadata Integration", () => {
     });
 
     const retrieved = await payload.findByID({
-      collection: "orders",
       id: created.id,
+      collection: "orders",
     });
     expect(retrieved.paymentStatus).toBe("paid");
     expect(retrieved.paymentMetadata).toStrictEqual(updatedMetadata);

@@ -55,7 +55,7 @@ describe("xendit signature and token verification", () => {
   });
 
   describe(verifyXenditHmacSignature, () => {
-    const rawBody = JSON.stringify({ event: "invoice.paid", id: "inv_123" });
+    const rawBody = JSON.stringify({ id: "inv_123", event: "invoice.paid" });
     const secret = "webhook-hmac-secret-98765";
     // Independently verified HMAC-SHA256 digest
     const expectedDigest =

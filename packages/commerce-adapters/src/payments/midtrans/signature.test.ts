@@ -1,10 +1,11 @@
+import type { MidtransSignatureInput } from "./types";
+
 import { describe, expect, it } from "vitest";
 
 import {
   generateMidtransSignature,
   verifyMidtransSignature,
 } from "./signature";
-import type { MidtransSignatureInput } from "./types";
 
 describe("midtrans signature verification", () => {
   const serverKey = "SB-Mid-server-TESTKEY12345";

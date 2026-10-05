@@ -1,5 +1,6 @@
-import { createTestPayload, resetDatabase } from "@repo/test-kit";
 import { describe, expect, it } from "vitest";
+
+import { createTestPayload, resetDatabase } from "@repo/test-kit";
 
 describe("@repo/test-kit lifecycle integration helpers", () => {
   it("boots a real Payload instance with in-tree in-memory PGlite adapter and relations", async () => {
@@ -15,8 +16,8 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
             { name: "title", type: "text" },
             {
               name: "category",
-              relationTo: "categories",
               type: "relationship",
+              relationTo: "categories",
             },
           ],
         },
@@ -39,8 +40,8 @@ describe("@repo/test-kit lifecycle integration helpers", () => {
       });
 
       const foundWidget = await payload.findByID({
-        collection: "widgets",
         id: widget.id,
+        collection: "widgets",
       });
       expect(foundWidget.title).toBe("Gadget");
     } finally {

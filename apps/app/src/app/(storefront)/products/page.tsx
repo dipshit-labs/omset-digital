@@ -1,13 +1,14 @@
+import type { ReactElement } from "react";
+
 import config from "@payload-config";
-import { toClientThemeManifest } from "@repo/theme-core";
 import { draftMode, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
-import type { ReactElement } from "react";
 
 import { LivePreviewListener } from "@/components/LivePreviewListener";
 import { StorefrontCanvas } from "@/components/StorefrontCanvas";
 import { resolveStorefront } from "@/lib/storefront";
+import { toClientThemeManifest } from "@repo/theme-core";
 
 export interface ProductsPageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;

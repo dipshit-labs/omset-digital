@@ -1,6 +1,6 @@
 import type { Payload } from "payload";
-
 import type { PgPoolLike } from "./database/postgres";
+
 import { truncatePostgresTables } from "./database/postgres";
 
 export interface PostgresAdapterLike {

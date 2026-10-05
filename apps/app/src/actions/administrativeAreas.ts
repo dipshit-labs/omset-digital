@@ -1,17 +1,19 @@
 "use server";
 
-import config from "@payload-config";
-import {
-  getCities as getCitiesQuery,
-  getProvinces as getProvincesQuery,
-  getSubdistricts as getSubdistrictsQuery,
-} from "@repo/payload-plugin-commerce/actions";
 import type {
   CityItem,
   ProvinceItem,
   SubdistrictItem,
 } from "@repo/payload-plugin-commerce/types";
+
+import config from "@payload-config";
 import { getPayload } from "payload";
+
+import {
+  getCities as getCitiesQuery,
+  getProvinces as getProvincesQuery,
+  getSubdistricts as getSubdistrictsQuery,
+} from "@repo/payload-plugin-commerce/actions";
 
 export interface AdministrativeAreasPayloadClient {
   db: {

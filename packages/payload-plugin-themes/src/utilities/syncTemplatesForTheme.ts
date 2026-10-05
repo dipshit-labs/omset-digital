@@ -1,6 +1,6 @@
+import type { ThemeSyncDoc, ThemeSyncPayload } from "../types";
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 
-import type { ThemeSyncDoc, ThemeSyncPayload } from "../types";
 import { resolveTemplatesList } from "./resolveTemplatesList";
 
 export const syncTemplatesForTheme = async (
@@ -44,10 +44,10 @@ export const syncTemplatesForTheme = async (
 
         const data = {
           name: tpl.name,
+          type: tpl.type,
           sections,
           [tenantField]: store.id,
           theme: themeId,
-          type: tpl.type,
         };
 
         await client.create({

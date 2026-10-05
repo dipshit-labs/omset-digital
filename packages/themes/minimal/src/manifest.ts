@@ -1,6 +1,6 @@
-import { defineTheme } from "@repo/theme-core";
 import type { ThemeManifestDefinition } from "@repo/theme-core";
 
+import { defineTheme } from "@repo/theme-core";
 import { brandingSettings } from "./branding";
 import { heroSection } from "./sections/hero";
 import { homeTemplate } from "./templates/home";

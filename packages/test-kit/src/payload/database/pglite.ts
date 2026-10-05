@@ -1,8 +1,9 @@
+import type { DatabaseAdapter, DatabaseAdapterObj } from "payload";
+
 import { PGlite } from "@electric-sql/pglite";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { pushDevSchema } from "@payloadcms/drizzle";
 import { drizzle } from "drizzle-orm/pglite";
-import type { DatabaseAdapter, DatabaseAdapterObj } from "payload";
 
 export type PgLiteAdapterInstance = Omit<
   DatabaseAdapter,

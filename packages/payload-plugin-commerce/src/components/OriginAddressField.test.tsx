@@ -1,4 +1,6 @@
 import type * as UI from "@payloadcms/ui";
+import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
+
 import {
   cleanup,
   fireEvent,
@@ -8,7 +10,6 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
 import { OriginAddressField } from "./OriginAddressField";
 
 const mockSetProvinceId = vi.fn<(v: string) => void>();

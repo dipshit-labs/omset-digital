@@ -6,12 +6,12 @@ import type {
   TabsField,
   UIField,
 } from "payload";
+import type { CommercePluginOptions } from "./types";
 
 import { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
 import { createPackagesCollection } from "./collections/packages";
 import { createStoreCredentialsCollection } from "./collections/storeCredentials";
 import { paymentMetadataField } from "./fields/paymentMetadata";
-import type { CommercePluginOptions } from "./types";
 
 export const originAddressField: Field = {
   name: "originAddress",
@@ -24,57 +24,57 @@ export const originAddressField: Field = {
   },
   fields: [
     {
-      admin: { description: "Province numeric ID" },
       name: "provinceId",
       type: "text",
+      admin: { description: "Province numeric ID" },
     },
     {
-      admin: { description: "Province name" },
       name: "provinceName",
       type: "text",
+      admin: { description: "Province name" },
     },
     {
-      admin: { description: "City/Regency numeric ID" },
       name: "cityId",
       type: "text",
+      admin: { description: "City/Regency numeric ID" },
     },
     {
-      admin: { description: "City/Regency name" },
       name: "cityName",
       type: "text",
+      admin: { description: "City/Regency name" },
     },
     {
-      admin: { description: "City or regency type (Kota or Kabupaten)" },
       name: "cityType",
       type: "text",
+      admin: { description: "City or regency type (Kota or Kabupaten)" },
     },
     {
-      admin: { description: "Subdistrict numeric ID" },
       name: "subdistrictId",
       type: "text",
+      admin: { description: "Subdistrict numeric ID" },
     },
     {
-      admin: { description: "Subdistrict name" },
       name: "subdistrictName",
       type: "text",
+      admin: { description: "Subdistrict name" },
     },
     {
-      admin: { description: "Street address and fulfillment location details" },
       name: "streetAddress",
       type: "textarea",
+      admin: { description: "Street address and fulfillment location details" },
     },
     {
-      admin: { description: "Postal code" },
       name: "postalCode",
       type: "text",
+      admin: { description: "Postal code" },
     },
   ],
 };
 
 export const activePaymentProviderField: Field = {
-  defaultValue: "none",
   name: "activePaymentProvider",
   type: "select",
+  defaultValue: "none",
   admin: {
     description: "Active payment gateway",
   },
@@ -86,9 +86,9 @@ export const activePaymentProviderField: Field = {
 };
 
 export const activeShippingProviderField: Field = {
-  defaultValue: "none",
   name: "activeShippingProvider",
   type: "select",
+  defaultValue: "none",
   admin: {
     description: "Active shipping provider",
   },

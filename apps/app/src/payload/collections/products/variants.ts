@@ -2,7 +2,6 @@ import type { CollectionConfig } from "payload";
 
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
-
 import { readProductAccess } from "./access/read";
 import { inventoryFields } from "./fields/inventory";
 import { pricingFields } from "./fields/pricing";
@@ -26,21 +25,21 @@ export const VariantTypes: CollectionConfig = {
   fields: [
     {
       name: "label",
-      required: true,
       type: "text",
+      required: true,
     },
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
     },
     {
+      name: "options",
+      type: "join",
       collection: "variantOptions",
       maxDepth: 2,
-      name: "options",
       on: "variantType",
       orderable: true,
-      type: "join",
     },
   ],
   hooks: {
@@ -64,22 +63,22 @@ export const VariantOptions: CollectionConfig = {
   fields: [
     {
       name: "variantType",
+      type: "relationship",
       relationTo: "variantTypes",
       required: true,
-      type: "relationship",
       admin: {
         readOnly: true,
       },
     },
     {
       name: "label",
-      required: true,
       type: "text",
+      required: true,
     },
     {
       name: "value",
-      required: true,
       type: "text",
+      required: true,
       admin: {
         description: 'Machine-readable value, such as "small" or "red".',
       },
@@ -116,8 +115,8 @@ export const Variants: CollectionConfig = {
     },
     {
       name: "image",
-      relationTo: "media",
       type: "upload",
+      relationTo: "media",
       admin: {
         description:
           "Featured image for this variant. Automatically synced to product gallery.",
@@ -130,28 +129,28 @@ export const Variants: CollectionConfig = {
       type: "tabs",
       tabs: [
         {
+          name: "pricing",
           fields: [...pricingFields()],
           label: "Pricing",
-          name: "pricing",
         },
         {
+          name: "inventory",
           fields: [...inventoryFields()],
           label: "Inventory",
-          name: "inventory",
         },
         {
+          name: "shipping",
           fields: [...shippingFields()],
           label: "Shipping",
-          name: "shipping",
         },
       ],
     },
 
     {
       name: "product",
+      type: "relationship",
       relationTo: "products",
       required: true,
-      type: "relationship",
       admin: {
         position: "sidebar",
         readOnly: true,

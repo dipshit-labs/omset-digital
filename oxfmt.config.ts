@@ -12,4 +12,23 @@ export default defineConfig({
     "packages/ui/src/components/ui/**",
     "**/CONTEXT.md",
   ],
+
+  sortImports: {
+    internalPattern: ["~/", "@/", "#", "@repo/"],
+    newlinesBetween: false,
+    order: "asc",
+    partitionByComment: true,
+    groups: [
+      "type-import",
+      ["type-internal", "type-parent", "type-sibling", "type-index"],
+      { newlinesBetween: true },
+      "value-builtin",
+      "value-external",
+      { newlinesBetween: true },
+      "value-internal",
+      ["value-parent", "value-sibling", "value-index"],
+      "side_effect",
+      "unknown",
+    ],
+  },
 });

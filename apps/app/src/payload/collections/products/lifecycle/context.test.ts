@@ -1,13 +1,14 @@
-import { createTestReq } from "@repo/test-kit";
 import type { PayloadRequest } from "payload";
+import type { VirtualCatalogData } from "./context";
+
 import { describe, expect, it } from "vitest";
 
+import { createTestReq } from "@repo/test-kit";
 import {
   getStashedVirtualData,
   stashVirtualData,
   VIRTUAL_DATA_KEY,
 } from "./context";
-import type { VirtualCatalogData } from "./context";
 
 describe("lifecycle virtual context", () => {
   it("stashes virtual catalog data into req.context with proper key", () => {

@@ -1,9 +1,9 @@
-import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { CollectionConfig, Field } from "payload";
+import type { CreateThemesCollectionOptions } from "../types";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 
 import { buildThemeSettingsFields } from "../fields/ThemeSettingsFields";
 import { enforceSingleLiveTheme } from "../hooks/enforceSingleLiveTheme";
-import type { CreateThemesCollectionOptions } from "../types";
 import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
 import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
@@ -26,16 +26,16 @@ export const createThemesCollection = (
   const fields: Field[] = [
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
       admin: {
         description: "Display name of the theme",
       },
     },
     {
       name: "slug",
-      required: true,
       type: "text",
+      required: true,
       admin: {
         description: "Unique theme identifier matching the theme package slug",
       },
@@ -48,9 +48,9 @@ export const createThemesCollection = (
       },
     },
     {
-      defaultValue: false,
       name: "isLive",
       type: "checkbox",
+      defaultValue: false,
       admin: {
         description: "Set this theme as active for the store",
       },
@@ -59,10 +59,10 @@ export const createThemesCollection = (
 
   if (settingsFields.length > 0) {
     fields.push({
-      fields: settingsFields,
-      label: "Theme Settings",
       name: "settings",
       type: "group",
+      fields: settingsFields,
+      label: "Theme Settings",
       admin: {
         description: "Branding settings, colors, and typography presets",
       },

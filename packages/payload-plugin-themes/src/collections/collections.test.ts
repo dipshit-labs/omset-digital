@@ -1,4 +1,5 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core";
+
 import { describe, expect, it } from "vitest";
 
 import { createTemplatesCollection } from "./createTemplatesCollection";
@@ -195,8 +196,8 @@ describe("Collection admin.livePreview Hooks", () => {
     const homeUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Home Layout",
-        store: { slug: "toko-sepatu" },
         type: "home",
+        store: { slug: "toko-sepatu" },
       })
     );
     expect(homeUrl).toContain("/next/preview?path=%2Ftoko-sepatu");
@@ -204,8 +205,8 @@ describe("Collection admin.livePreview Hooks", () => {
     const productUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Product Layout",
-        store: { slug: "toko-sepatu" },
         type: "product",
+        store: { slug: "toko-sepatu" },
       })
     );
     expect(productUrl).toContain(
@@ -227,8 +228,8 @@ describe("Collection admin.livePreview Hooks", () => {
     const collectionUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Collection Layout",
-        store: { slug: "toko-sepatu" },
         type: "collection",
+        store: { slug: "toko-sepatu" },
       })
     );
     expect(collectionUrl).toContain(
@@ -238,8 +239,8 @@ describe("Collection admin.livePreview Hooks", () => {
     const pageUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Page Layout",
-        store: { slug: "toko-sepatu" },
         type: "page",
+        store: { slug: "toko-sepatu" },
       })
     );
     expect(pageUrl).toContain(
@@ -249,9 +250,9 @@ describe("Collection admin.livePreview Hooks", () => {
     const pageWithSlugUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Custom Page Layout",
+        type: "page",
         slug: "about-us",
         store: { slug: "toko-sepatu" },
-        type: "page",
       })
     );
     expect(pageWithSlugUrl).toContain(
@@ -273,8 +274,8 @@ describe("Collection admin.livePreview Hooks", () => {
     const productUrl = await urlFn(
       createFakeLivePreviewArgs({
         name: "Product Layout",
-        store: { slug: "toko-sepatu" },
         type: "product",
+        store: { slug: "toko-sepatu" },
       })
     );
     expect(productUrl).toBe("/next/preview?path=%2Fproducts");

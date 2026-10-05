@@ -1,11 +1,11 @@
+import type { CreatePaymentSessionInput } from "../types";
+
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-
-import { server } from "@repo/test-kit/msw";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { CreatePaymentSessionInput } from "../types";
+import { server } from "@repo/test-kit/msw";
 import { PaymentWebhookError } from "../types";
 import { XenditClient } from "./client";
 import {
@@ -72,9 +72,9 @@ describe(XenditClient, () => {
           parsedBody = (await request.json()) as Record<string, unknown>;
           return HttpResponse.json(
             {
+              id: expectedInvoiceId,
               amount: 250_000,
               external_id: "ORDER-2001",
-              id: expectedInvoiceId,
               invoice_url: expectedInvoiceUrl,
               status: "PENDING",
             },
@@ -219,13 +219,13 @@ describe(XenditClient, () => {
 
   describe("getTransactionStatus", () => {
     const mockInvoiceResponse = {
+      id: "inv_12345",
       amount: 150_000,
       created: "2026-09-30T10:00:00.000Z",
       currency: "IDR",
       description: "Order #ORDER-1001",
       expiry_date: "2026-10-01T10:00:00.000Z",
       external_id: "ORDER-1001",
-      id: "inv_12345",
       invoice_url: "https://checkout.xendit.co/web/inv_12345",
       merchant_name: "Omset Digital Store",
       paid_amount: 150_000,
@@ -270,6 +270,7 @@ describe(XenditClient, () => {
         settlementTime: "2026-09-30T11:30:00.000Z",
         transactionId: "inv_12345",
         metadata: {
+          id: "inv_12345",
           amount: 150_000,
           created: "2026-09-30T10:00:00.000Z",
           currency: "IDR",
@@ -277,7 +278,6 @@ describe(XenditClient, () => {
           event: undefined,
           expiryDate: "2026-10-01T10:00:00.000Z",
           externalId: "ORDER-1001",
-          id: "inv_12345",
           invoiceUrl: "https://checkout.xendit.co/web/inv_12345",
           isHigh: undefined,
           merchantName: "Omset Digital Store",
@@ -416,12 +416,12 @@ describe(XenditClient, () => {
     const webhookToken = "xnd_webhook_verification_token_secret";
     const webhookSecret = "xnd_webhook_hmac_secret_key_12345";
     const sampleInvoicePayload = {
+      id: "inv_651234567890abcdef",
       amount: 250_000,
       created: "2026-09-30T10:00:00.000Z",
       currency: "IDR",
       description: "Payment for Order #ORDER-2001",
       external_id: "ORDER-2001",
-      id: "inv_651234567890abcdef",
       is_high: false,
       merchant_name: "Omset Digital Store",
       paid_amount: 250_000,
@@ -456,6 +456,7 @@ describe(XenditClient, () => {
           paymentStatus: "paid",
           providerEventId: "inv_651234567890abcdef",
           metadata: {
+            id: "inv_651234567890abcdef",
             amount: 250_000,
             created: "2026-09-30T10:00:00.000Z",
             currency: "IDR",
@@ -463,7 +464,6 @@ describe(XenditClient, () => {
             event: undefined,
             expiryDate: undefined,
             externalId: "ORDER-2001",
-            id: "inv_651234567890abcdef",
             invoiceUrl: undefined,
             isHigh: false,
             merchantName: "Omset Digital Store",
@@ -705,8 +705,8 @@ describe(XenditClient, () => {
           client.parseWebhook({
             headers: { "x-callback-token": webhookToken },
             rawBody: JSON.stringify({
-              amount: 100_000,
               id: "inv_123",
+              amount: 100_000,
               status: "PAID",
               // missing external_id and data.reference_id
             }),
@@ -759,9 +759,9 @@ describe(XenditClient, () => {
           created: "2026-09-30T12:00:00.000Z",
           event: "payment.succeeded",
           data: {
+            id: "pr_9999",
             amount: 300_000,
             currency: "IDR",
-            id: "pr_9999",
             reference_id: "ORDER-MODERN-77",
             status: "SUCCEEDED",
           },
@@ -777,6 +777,7 @@ describe(XenditClient, () => {
           paymentStatus: "paid",
           providerEventId: "pr_9999",
           metadata: {
+            id: "pr_9999",
             amount: 300_000,
             created: "2026-09-30T12:00:00.000Z",
             currency: "IDR",
@@ -784,7 +785,6 @@ describe(XenditClient, () => {
             event: "payment.succeeded",
             expiryDate: undefined,
             externalId: "ORDER-MODERN-77",
-            id: "pr_9999",
             invoiceUrl: undefined,
             isHigh: undefined,
             merchantName: undefined,
@@ -828,9 +828,9 @@ describe(XenditClient, () => {
   describe("verifyHmacSignature (modern x-callback-signature)", () => {
     const secret = "xnd_webhook_secret_key_abcdef";
     const rawBody = JSON.stringify({
+      id: "inv_12345",
       amount: 250_000,
       external_id: "ORDER-2001",
-      id: "inv_12345",
       status: "PAID",
     });
 
@@ -848,9 +848,9 @@ describe(XenditClient, () => {
     it("rejects tampered body text", () => {
       const validSignature = generateXenditHmacSignature(rawBody, secret);
       const tamperedBody = JSON.stringify({
+        id: "inv_12345",
         amount: 10_000,
         external_id: "ORDER-2001",
-        id: "inv_12345",
         status: "PAID",
       });
 

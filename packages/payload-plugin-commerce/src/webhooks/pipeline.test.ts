@@ -1,19 +1,20 @@
+import type { WebhookPayloadClient } from "./pipeline";
+
+import { NextRequest } from "next/server";
+import { describe, expect, it, vi } from "vitest";
+
 import {
   generateMidtransSignature,
   generateXenditHmacSignature,
 } from "@repo/commerce-adapters/payments";
 import { encryptCredential } from "@repo/commerce-adapters/utils";
-import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
-
 import * as webhooksExports from "../exports/webhooks";
 import {
-  SUPPORTED_PAYMENT_PROVIDERS,
   isSupportedPaymentProvider,
   processIncomingWebhook,
   resolveCredential,
+  SUPPORTED_PAYMENT_PROVIDERS,
 } from "./pipeline";
-import type { WebhookPayloadClient } from "./pipeline";
 
 interface WhereEquals {
   equals?: unknown;
@@ -230,7 +231,7 @@ describe("processIncomingWebhook - Slice 1: Store resolution & provider status",
 
   it("returns 400 when store.activePaymentProvider does not match provider", async () => {
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "xendit", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "xendit", slug: "toko-kopi" }],
     });
     const req = new NextRequest(
       "http://localhost:3000/api/webhooks/midtrans/toko-kopi",
@@ -261,7 +262,7 @@ describe("processIncomingWebhook - Slice 2: Credentials resolution & adapter dis
   it("returns 400 when storeCredentials document is missing", async () => {
     const payload = createMockPayload({
       storeCredentials: [],
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
     });
     const req = new NextRequest(
       "http://localhost:3000/api/webhooks/midtrans/toko-kopi",
@@ -287,7 +288,7 @@ describe("processIncomingWebhook - Slice 2: Credentials resolution & adapter dis
   it("returns 400 when Midtrans serverKey is missing", async () => {
     const payload = createMockPayload({
       storeCredentials: [{ midtrans: {}, store: 1 }],
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
     });
     const req = new NextRequest(
       "http://localhost:3000/api/webhooks/midtrans/toko-kopi",
@@ -337,7 +338,7 @@ describe("processIncomingWebhook - Slice 2: Credentials resolution & adapter dis
     };
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       orders: [
         {
           id: 101,
@@ -387,10 +388,10 @@ describe("processIncomingWebhook - Slice 2: Credentials resolution & adapter dis
     const orderId = "ORDER-202";
 
     const webhookPayload = {
+      id: "inv-xen-202",
       amount: 250_000,
       created: "2026-10-01T10:00:00.000Z",
       external_id: orderId,
-      id: "inv-xen-202",
       paid_at: "2026-10-01T10:05:00.000Z",
       payment_channel: "BCA",
       payment_method: "BANK_TRANSFER",
@@ -401,7 +402,7 @@ describe("processIncomingWebhook - Slice 2: Credentials resolution & adapter dis
     const signature = generateXenditHmacSignature(rawBody, rawWebhookToken);
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "xendit", id: 2, slug: "toko-kopi" }],
+      stores: [{ id: 2, activePaymentProvider: "xendit", slug: "toko-kopi" }],
       orders: [
         {
           id: 202,
@@ -457,7 +458,7 @@ describe("processIncomingWebhook - Slice 3: Error handling & order lookup", () =
   it("returns 401 when Midtrans signature is invalid", async () => {
     const payload = createMockPayload({
       orders: [{ id: 1, orderNumber: "ORDER-401", store: 1 }],
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       storeCredentials: [
         { midtrans: { serverKey: encryptedServerKey }, store: 1 },
       ],
@@ -497,7 +498,7 @@ describe("processIncomingWebhook - Slice 3: Error handling & order lookup", () =
 
     const payload = createMockPayload({
       orders: [{ id: 2, orderNumber: "ORDER-401-X", store: 2 }],
-      stores: [{ activePaymentProvider: "xendit", id: 2, slug: "toko-kopi" }],
+      stores: [{ id: 2, activePaymentProvider: "xendit", slug: "toko-kopi" }],
       storeCredentials: [
         { store: 2, xendit: { webhookToken: encryptedToken } },
       ],
@@ -508,9 +509,9 @@ describe("processIncomingWebhook - Slice 3: Error handling & order lookup", () =
       {
         method: "POST",
         body: JSON.stringify({
+          id: "inv-401",
           amount: 50_000,
           external_id: "ORDER-401-X",
-          id: "inv-401",
           status: "PAID",
         }),
         headers: {
@@ -532,7 +533,7 @@ describe("processIncomingWebhook - Slice 3: Error handling & order lookup", () =
 
   it("returns 400 when raw body is invalid JSON", async () => {
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       storeCredentials: [
         { midtrans: { serverKey: encryptedServerKey }, store: 1 },
       ],
@@ -574,7 +575,7 @@ describe("processIncomingWebhook - Slice 3: Error handling & order lookup", () =
     );
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       orders: [
         // Order belongs to a different store (cross-tenant attack)
         { id: 404, orderNumber: orderId, store: 999 },
@@ -649,7 +650,7 @@ describe("processIncomingWebhook - Slice 4: Terminal-state idempotency guard", (
           { midtrans: { serverKey: encryptedServerKey }, store: 1 },
         ],
         stores: [
-          { activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" },
+          { id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" },
         ],
       });
 
@@ -716,7 +717,7 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
     );
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       orders: [
         {
           id: 55,
@@ -759,8 +760,8 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
 
     expect(res.status).toBe(200);
     expect(payload.update).toHaveBeenCalledExactlyOnceWith({
-      collection: "orders",
       id: 55,
+      collection: "orders",
       overrideAccess: true,
       data: {
         paymentStatus: "paid",
@@ -782,10 +783,10 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
     const orderId = "ORDER-MUTATE-2";
 
     const webhookPayload = {
+      id: "inv-xen-777",
       amount: 300_000,
       created: "2026-10-01T10:00:00.000Z",
       external_id: orderId,
-      id: "inv-xen-777",
       paid_at: "2026-10-01T10:02:00.000Z",
       payment_channel: "QRIS",
       payment_method: "QR_CODE",
@@ -796,7 +797,7 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
     const signature = generateXenditHmacSignature(rawBody, rawWebhookToken);
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "xendit", id: 2, slug: "toko-kopi" }],
+      stores: [{ id: 2, activePaymentProvider: "xendit", slug: "toko-kopi" }],
       orders: [
         {
           id: 77,
@@ -832,8 +833,8 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
 
     expect(res.status).toBe(200);
     expect(payload.update).toHaveBeenCalledExactlyOnceWith({
-      collection: "orders",
       id: 77,
+      collection: "orders",
       overrideAccess: true,
       data: {
         paymentStatus: "paid",
@@ -861,7 +862,7 @@ describe("processIncomingWebhook - Slice 5: State mutation & paymentMetadata per
     );
 
     const payload = createMockPayload({
-      stores: [{ activePaymentProvider: "midtrans", id: 1, slug: "toko-kopi" }],
+      stores: [{ id: 1, activePaymentProvider: "midtrans", slug: "toko-kopi" }],
       orders: [
         {
           id: 88,

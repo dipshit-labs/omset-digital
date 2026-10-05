@@ -1,5 +1,6 @@
-import { postgresAdapter } from "@payloadcms/db-postgres";
 import type { DatabaseAdapterObj } from "payload";
+
+import { postgresAdapter } from "@payloadcms/db-postgres";
 
 import { createPgLiteAdapter } from "./pglite";
 import {

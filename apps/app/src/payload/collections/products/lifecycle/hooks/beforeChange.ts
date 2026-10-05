@@ -1,5 +1,5 @@
-import type { Product } from "@repo/types";
 import type { CollectionBeforeChangeHook } from "payload";
+import type { Product } from "@repo/types";
 
 import { stashVirtualData } from "../context";
 import { validatePhysicalPackaging } from "../packaging";

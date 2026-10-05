@@ -29,10 +29,10 @@ export const inventoryFields = ({
   return [
     // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
-      defaultValue: virtual ? undefined : true,
-      label: "Inventory tracked",
       name: "tracked",
       type: "checkbox",
+      defaultValue: virtual ? undefined : true,
+      label: "Inventory tracked",
       ...trackedOverrides,
       virtual,
       admin: {
@@ -41,10 +41,10 @@ export const inventoryFields = ({
       },
     },
     {
-      defaultValue: virtual ? undefined : 0,
-      min: 0,
       name: "stock",
       type: "number",
+      defaultValue: virtual ? undefined : 0,
+      min: 0,
       ...stockOverrides,
       virtual,
       admin: {
@@ -56,8 +56,8 @@ export const inventoryFields = ({
       },
     },
     {
-      label: "More details",
       type: "collapsible",
+      label: "More details",
       admin: {
         initCollapsed: true,
       },
@@ -66,9 +66,9 @@ export const inventoryFields = ({
           type: "row",
           fields: [
             {
-              label: "SKU (Stock Keeping Unit)",
               name: "sku",
               type: "text",
+              label: "SKU (Stock Keeping Unit)",
               ...skuOverrides,
               virtual,
               admin: {
@@ -77,9 +77,9 @@ export const inventoryFields = ({
               },
             },
             {
-              label: "Barcode",
               name: "barcode",
               type: "text",
+              label: "Barcode",
               ...barcodeOverrides,
               virtual,
               admin: {
@@ -90,10 +90,10 @@ export const inventoryFields = ({
           ],
         },
         {
-          defaultValue: virtual ? undefined : false,
-          label: "Continue selling when out of stock",
           name: "allowBackorder",
           type: "checkbox",
+          defaultValue: virtual ? undefined : false,
+          label: "Continue selling when out of stock",
           ...allowBackorderOverrides,
           virtual,
           admin: {

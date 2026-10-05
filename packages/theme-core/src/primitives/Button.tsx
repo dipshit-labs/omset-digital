@@ -1,5 +1,6 @@
-import { Button as BaseUIButton } from "@base-ui/react/button";
 import type { ReactElement } from "react";
+
+import { Button as BaseUIButton } from "@base-ui/react/button";
 
 export type ButtonProps = BaseUIButton.Props;
 

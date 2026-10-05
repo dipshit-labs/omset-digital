@@ -1,5 +1,5 @@
-import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Condition, Field } from "payload";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 
 import { settingFieldToPayloadField } from "./converter";
 

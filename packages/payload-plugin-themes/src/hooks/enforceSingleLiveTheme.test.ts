@@ -1,4 +1,5 @@
 import type { CollectionBeforeChangeHook } from "payload";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { enforceSingleLiveTheme } from "./enforceSingleLiveTheme";
@@ -136,8 +137,8 @@ describe("enforceSingleLiveTheme hook", () => {
       originalDoc: undefined,
       req,
       data: {
-        isLive: true,
         name: "New Live Theme",
+        isLive: true,
         store: "store-1",
       },
     });
@@ -162,14 +163,14 @@ describe("enforceSingleLiveTheme hook", () => {
       req,
       data: {
         id: "theme-1",
-        isLive: true,
         name: "Renamed Theme",
+        isLive: true,
         store: "store-1",
       },
       originalDoc: {
         id: "theme-1",
-        isLive: true,
         name: "Old Name",
+        isLive: true,
         store: "store-1",
       },
     });
@@ -185,14 +186,14 @@ describe("enforceSingleLiveTheme hook", () => {
     const result = await runHook(hook, {
       req,
       data: {
-        _status: "draft",
         id: "theme-2",
+        _status: "draft",
         isLive: true,
         store: "store-1",
       },
       originalDoc: {
-        _status: "draft",
         id: "theme-2",
+        _status: "draft",
         isLive: false,
         store: "store-1",
       },
@@ -257,8 +258,8 @@ describe("enforceSingleLiveTheme hook", () => {
       originalDoc: undefined,
       req,
       data: {
-        isLive: true,
         name: "New Live Theme",
+        isLive: true,
       },
     });
 

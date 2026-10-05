@@ -1,6 +1,5 @@
 export { brandingSettings } from "./branding";
-export { defaultTheme, defaultTheme as default } from "./manifest";
-export { homePreset, homeTemplate } from "./templates/home";
+export { defaultTheme as default, defaultTheme } from "./manifest";
 export {
   Hero,
   HeroCtaClient,
@@ -12,3 +11,4 @@ export type {
   HeroCtaClientProps,
   HeroSettings,
 } from "./sections/hero";
+export { homePreset, homeTemplate } from "./templates/home";

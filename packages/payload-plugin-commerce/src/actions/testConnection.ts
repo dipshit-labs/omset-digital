@@ -229,8 +229,8 @@ export const testRajaOngkirConnection = async ({
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Accept: "application/json",
         key: trimmedKey,
+        Accept: "application/json",
       },
     });
 

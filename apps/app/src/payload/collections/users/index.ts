@@ -1,8 +1,8 @@
-import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 import type { CollectionConfig } from "payload";
 
-import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
+import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 
+import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { createUserAccess } from "./access/create";
 import { readUserAccess } from "./access/read";
 import { updateAndDeleteUserAccess } from "./access/updateAndDelete";
@@ -16,12 +16,12 @@ const defaultStoreArrayField = tenantsArrayField({
   tenantsCollectionSlug: "stores",
   rowFields: [
     {
+      name: "roles",
+      type: "select",
       defaultValue: ["manager"],
       hasMany: true,
-      name: "roles",
       options: ["owner", "manager"],
       required: true,
-      type: "select",
       access: {
         update: ({ req }) => Boolean(req.user),
       },
@@ -43,17 +43,17 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
-      index: true,
       name: "username",
       type: "text",
+      index: true,
       hooks: {
         beforeValidate: [ensureUniqueUsername],
       },
     },
     {
-      hidden: true,
       name: "password",
       type: "text",
+      hidden: true,
       access: {
         read: () => false,
         update: ({ id, req }) => {
@@ -70,12 +70,12 @@ export const Users: CollectionConfig = {
       },
     },
     {
+      name: "roles",
+      type: "select",
       defaultValue: ["user"],
       hasMany: true,
-      name: "roles",
       options: ["super-admin", "user"],
       saveToJWT: true,
-      type: "select",
       access: {
         update: ({ req }) => isSuperAdmin(req.user),
       },

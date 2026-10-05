@@ -1,4 +1,6 @@
+import type { FormattedShippingRateOption } from "./CheckoutShippingSection";
 import type { GetShippingRatesResult } from "@repo/payload-plugin-commerce/actions";
+
 import {
   cleanup,
   fireEvent,
@@ -9,7 +11,6 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CheckoutShippingSection } from "./CheckoutShippingSection";
-import type { FormattedShippingRateOption } from "./CheckoutShippingSection";
 
 describe(CheckoutShippingSection, () => {
   afterEach(() => {

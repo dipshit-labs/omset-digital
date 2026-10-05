@@ -1,5 +1,6 @@
-import { encryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
 import type { FieldHook, PayloadRequest } from "payload";
+
+import { encryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
 
 const getNestedValue = (
   obj: unknown,

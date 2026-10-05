@@ -31,9 +31,9 @@ const queryStoreSlugById = async (
     // SAFETY: tenantsSlug dynamically targets the configured multi-tenant collection (e.g. "stores").
     const targetCollection = tenantsSlug as CollectionSlug;
     const storeDoc = await req.payload.findByID({
+      id,
       collection: targetCollection,
       depth: 0,
-      id,
     });
 
     if (

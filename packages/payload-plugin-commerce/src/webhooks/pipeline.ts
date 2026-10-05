@@ -1,18 +1,20 @@
+import type { NextRequest } from "next/server";
+import type { Payload, Where } from "payload";
 import type {
   ParsedWebhookEvent,
   PaymentMetadata,
   PaymentProvider,
   PaymentStatus,
 } from "@repo/commerce-adapters/payments";
+
+import { NextResponse } from "next/server";
+
 import {
   MidtransClient,
   PaymentWebhookError,
   XenditClient,
 } from "@repo/commerce-adapters/payments";
 import { decryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import type { Payload, Where } from "payload";
 
 export const SUPPORTED_PAYMENT_PROVIDERS = ["midtrans", "xendit"] as const;
 
@@ -296,8 +298,8 @@ const updateOrderPayment = async (
 
   try {
     await payload.update({
-      collection: "orders",
       id: orderDoc.id,
+      collection: "orders",
       overrideAccess: true,
       data: {
         paymentMetadata: updatedMetadata,

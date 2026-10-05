@@ -1,9 +1,10 @@
-import type { LegacyOrderRecord } from "@repo/payload-plugin-commerce/types";
-import { createTestReq } from "@repo/test-kit";
-import type { Order } from "@repo/types";
 import type { JSONField } from "payload";
+import type { LegacyOrderRecord } from "@repo/payload-plugin-commerce/types";
+import type { Order } from "@repo/types";
+
 import { describe, expect, it } from "vitest";
 
+import { createTestReq } from "@repo/test-kit";
 import { Orders } from "./index";
 
 type LegacyTestOrder = Order & LegacyOrderRecord;
@@ -20,9 +21,9 @@ describe("Orders paymentMetadata unit tests", () => {
     expect(afterReadHook).toBeDefined();
 
     const legacyOrder: LegacyTestOrder = {
+      id: 5,
       createdAt: "2026-10-01T08:00:00Z",
       currency: "IDR",
-      id: 5,
       orderNumber: "ORDER-1005",
       paymentMetadata: null,
       paymentStatus: "paid",
@@ -38,10 +39,10 @@ describe("Orders paymentMetadata unit tests", () => {
 
     const req = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         createdAt: "2026-10-01T00:00:00Z",
         email: "admin@example.com",
-        id: 1,
         updatedAt: "2026-10-01T00:00:00Z",
       },
     });
@@ -74,9 +75,9 @@ describe("Orders paymentMetadata unit tests", () => {
     expect(afterReadHook).toBeDefined();
 
     const legacyOrder: LegacyTestOrder = {
+      id: 6,
       createdAt: "2026-10-01T09:00:00Z",
       currency: "IDR",
-      id: 6,
       orderNumber: "ORDER-1006",
       paymentMetadata: null,
       paymentStatus: "paid",
@@ -95,10 +96,10 @@ describe("Orders paymentMetadata unit tests", () => {
 
     const req = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         createdAt: "2026-10-01T00:00:00Z",
         email: "admin@example.com",
-        id: 1,
         updatedAt: "2026-10-01T00:00:00Z",
       },
     });
@@ -133,10 +134,10 @@ describe("Orders paymentMetadata unit tests", () => {
 
     const authReq = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         createdAt: "2026-10-01T00:00:00Z",
         email: "merchant@example.com",
-        id: 1,
         updatedAt: "2026-10-01T00:00:00Z",
       },
     });
@@ -159,10 +160,10 @@ describe("Orders paymentMetadata unit tests", () => {
 
     const authReq = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         createdAt: "2026-10-01T00:00:00Z",
         email: "merchant@example.com",
-        id: 1,
         updatedAt: "2026-10-01T00:00:00Z",
       },
     });

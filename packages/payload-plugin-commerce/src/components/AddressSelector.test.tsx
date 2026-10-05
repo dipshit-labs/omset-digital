@@ -1,3 +1,6 @@
+import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
+import type { ResolvedAddress } from "./useAdministrativeAreas";
+
 import {
   cleanup,
   fireEvent,
@@ -7,9 +10,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
 import { AddressSelector } from "./AddressSelector";
-import type { ResolvedAddress } from "./useAdministrativeAreas";
 
 const mockProvinces: ProvinceItem[] = [
   { province_id: 1, province_name: "Bali" },

@@ -1,8 +1,7 @@
 import type { CheckboxField, Field, RelationshipField } from "payload";
-
-import { measurementField } from "@/payload/fields/measurement";
 import type { MeasurementFieldOverrides } from "@/payload/fields/measurement";
 
+import { measurementField } from "@/payload/fields/measurement";
 import { resolveDefaultPackage } from "../lifecycle/packaging";
 
 interface ShippingFieldsOverrides {
@@ -27,10 +26,10 @@ const shippingFields = ({
   return [
     // TODO: Create a custom UI to turn this into a Switch instead of checkbox
     {
-      defaultValue: virtual ? undefined : defaultRequired,
-      label: "This is a physical product",
       name: "required",
       type: "checkbox",
+      defaultValue: virtual ? undefined : defaultRequired,
+      label: "This is a physical product",
       ...requiredOverrides,
       virtual,
       admin: {
@@ -49,9 +48,9 @@ const shippingFields = ({
       fields: [
         {
           name: "package",
+          type: "relationship",
           relationTo: "packages",
           required: true,
-          type: "relationship",
           ...packageOverrides,
           virtual,
           admin: {
@@ -69,10 +68,10 @@ const shippingFields = ({
               },
         },
         measurementField({
-          label: "Product Weight",
           name: "weight",
-          required: true,
           type: "weight",
+          label: "Product Weight",
+          required: true,
           overrides: {
             unitOverrides: {
               virtual,

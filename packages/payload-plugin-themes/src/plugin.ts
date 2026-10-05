@@ -1,10 +1,10 @@
 import type { CollectionConfig, Config, Plugin } from "payload";
+import type { ThemesPluginOptions } from "./types";
 
 import { createTemplatesCollection } from "./collections/createTemplatesCollection";
 import { createThemesCollection } from "./collections/createThemesCollection";
 import { sanitizePluginConfig } from "./defaults";
 import { syncThemes } from "./onInit";
-import type { ThemesPluginOptions } from "./types";
 
 const mergeCollectionAdmin = (
   baseAdmin: CollectionConfig["admin"],

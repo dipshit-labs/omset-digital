@@ -1,6 +1,7 @@
+import type { NextRequest } from "next/server";
+
 import { draftMode } from "next/headers";
 import { redirect } from "next/navigation";
-import type { NextRequest } from "next/server";
 import { getSafeRedirect } from "payload/shared";
 
 export const GET: (req?: NextRequest) => Promise<Response> = async (

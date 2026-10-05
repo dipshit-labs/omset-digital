@@ -1,5 +1,6 @@
-import type { SettingField, ThemeManifestDefinition } from "@repo/theme-core";
 import type { ArrayField, BlocksField, Field, GroupField } from "payload";
+import type { SettingField, ThemeManifestDefinition } from "@repo/theme-core";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -10,23 +11,23 @@ import {
 describe(settingFieldToPayloadField, () => {
   it("converts text field correctly", () => {
     const field: SettingField = {
+      name: "heading",
+      type: "text",
       admin: { description: "Main headline" },
       defaultValue: "Welcome",
       label: "Heading",
-      name: "heading",
       placeholder: "Enter title",
       required: true,
-      type: "text",
     };
 
     const payloadField = settingFieldToPayloadField(field);
 
     expect(payloadField).toStrictEqual({
+      name: "heading",
+      type: "text",
       defaultValue: "Welcome",
       label: "Heading",
-      name: "heading",
       required: true,
-      type: "text",
       admin: {
         description: "Main headline",
         placeholder: "Enter title",
@@ -36,19 +37,19 @@ describe(settingFieldToPayloadField, () => {
 
   it("converts toggle field to checkbox", () => {
     const field: SettingField = {
-      defaultValue: true,
-      label: "Show Badge",
       name: "showBadge",
       type: "toggle",
+      defaultValue: true,
+      label: "Show Badge",
     };
 
     const payloadField = settingFieldToPayloadField(field);
 
     expect(payloadField).toStrictEqual({
-      defaultValue: true,
-      label: "Show Badge",
       name: "showBadge",
       type: "checkbox",
+      defaultValue: true,
+      label: "Show Badge",
       admin: {
         description: undefined,
       },
@@ -57,11 +58,11 @@ describe(settingFieldToPayloadField, () => {
 
   it("converts select field with options", () => {
     const field: SettingField = {
+      name: "alignment",
+      type: "select",
       defaultValue: "left",
       label: "Alignment",
-      name: "alignment",
       required: true,
-      type: "select",
       options: [
         { label: "Left", value: "left" },
         { label: "Center", value: "center" },
@@ -71,11 +72,11 @@ describe(settingFieldToPayloadField, () => {
     const payloadField = settingFieldToPayloadField(field);
 
     expect(payloadField).toStrictEqual({
+      name: "alignment",
+      type: "select",
       defaultValue: "left",
       label: "Alignment",
-      name: "alignment",
       required: true,
-      type: "select",
       admin: {
         description: undefined,
       },
@@ -88,19 +89,19 @@ describe(settingFieldToPayloadField, () => {
 
   it("converts upload field with default relationTo media", () => {
     const field: SettingField = {
-      label: "Image",
       name: "image",
       type: "upload",
+      label: "Image",
     };
 
     const payloadField = settingFieldToPayloadField(field);
 
     expect(payloadField).toStrictEqual({
-      label: "Image",
       name: "image",
+      type: "upload",
+      label: "Image",
       relationTo: "media",
       required: undefined,
-      type: "upload",
       admin: {
         description: undefined,
       },
@@ -109,9 +110,9 @@ describe(settingFieldToPayloadField, () => {
 
   it("converts link field to structured group", () => {
     const field: SettingField = {
-      label: "Call to Action",
       name: "cta",
       type: "link",
+      label: "Call to Action",
       defaultValue: {
         label: "Shop Now",
         newTab: false,
@@ -136,16 +137,16 @@ describe(settingFieldToPayloadField, () => {
 
   it("converts nested group and array fields recursively", () => {
     const field: SettingField = {
+      name: "slides",
+      type: "array",
       label: "Slides",
       maxRows: 5,
       minRows: 1,
-      name: "slides",
-      type: "array",
       fields: [
         {
-          label: "Slide Title",
           name: "title",
           type: "text",
+          label: "Slide Title",
         },
       ],
     };
@@ -174,9 +175,9 @@ describe(manifestToPayloadBlocks, () => {
           slug: "hero",
           settings: [
             {
-              label: "Heading",
               name: "heading",
               type: "text",
+              label: "Heading",
             },
           ],
         },
@@ -185,9 +186,9 @@ describe(manifestToPayloadBlocks, () => {
           slug: "banner",
           settings: [
             {
-              label: "Text",
               name: "text",
               type: "text",
+              label: "Text",
             },
           ],
         },
@@ -224,23 +225,23 @@ describe(manifestToPayloadBlocks, () => {
               slug: "feature_item",
               fields: [
                 {
-                  label: "Feature Title",
                   name: "title",
                   type: "text",
+                  label: "Feature Title",
                 },
                 {
-                  label: "Description",
                   name: "description",
                   type: "textarea",
+                  label: "Description",
                 },
               ],
             },
           ],
           settings: [
             {
-              label: "Title",
               name: "title",
               type: "text",
+              label: "Title",
             },
           ],
         },

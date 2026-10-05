@@ -8,20 +8,20 @@ const createRajaOngkirCostResponse = (
 ) => ({
   rajaongkir: {
     destination_details: {
+      type: "Kota",
       city_id: destination,
       city_name: "Jakarta Barat",
       postal_code: "11480",
       province: "DKI Jakarta",
       province_id: "6",
-      type: "Kota",
     },
     origin_details: {
+      type: "Kota",
       city_id: origin,
       city_name: "Yogyakarta",
       postal_code: "55000",
       province: "DI Yogyakarta",
       province_id: "5",
-      type: "Kota",
     },
     query: {
       courier,
@@ -31,8 +31,8 @@ const createRajaOngkirCostResponse = (
     },
     results: [
       {
-        code: courier || "jne",
         name: `${courier.toUpperCase()} Courier Service`,
+        code: courier || "jne",
         costs: [
           {
             description: "Layanan Reguler",

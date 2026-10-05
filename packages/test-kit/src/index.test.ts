@@ -6,14 +6,14 @@ import {
   createTestPayload,
   createTestReq,
   defineIntegrationSuite,
-  describe as fixtureDescribe,
   destroyTestPayload,
+  describe as fixtureDescribe,
+  it as fixtureIt,
+  test as fixtureTest,
   integrationSuite,
   integrationTest,
-  it as fixtureIt,
   resetDatabase,
   setTestPayloadConfig,
-  test as fixtureTest,
 } from "./index";
 import { handlers, server } from "./msw";
 import { createPgLiteAdapter } from "./payload/database/pglite";

@@ -1,11 +1,13 @@
+import type { NextRequest } from "next/server";
+
 import configPromise from "@payload-config";
+import { NextResponse } from "next/server";
+import { getPayload } from "payload";
+
 import {
   isSupportedPaymentProvider,
   processIncomingWebhook,
 } from "@repo/payload-plugin-commerce/webhooks";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getPayload } from "payload";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

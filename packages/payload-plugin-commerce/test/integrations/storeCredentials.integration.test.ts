@@ -1,10 +1,11 @@
-import { decryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
-import { defineIntegrationSuite } from "@repo/test-kit";
 import type { CollectionConfig, Payload } from "payload";
+import type { StoreCredentials } from "../../src/types";
+
 import { expect } from "vitest";
 
+import { decryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
+import { defineIntegrationSuite } from "@repo/test-kit";
 import { createStoreCredentialsCollection } from "../../src/collections/storeCredentials";
-import type { StoreCredentials } from "../../src/types";
 import { storeCredentialsFactory } from "../factories/storeCredentialsFactory";
 
 const TEST_SECRET = "omset-digital-test-master-secret-32-chars!";
@@ -12,13 +13,13 @@ const TEST_SECRET = "omset-digital-test-master-secret-32-chars!";
 const storesCollection: CollectionConfig = {
   slug: "stores",
   fields: [
-    { name: "name", required: true, type: "text" },
-    { name: "slug", required: true, type: "text" },
+    { name: "name", type: "text", required: true },
+    { name: "slug", type: "text", required: true },
     { name: "theme", type: "text" },
     {
-      fields: [{ name: "status", type: "text" }],
       name: "subscription",
       type: "group",
+      fields: [{ name: "status", type: "text" }],
     },
     { name: "activePaymentProvider", type: "text" },
     { name: "activeShippingProvider", type: "text" },
@@ -156,8 +157,8 @@ describe("storeCredentials Collection Integration", () => {
 
     // SAFETY: Payload Local API update returns persisted document matching StoreCredentials interface.
     const updated = (await payload.update({
-      collection: "storeCredentials",
       id: created.id,
+      collection: "storeCredentials",
       data: {
         midtrans: {
           clientKey: "new-client-key-updated",
@@ -203,8 +204,8 @@ describe("storeCredentials Collection Integration", () => {
 
     // SAFETY: Payload Local API update returns persisted document matching StoreCredentials interface.
     const updated = (await payload.update({
-      collection: "storeCredentials",
       id: created.id,
+      collection: "storeCredentials",
       data: {
         paymentProvider: "xendit",
       },
@@ -239,8 +240,8 @@ describe("storeCredentials Collection Integration", () => {
       });
 
     await payload.update({
-      collection: "stores",
       id: store.id,
+      collection: "stores",
       data: {
         name: "New Store Display Name",
       },
@@ -252,8 +253,8 @@ describe("storeCredentials Collection Integration", () => {
 
     // SAFETY: Payload Local API findByID returns persisted document matching StoreCredentials interface.
     const fetched = (await payload.findByID({
-      collection: "storeCredentials",
       id: created.id,
+      collection: "storeCredentials",
     })) as StoreCredentials;
 
     expect(fetched.midtrans?.serverKey).toBe(created.midtrans?.serverKey);

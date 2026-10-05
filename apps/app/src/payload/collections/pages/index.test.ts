@@ -1,10 +1,10 @@
 import type { PayloadRequest } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { env } from "@/env";
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
-
 import { readPageAccess } from "./access/read";
 import { Pages } from "./index";
 

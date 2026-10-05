@@ -1,6 +1,6 @@
 "use client";
 
-import { formatEstimatedDays } from "@repo/payload-plugin-commerce/actions";
+import type { ReactElement } from "react";
 import type {
   CustomerDestinationInput,
   FormattedShippingRateOption,
@@ -8,9 +8,11 @@ import type {
   GetShippingRatesResult,
   ShippingRateItemInput,
 } from "@repo/payload-plugin-commerce/actions";
-import { cn } from "@repo/theme-core/utils";
+
 import { useEffect, useState } from "react";
-import type { ReactElement } from "react";
+
+import { formatEstimatedDays } from "@repo/payload-plugin-commerce/actions";
+import { cn } from "@repo/theme-core/utils";
 
 export type { FormattedShippingRateOption } from "@repo/payload-plugin-commerce/actions";
 

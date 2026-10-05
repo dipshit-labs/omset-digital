@@ -1,14 +1,15 @@
-import type { Package, Product, Variant } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   PayloadRequest,
   RequestContext,
 } from "payload";
+import type { RawShipping } from "../packaging";
+import type { Package, Product, Variant } from "@repo/types";
+
 import { extractID } from "payload/shared";
 
 import { getStashedVirtualData } from "../context";
 import { normalizeShipping } from "../packaging";
-import type { RawShipping } from "../packaging";
 import { resolveDocumentStoreId } from "../store";
 import { cleanupDefaultVariant, findDefaultVariant } from "../variant";
 
@@ -155,11 +156,11 @@ const saveDefaultVariant = async (
   if (existingVariant) {
     // SAFETY: variantPayload fields conform to the variants collection schema.
     const updated = await req.payload.update({
+      id: existingVariant.id,
       collection: "variants",
       context: syncContext,
       data: variantPayload as never,
       draft: isDraft,
-      id: existingVariant.id,
       overrideAccess: true,
       req,
     });

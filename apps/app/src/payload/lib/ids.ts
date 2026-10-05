@@ -1,5 +1,6 @@
-import type { Store, User } from "@repo/types";
 import type { CollectionSlug, Payload } from "payload";
+import type { Store, User } from "@repo/types";
+
 import { extractID } from "payload/shared";
 
 type UserStoreRole = NonNullable<User["stores"]>[number]["roles"][number];

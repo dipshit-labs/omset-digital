@@ -9,9 +9,9 @@ export default defineProject({
     projects: [
       {
         test: {
+          name: "unit",
           environment: "node",
           include: ["src/**/*.test.ts"],
-          name: "unit",
           setupFiles: ["@repo/test-kit/msw/setup"],
         },
       },

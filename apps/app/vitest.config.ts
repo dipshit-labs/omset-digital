@@ -1,7 +1,6 @@
 // oxlint-disable unicorn/prefer-import-meta-properties
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 import react from "@vitejs/plugin-react";
 import { loadEnv } from "payload/node";
 import { defineProject } from "vitest/config";
@@ -18,22 +17,22 @@ export default defineProject(() => {
       tsconfigPaths: true,
     },
     test: {
-      environment: "node",
       name: "app",
+      environment: "node",
       projects: [
         {
           test: {
+            name: "unit",
             environment: "node",
             include: ["src/**/*.test.ts", "test/factories/**/*.test.ts"],
-            name: "unit",
           },
         },
         {
           test: {
+            name: "ui",
             css: true,
             environment: "jsdom",
             include: ["src/**/*.test.tsx"],
-            name: "ui",
             server: {
               deps: {
                 inline: [/@payloadcms\/ui/u, /react-image-crop/u],
@@ -43,11 +42,11 @@ export default defineProject(() => {
         },
         {
           test: {
+            name: "integration",
             environment: "node",
             fileParallelism: false,
             hookTimeout: 30_000,
             include: ["test/integrations/*.integration.test.ts"],
-            name: "integration",
             testTimeout: 30_000,
           },
         },

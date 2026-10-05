@@ -1,8 +1,8 @@
-import type { Variant } from "@repo/types";
 import type { CollectionBeforeChangeHook } from "payload";
+import type { RawShipping } from "../packaging";
+import type { Variant } from "@repo/types";
 
 import { normalizeShipping, resolveDefaultPackage } from "../packaging";
-import type { RawShipping } from "../packaging";
 import { resolveDocumentStoreId } from "../store";
 import { deriveVariantTitle } from "../variant";
 

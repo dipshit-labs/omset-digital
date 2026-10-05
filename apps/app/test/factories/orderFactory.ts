@@ -1,6 +1,7 @@
-import type { Order } from "@repo/types";
-import { Factory } from "fishery";
 import type { Payload } from "payload";
+import type { Order } from "@repo/types";
+
+import { Factory } from "fishery";
 
 export interface OrderTransientParams {
   payload?: Payload;
@@ -27,9 +28,9 @@ export const orderFactory = Factory.define<Order, OrderTransientParams>(
     });
 
     return {
+      id: sequence,
       createdAt: new Date().toISOString(),
       currency: "IDR",
-      id: sequence,
       orderNumber: `ORDER-${1000 + sequence}`,
       paymentMetadata: null,
       paymentStatus: "pending",

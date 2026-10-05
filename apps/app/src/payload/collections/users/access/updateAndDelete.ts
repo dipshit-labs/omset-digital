@@ -2,7 +2,6 @@ import type { Access } from "payload";
 
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getUserStoreIDs } from "@/payload/lib/ids";
-
 import { isAccessingSelf } from "./isAccessingSelf";
 
 /**

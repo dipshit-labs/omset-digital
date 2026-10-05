@@ -1,8 +1,8 @@
-import { defineSection } from "@repo/theme-core";
+import type { HeroBulletBlock, HeroSettings } from "./Hero";
 import type { SettingField } from "@repo/theme-core";
 
+import { defineSection } from "@repo/theme-core";
 import { Hero } from "./Hero";
-import type { HeroBulletBlock, HeroSettings } from "./Hero";
 
 export { Hero } from "./Hero";
 export type { HeroBulletBlock, HeroSettings } from "./Hero";
@@ -11,43 +11,43 @@ export type { HeroCtaClientProps } from "./HeroCtaClient";
 
 export const heroSettings: SettingField[] = [
   {
-    label: "Heading",
     name: "heading",
-    required: true,
     type: "text",
+    label: "Heading",
+    required: true,
   },
   {
-    label: "Subheading",
     name: "subheading",
     type: "textarea",
+    label: "Subheading",
   },
   {
-    defaultValue: "center",
-    label: "Alignment",
     name: "alignment",
     type: "select",
+    defaultValue: "center",
+    label: "Alignment",
     options: [
       { label: "Center", value: "center" },
       { label: "Left", value: "left" },
     ],
   },
   {
-    label: "Call to Action",
     name: "cta",
     type: "group",
+    label: "Call to Action",
     fields: [
-      { label: "Label", name: "label", type: "text" },
-      { label: "URL", name: "url", required: true, type: "text" },
-      { label: "Open in new tab", name: "newTab", type: "toggle" },
+      { name: "label", type: "text", label: "Label" },
+      { name: "url", type: "text", label: "URL", required: true },
+      { name: "newTab", type: "toggle", label: "Open in new tab" },
     ],
   },
 ];
 
 export const heroSection = defineSection<HeroSettings, HeroBulletBlock>({
+  name: "Hero",
   category: "Hero",
   Component: Hero,
   description: "Prominent banner section at the top of the page",
-  name: "Hero",
   settings: heroSettings,
   slug: "hero",
   blocks: [
@@ -55,16 +55,16 @@ export const heroSection = defineSection<HeroSettings, HeroBulletBlock>({
       slug: "bullet",
       fields: [
         {
-          label: "Text",
           name: "text",
-          required: true,
           type: "text",
+          label: "Text",
+          required: true,
         },
         {
-          defaultValue: "check",
-          label: "Icon",
           name: "icon",
           type: "select",
+          defaultValue: "check",
+          label: "Icon",
           options: [
             { label: "Check", value: "check" },
             { label: "Star", value: "star" },

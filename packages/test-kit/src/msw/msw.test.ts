@@ -129,8 +129,8 @@ describe("@repo/test-kit MSW centralized handlers", () => {
         body: params.toString(),
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
           key: "test-api-key",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
 
@@ -159,8 +159,8 @@ describe("@repo/test-kit MSW centralized handlers", () => {
         body: params.toString(),
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
           key: "test-api-key",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
 

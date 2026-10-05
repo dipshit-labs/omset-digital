@@ -1,5 +1,7 @@
-import { buildConfig, getPayload } from "payload";
 import type { Config, Payload } from "payload";
+import type { ManagedTestPayload } from "./destroyTestPayload";
+
+import { buildConfig, getPayload } from "payload";
 
 import { createTestDatabase } from "./database";
 import {
@@ -7,7 +9,6 @@ import {
   destroyTestPayload,
   ORIGINAL_DESTROY,
 } from "./destroyTestPayload";
-import type { ManagedTestPayload } from "./destroyTestPayload";
 
 const TEST_SECRET = "test-secret-must-be-at-least-32-chars-long";
 

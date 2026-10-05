@@ -1,13 +1,12 @@
+import type { CollectionConfig } from "payload";
+
+import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
 import {
   activePaymentProviderField,
   activeShippingProviderField,
   credentialsManagerField,
   originAddressField,
 } from "@repo/payload-plugin-commerce/fields";
-import type { CollectionConfig } from "payload";
-
-import { isSuperAdminAccess } from "@/payload/access/isSuperAdmin";
-
 import { updateAndDeleteStoreAccess } from "./access/updateAndDelete";
 
 export const Stores: CollectionConfig = {
@@ -31,8 +30,8 @@ export const Stores: CollectionConfig = {
           fields: [
             {
               name: "name",
-              required: true,
               type: "text",
+              required: true,
               admin: {
                 description: "Display name of the merchant's store",
               },
@@ -41,8 +40,8 @@ export const Stores: CollectionConfig = {
               // ! Note: change this in the future
               // unique implies an index in Postgres — no need for index: true
               name: "slug",
-              required: true,
               type: "text",
+              required: true,
               unique: true,
               admin: {
                 description:
@@ -57,10 +56,10 @@ export const Stores: CollectionConfig = {
               },
             },
             {
-              defaultValue: "default",
               name: "theme",
-              required: true,
               type: "select",
+              defaultValue: "default",
+              required: true,
               admin: {
                 description: "Active storefront theme",
               },
@@ -85,10 +84,10 @@ export const Stores: CollectionConfig = {
               },
               fields: [
                 {
-                  defaultValue: "trial",
                   name: "status",
-                  required: true,
                   type: "select",
+                  defaultValue: "trial",
+                  required: true,
                   options: [
                     { label: "Trial", value: "trial" },
                     { label: "Active", value: "active" },
@@ -113,9 +112,9 @@ export const Stores: CollectionConfig = {
               type: "group",
               fields: [
                 {
-                  defaultValue: false,
                   name: "enabled",
                   type: "checkbox",
+                  defaultValue: false,
                 },
                 {
                   name: "phoneNumber",

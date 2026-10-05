@@ -1,8 +1,9 @@
 "use client";
 
+import type { MouseEvent, ReactElement } from "react";
+
 import { Link } from "@repo/theme-core/primitives";
 import { cn } from "@repo/theme-core/utils";
-import type { MouseEvent, ReactElement } from "react";
 
 export interface HeroCtaClientProps {
   className?: string;

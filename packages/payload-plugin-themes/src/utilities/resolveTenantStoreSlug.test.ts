@@ -1,4 +1,5 @@
 import type { PayloadRequest } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { resolveTenantStoreSlug } from "./resolveTenantStoreSlug";

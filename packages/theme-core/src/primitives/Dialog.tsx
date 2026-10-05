@@ -1,7 +1,8 @@
 "use client";
 
-import { Dialog as BaseUIDialog } from "@base-ui/react/dialog";
 import type { ComponentProps, ReactElement } from "react";
+
+import { Dialog as BaseUIDialog } from "@base-ui/react/dialog";
 
 import { cn } from "../utils/cn";
 

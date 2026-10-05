@@ -6,9 +6,9 @@ import type {
   Field,
   Where,
 } from "payload";
-import { APIError } from "payload";
-
 import type { CreatePackagesCollectionOptions } from "../types";
+
+import { APIError } from "payload";
 
 /**
  * Extracts store tenant ID from string, number, or populated object.
@@ -214,30 +214,30 @@ export const createPackagesCollection = (
 
   const fields: Field[] = [
     {
-      index: true,
       name: "store",
+      type: "relationship",
+      index: true,
       // SAFETY: storesSlug references the configured stores collection slug.
       relationTo: storesSlug as CollectionSlug,
       required: true,
-      type: "relationship",
       admin: {
         description: "Associated store document",
         position: "sidebar",
       },
     },
     {
-      label: "Package name",
       name: "title",
-      required: true,
       type: "text",
+      label: "Package name",
+      required: true,
     },
     {
       type: "row",
       fields: [
         {
-          label: false,
           name: "dimensions",
           type: "group",
+          label: false,
           admin: {
             hideGutter: true,
             width: "60%",
@@ -247,31 +247,31 @@ export const createPackagesCollection = (
               type: "row",
               fields: [
                 {
+                  name: "length",
+                  type: "number",
                   label: "Length (cm)",
                   min: 0.1,
-                  name: "length",
                   required: true,
-                  type: "number",
                   admin: {
                     placeholder: "0.0",
                   },
                 },
                 {
+                  name: "width",
+                  type: "number",
                   label: "Width (cm)",
                   min: 0.1,
-                  name: "width",
                   required: true,
-                  type: "number",
                   admin: {
                     placeholder: "0.0",
                   },
                 },
                 {
+                  name: "height",
+                  type: "number",
                   label: "Height (cm)",
                   min: 0.1,
-                  name: "height",
                   required: true,
-                  type: "number",
                   admin: {
                     placeholder: "0.0",
                   },
@@ -281,9 +281,9 @@ export const createPackagesCollection = (
           ],
         },
         {
-          label: false,
           name: "tareWeight",
           type: "group",
+          label: false,
           admin: {
             hideGutter: true,
           },
@@ -292,22 +292,22 @@ export const createPackagesCollection = (
               type: "row",
               fields: [
                 {
+                  name: "value",
+                  type: "number",
                   defaultValue: 0,
                   label: "Weight (Empty)",
                   min: 0,
-                  name: "value",
                   required: true,
-                  type: "number",
                   admin: {
                     placeholder: "0",
                   },
                 },
                 {
+                  name: "unit",
+                  type: "select",
                   defaultValue: "g",
                   label: false,
-                  name: "unit",
                   required: true,
-                  type: "select",
                   admin: {
                     isClearable: false,
                     width: "35%",
@@ -327,10 +327,10 @@ export const createPackagesCollection = (
       ],
     },
     {
-      defaultValue: false,
-      label: "Use as default package for all products",
       name: "isDefault",
       type: "checkbox",
+      defaultValue: false,
+      label: "Use as default package for all products",
       admin: {
         description:
           "Used to calculate rates at checkout and pre-selected when buying labels",

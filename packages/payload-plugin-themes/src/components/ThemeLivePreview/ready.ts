@@ -15,8 +15,8 @@ export const ready = (options?: ReadyOptions): void => {
 
   targetWindow.postMessage(
     {
-      ready: true,
       type: "payload-live-preview",
+      ready: true,
     },
     options?.serverURL ?? "*"
   );

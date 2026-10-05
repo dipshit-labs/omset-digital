@@ -1,7 +1,7 @@
-import { Factory } from "fishery";
 import type { Payload } from "payload";
-
 import type { StoreCredentials } from "../../src/types";
+
+import { Factory } from "fishery";
 
 export interface StoreCredentialsTransientParams {
   payload?: Payload;
@@ -30,8 +30,8 @@ export const storeCredentialsFactory = Factory.define<
   });
 
   return {
-    createdAt: new Date().toISOString(),
     id: sequence,
+    createdAt: new Date().toISOString(),
     paymentProvider: "midtrans",
     shippingProvider: "rajaongkir",
     store: sequence,

@@ -1,4 +1,5 @@
 import type { FieldHook } from "payload";
+
 import { slugify } from "payload/shared";
 
 export const formatSlugHook =

@@ -1,11 +1,11 @@
+import type { PreviewLoggerErrorData, PreviewPayloadClient } from "./route";
 import type { Store, User } from "@repo/types";
+
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { env } from "@/env";
-
 import { createPreviewHandler } from "./route";
-import type { PreviewLoggerErrorData, PreviewPayloadClient } from "./route";
 
 interface RedirectError extends Error {
   digest: string;
@@ -43,9 +43,9 @@ vi.mock(import("next/navigation"), () => ({
 }));
 
 const createMockStore = (overrides: Partial<Store> = {}): Store => ({
-  createdAt: "",
   id: 1,
   name: "Default Store",
+  createdAt: "",
   slug: "default",
   theme: "default",
   updatedAt: "",
@@ -194,10 +194,10 @@ describe("GET /next/preview", () => {
 
   it("returns 403 when merchant does not have access to the target store", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "merchant@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [
@@ -233,10 +233,10 @@ describe("GET /next/preview", () => {
 
   it("returns 404 when target store slug is not found in database", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "merchant@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [
@@ -263,10 +263,10 @@ describe("GET /next/preview", () => {
 
   it("allows previewing non-store paths like /products when merchant has store access", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "merchant@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [
@@ -292,10 +292,10 @@ describe("GET /next/preview", () => {
 
   it("activates draft mode and redirects when merchant has store access", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "merchant@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [
@@ -328,10 +328,10 @@ describe("GET /next/preview", () => {
 
   it("normalizes store path prefix to query parameter on nested routes", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "merchant@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [
@@ -364,10 +364,10 @@ describe("GET /next/preview", () => {
 
   it("activates draft mode and redirects for super admin regardless of store assignments", async () => {
     fakeState.currentUser = {
+      id: 1,
       collection: "users",
       createdAt: "",
       email: "admin@test.com",
-      id: 1,
       roles: ["super-admin"],
       stores: [],
       updatedAt: "",
@@ -387,10 +387,10 @@ describe("GET /next/preview", () => {
 
   it("resolves target store from explicit search parameter when path is root", async () => {
     fakeState.currentUser = {
+      id: 42,
       collection: "users",
       createdAt: "",
       email: "manager@test.com",
-      id: 42,
       roles: ["user"],
       updatedAt: "",
       stores: [

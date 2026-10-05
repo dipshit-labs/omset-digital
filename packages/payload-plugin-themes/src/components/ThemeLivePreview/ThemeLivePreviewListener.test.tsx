@@ -1,4 +1,5 @@
 import type { ThemeManifestDefinition } from "@repo/theme-core";
+
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -11,11 +12,11 @@ const mockManifest: ThemeManifestDefinition = {
   version: "1.0.0",
   settings: [
     {
+      name: "primaryColor",
+      type: "color",
       cssVar: "--color-primary",
       defaultValue: "#111111",
       label: "Primary Color",
-      name: "primaryColor",
-      type: "color",
     },
   ],
 };
@@ -45,7 +46,7 @@ describe(ThemeLivePreviewListener, () => {
     );
 
     expect(postMessageSpy).toHaveBeenCalledWith(
-      { ready: true, type: "payload-live-preview" },
+      { type: "payload-live-preview", ready: true },
       "http://localhost:3000"
     );
 
@@ -68,8 +69,8 @@ describe(ThemeLivePreviewListener, () => {
       new MessageEvent("message", {
         origin: "http://localhost:3000",
         data: {
-          event: "save",
           type: "payload-document-event",
+          event: "save",
         },
       })
     );

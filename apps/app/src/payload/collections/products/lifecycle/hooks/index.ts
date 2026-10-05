@@ -1,9 +1,9 @@
-import type { Product, Variant } from "@repo/types";
 import type {
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
   CollectionBeforeChangeHook,
 } from "payload";
+import type { Product, Variant } from "@repo/types";
 
 import { productLifecycleAfterChange } from "./afterChange";
 import { productLifecycleAfterRead } from "./afterRead";

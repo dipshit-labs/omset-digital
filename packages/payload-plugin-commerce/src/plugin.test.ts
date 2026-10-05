@@ -5,6 +5,7 @@ import type {
   GroupField,
   TabsField,
 } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { commercePlugin } from "./plugin";
@@ -17,13 +18,13 @@ const mockStoresCollection: CollectionConfig = {
   fields: [
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
     },
     {
       name: "slug",
-      required: true,
       type: "text",
+      required: true,
     },
   ],
 };

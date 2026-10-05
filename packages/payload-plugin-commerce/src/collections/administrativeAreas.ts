@@ -1,5 +1,4 @@
 import type { CollectionConfig } from "payload";
-
 import type { CreateAdministrativeAreasCollectionOptions } from "../types";
 
 export const createAdministrativeAreasCollection = (
@@ -21,60 +20,60 @@ export const createAdministrativeAreasCollection = (
     },
     fields: [
       {
-        index: true,
         name: "subdistrict_id",
-        required: true,
         type: "number",
+        index: true,
+        required: true,
         admin: {
           description: "Unique subdistrict numeric identifier from RajaOngkir",
         },
       },
       {
         name: "subdistrict_name",
-        required: true,
         type: "text",
+        required: true,
         admin: {
           description: "Subdistrict (kecamatan) name",
         },
       },
       {
-        index: true,
         name: "city_id",
-        required: true,
         type: "number",
+        index: true,
+        required: true,
         admin: {
           description: "City or regency numeric identifier from RajaOngkir",
         },
       },
       {
         name: "city_name",
-        required: true,
         type: "text",
+        required: true,
         admin: {
           description: "City or regency name",
         },
       },
       {
         name: "city_type",
-        required: true,
         type: "text",
+        required: true,
         admin: {
           description: "Geographic unit type (Kota or Kabupaten)",
         },
       },
       {
-        index: true,
         name: "province_id",
-        required: true,
         type: "number",
+        index: true,
+        required: true,
         admin: {
           description: "Province numeric identifier from RajaOngkir",
         },
       },
       {
         name: "province_name",
-        required: true,
         type: "text",
+        required: true,
         admin: {
           description: "Province name",
         },

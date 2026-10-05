@@ -1,10 +1,10 @@
-import { slugField } from "payload";
 import type { CollectionConfig } from "payload";
+
+import { slugField } from "payload";
 
 import { canWrite } from "@/payload/access/canWrite";
 import { seoField } from "@/payload/fields/seo";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
-
 import { readProductAccess } from "./access/read";
 import { productLifecycleHooks } from "./lifecycle";
 import { virtualCatalogFields } from "./lifecycle/fields";
@@ -25,14 +25,14 @@ export const Products: CollectionConfig = {
   fields: [
     {
       name: "title",
-      required: true,
       type: "text",
+      required: true,
     },
     {
-      label: false,
       name: "description",
-      required: false,
       type: "richText",
+      label: false,
+      required: false,
     },
     // TODO: create custom component for this since the current UX is so bad
     {
@@ -40,11 +40,11 @@ export const Products: CollectionConfig = {
       type: "array",
       fields: [
         {
-          label: false,
           name: "asset",
+          type: "upload",
+          label: false,
           relationTo: "media",
           required: true,
-          type: "upload",
         },
       ],
     },
@@ -52,23 +52,23 @@ export const Products: CollectionConfig = {
     ...virtualCatalogFields,
 
     {
-      label: "Variants",
       type: "group",
+      label: "Variants",
       fields: [
         {
+          name: "variantTypes",
+          type: "relationship",
           hasMany: true,
           label: false,
-          name: "variantTypes",
           relationTo: "variantTypes",
-          type: "relationship",
         },
         {
+          name: "variants",
+          type: "join",
           collection: "variants",
           label: "Available Variants",
           maxDepth: 2,
-          name: "variants",
           on: "product",
-          type: "join",
           admin: {
             defaultColumns: ["options", "price", "stock", "_status"],
             condition: (data) =>
@@ -87,20 +87,20 @@ export const Products: CollectionConfig = {
     // Sidebar
     slugField(),
     {
-      hasMany: false,
       name: "category",
-      relationTo: "categories",
       type: "relationship",
+      hasMany: false,
+      relationTo: "categories",
       admin: {
         position: "sidebar",
         sortOptions: "name",
       },
     },
     {
-      hasMany: true,
       name: "relatedProducts",
-      relationTo: "products",
       type: "relationship",
+      hasMany: true,
+      relationTo: "products",
       filterOptions: ({ id }) => {
         if (id) {
           return {

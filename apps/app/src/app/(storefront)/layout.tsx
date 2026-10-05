@@ -1,5 +1,5 @@
-import { cn } from "@repo/theme-core/utils";
 import type { Metadata } from "next";
+
 import {
   Geist,
   Geist_Mono,
@@ -9,6 +9,7 @@ import {
   Roboto,
 } from "next/font/google";
 
+import { cn } from "@repo/theme-core/utils";
 import "./globals.css";
 
 const geistSans = Geist({

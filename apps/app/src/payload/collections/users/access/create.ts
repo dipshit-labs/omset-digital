@@ -1,5 +1,5 @@
-import type { Store, User } from "@repo/types";
 import type { Access } from "payload";
+import type { Store, User } from "@repo/types";
 
 import { isSuperAdmin } from "@/payload/access/isSuperAdmin";
 import { getUserStoreIDs } from "@/payload/lib/ids";

@@ -45,7 +45,7 @@ export default defineConfig({
       },
     },
     {
-      files: ["scripts/**/*.{ts,js,mjs,cjs}"],
+      files: ["**/scripts/**/*.{ts,js,mjs,cjs}"],
       rules: {
         "unicorn/filename-case": [
           "error",
@@ -72,10 +72,40 @@ export default defineConfig({
     "perfectionist/sort-objects": [
       "error",
       {
-        groups: ["unknown", "method", "multiline-member"],
-        order: "asc",
         type: "natural",
+        ignoreCase: true,
+        order: "asc",
+        specialCharacters: "keep",
+
+        partitionByComment: true,
+        partitionByNewLine: true,
+
+        groups: ["top", "unknown", "method", "multiline-member"],
+        customGroups: [
+          {
+            elementNamePattern: "^(?:id|key|name|type)$",
+            groupName: "top",
+            selector: "property",
+          },
+        ],
+
+        useConfigurationIf: {
+          objectType: "non-destructured",
+        },
       },
+      {
+        type: "unsorted",
+      },
+    ],
+
+    "perfectionist/sort-exports": ["error", { type: "natural", order: "asc" }],
+    "perfectionist/sort-named-exports": [
+      "error",
+      { type: "natural", order: "asc" },
+    ],
+    "perfectionist/sort-named-imports": [
+      "error",
+      { type: "natural", order: "asc" },
     ],
 
     "unicorn/filename-case": [

@@ -1,13 +1,7 @@
+import type { Config } from "@repo/types";
+
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
-import { createPackagesCollection } from "@repo/payload-plugin-commerce";
-import {
-  createTestReq,
-  describe,
-  it,
-  setTestPayloadConfig,
-} from "@repo/test-kit";
-import type { Config } from "@repo/types";
 import { expect } from "vitest";
 
 import { Categories } from "@/payload/collections/categories";
@@ -21,7 +15,13 @@ import {
 } from "@/payload/collections/products/variants";
 import { Stores } from "@/payload/collections/stores";
 import { Users } from "@/payload/collections/users";
-
+import { createPackagesCollection } from "@repo/payload-plugin-commerce";
+import {
+  createTestReq,
+  describe,
+  it,
+  setTestPayloadConfig,
+} from "@repo/test-kit";
 import { productFactory } from "../factories/productFactory";
 import { variantFactory } from "../factories/variantFactory";
 
@@ -141,8 +141,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     expect(product.title).toBe("Persisted T-Shirt");
 
     const retrieved = await payload.findByID({
-      collection: "products",
       id: product.id,
+      collection: "products",
     });
 
     expect(retrieved.id).toBe(product.id);
@@ -275,8 +275,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     expect(variant.id).toBeTypeOf("number");
 
     const retrievedVariant = await payload.findByID({
-      collection: "variants",
       id: variant.id,
+      collection: "variants",
     });
 
     expect(retrievedVariant.id).toBe(variant.id);
@@ -400,8 +400,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     });
 
     const retrieved = await payload.findByID({
-      collection: "products",
       id: product.id,
+      collection: "products",
     });
     expect(retrieved).toMatchObject({
       id: product.id,
@@ -576,8 +576,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     });
 
     const updated = await payload.update({
-      collection: "products",
       id: product.id,
+      collection: "products",
       data: {
         title: "Updated Custom Box Item",
       },
@@ -655,9 +655,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // Update virtual pricing and inventory on the parent product
     await payload.update({
+      id: product.id,
       collection: "products",
       draft: false,
-      id: product.id,
       data: {
         title: "Updated Single Product",
         inventory: {
@@ -799,9 +799,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     });
 
     const publishedProduct = await payload.update({
+      id: draftProduct.id,
       collection: "products",
       draft: false,
-      id: draftProduct.id,
       data: {
         _status: "published",
       },
@@ -872,8 +872,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // Retrieve via findByID
     const retrieved = await payload.findByID({
-      collection: "products",
       id: product.id,
+      collection: "products",
     });
 
     expect(retrieved.pricing).toMatchObject({
@@ -961,9 +961,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // 2. Read draft product and verify virtual field hydration
     const draftRead = await payload.findByID({
+      id: createdProduct.id,
       collection: "products",
       draft: true,
-      id: createdProduct.id,
     });
     expect(draftRead).toMatchObject({
       inventory: { sku: "ROUND-TRIP-SKU", stock: 50 },
@@ -973,9 +973,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // 3. Update virtual fields on the draft product
     await payload.update({
+      id: createdProduct.id,
       collection: "products",
       draft: true,
-      id: createdProduct.id,
       // SAFETY: Partial update modifying virtual price and stock on draft product.
       data: {
         inventory: {
@@ -990,9 +990,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // 4. Publish the product
     const publishedProduct = await payload.update({
+      id: createdProduct.id,
       collection: "products",
       draft: false,
-      id: createdProduct.id,
       data: {
         _status: "published",
       },
@@ -1001,9 +1001,9 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // 5. Read published product and verify updated virtual field hydration
     const publishedRead = await payload.findByID({
+      id: createdProduct.id,
       collection: "products",
       draft: false,
-      id: createdProduct.id,
     });
     expect(publishedRead).toMatchObject({
       inventory: { sku: "ROUND-TRIP-SKU", stock: 60 },
@@ -1046,8 +1046,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     const sizeType = await payload.create({
       collection: "variantTypes",
       data: {
-        label: "Size",
         name: "size",
+        label: "Size",
         store: store.id,
       },
     });
@@ -1079,8 +1079,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     // Transition to multi-variant by adding variantTypes
     const updatedProduct = await payload.update({
-      collection: "products",
       id: product.id,
+      collection: "products",
       data: {
         variantTypes: [sizeType.id],
       },
@@ -1123,8 +1123,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     const sizeType = await payload.create({
       collection: "variantTypes",
       data: {
-        label: "Size",
         name: "size",
+        label: "Size",
         store: store.id,
       },
     });
@@ -1157,8 +1157,8 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
     });
 
     await payload.update({
-      collection: "products",
       id: product.id,
+      collection: "products",
       data: {
         variantTypes: [sizeType.id],
       },
@@ -1218,11 +1218,11 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     const sizeType = await payload.create({
       collection: "variantTypes",
-      data: { label: "Size", name: "size", store: store.id },
+      data: { name: "size", label: "Size", store: store.id },
     });
     const colorType = await payload.create({
       collection: "variantTypes",
-      data: { label: "Color", name: "color", store: store.id },
+      data: { name: "color", label: "Color", store: store.id },
     });
 
     const smallOption = await payload.create({
@@ -1333,11 +1333,11 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     const sizeType = await payload.create({
       collection: "variantTypes",
-      data: { label: "Size", name: "size", store: store.id },
+      data: { name: "size", label: "Size", store: store.id },
     });
     const colorType = await payload.create({
       collection: "variantTypes",
-      data: { label: "Color", name: "color", store: store.id },
+      data: { name: "color", label: "Color", store: store.id },
     });
 
     const smallOption = await payload.create({
@@ -1446,7 +1446,7 @@ describe("catalog baseline integration", { timeout: 30_000 }, () => {
 
     const sizeType = await payload.create({
       collection: "variantTypes",
-      data: { label: "Size", name: "size", store: store.id },
+      data: { name: "size", label: "Size", store: store.id },
     });
     const medOption = await payload.create({
       collection: "variantOptions",

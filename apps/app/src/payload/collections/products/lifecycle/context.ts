@@ -1,5 +1,5 @@
-import type { Product } from "@repo/types";
 import type { PayloadRequest } from "payload";
+import type { Product } from "@repo/types";
 
 export const VIRTUAL_DATA_KEY = "products:defaultVariant:virtualData";
 

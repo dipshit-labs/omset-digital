@@ -1,4 +1,5 @@
 import type { Validate } from "payload";
+
 import { extractID } from "payload/shared";
 
 import { checkVariantOptionConstraints } from "./constraints";
@@ -16,10 +17,10 @@ const validateVariantOptions: Validate = async (value, { data, req }) => {
   let product: { variantTypes?: unknown } | null = null;
   try {
     product = await req.payload.findByID({
+      id: productId,
       collection: "products",
       depth: 0,
       draft: true,
-      id: productId,
       overrideAccess: true,
       req,
       select: { variantTypes: true },

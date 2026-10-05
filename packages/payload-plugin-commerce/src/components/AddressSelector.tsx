@@ -1,13 +1,12 @@
 "use client";
 
 import type { ReactElement } from "react";
-
 import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
-import { cn } from "../utils/cn";
 import type { ResolvedAddress } from "./useAdministrativeAreas";
-import { useAdministrativeAreas } from "./useAdministrativeAreas";
 
+import { cn } from "../utils/cn";
 import styles from "./AddressSelector.module.css";
+import { useAdministrativeAreas } from "./useAdministrativeAreas";
 
 export interface AddressSelectorProps {
   className?: string;

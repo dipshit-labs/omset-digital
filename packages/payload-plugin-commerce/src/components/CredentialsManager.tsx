@@ -1,9 +1,6 @@
 "use client";
 
-import { Button } from "@payloadcms/ui";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
-
-import { testConnection } from "../actions/testConnection";
 import type {
   TestConnectionInput,
   TestConnectionResult,
@@ -17,11 +14,14 @@ import type {
   StoreCredentials,
   XenditCredentials,
 } from "../types";
-import { cn } from "../utils/cn";
 import type { TestStatusState } from "./useCredentialsManager";
-import { useCredentialsManager } from "./useCredentialsManager";
 
+import { Button } from "@payloadcms/ui";
+
+import { testConnection } from "../actions/testConnection";
+import { cn } from "../utils/cn";
 import styles from "./CredentialsManager.module.css";
+import { useCredentialsManager } from "./useCredentialsManager";
 
 export interface CredentialsManagerProps {
   initialCredentials?: StoreCredentials;

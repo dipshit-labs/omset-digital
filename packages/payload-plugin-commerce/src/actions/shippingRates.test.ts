@@ -1,16 +1,17 @@
-import { encryptCredential } from "@repo/commerce-adapters/utils";
+import type {
+  GetShippingRatesInput,
+  ShippingRatesPayloadClient,
+} from "./shippingRates";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { encryptCredential } from "@repo/commerce-adapters/utils";
 import {
   createInMemoryRateCache,
   generateRateCacheKey,
   resolveWeightTier,
 } from "./shippingRateCache";
 import { calculateShippingRates } from "./shippingRates";
-import type {
-  GetShippingRatesInput,
-  ShippingRatesPayloadClient,
-} from "./shippingRates";
 
 interface MockPayloadQueryArgs {
   collection: string;
@@ -28,8 +29,8 @@ describe(calculateShippingRates, () => {
   });
 
   const mockStore = {
-    activeShippingProvider: "rajaongkir",
     id: 10,
+    activeShippingProvider: "rajaongkir",
     slug: "toko-kopi",
     originAddress: {
       cityId: 501,
@@ -55,8 +56,8 @@ describe(calculateShippingRates, () => {
 
   const mockDefaultPackage = {
     // 6000 / 6 = 1000g volumetric
-    dimensions: { height: 10, length: 30, width: 20 },
     id: 100,
+    dimensions: { height: 10, length: 30, width: 20 },
     isDefault: true,
     store: 10,
     tareWeight: { unit: "g" as const, value: 50 },
@@ -65,8 +66,8 @@ describe(calculateShippingRates, () => {
 
   const mockRajaOngkirResults = [
     {
-      code: "jne",
       name: "Jalur Nugraha Ekakurir (JNE)",
+      code: "jne",
       costs: [
         {
           cost: [{ etd: "1-2", note: "", value: 18_000 }],
@@ -81,8 +82,8 @@ describe(calculateShippingRates, () => {
       ],
     },
     {
-      code: "pos",
       name: "POS Indonesia",
+      code: "pos",
       costs: [
         {
           cost: [{ etd: "2-3", note: "", value: 15_000 }],
@@ -421,8 +422,8 @@ describe(calculateShippingRates, () => {
   it("recovers from corrupted cache and uses explicit packageId", async () => {
     const cache = createInMemoryRateCache();
     const explicitPackage = {
-      dimensions: { height: 10, length: 20, width: 15 },
       id: 99,
+      dimensions: { height: 10, length: 20, width: 15 },
       isDefault: false,
       store: 1,
       tareWeight: { unit: "g", value: 50 },

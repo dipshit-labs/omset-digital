@@ -16,9 +16,9 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
   const { checkboxOverrides, slugOverrides } = overrides;
 
   const checkBoxField: CheckboxField = {
-    defaultValue: true,
     name: "slugLock",
     type: "checkbox",
+    defaultValue: true,
     admin: {
       hidden: true,
       position: "sidebar",
@@ -28,10 +28,10 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
 
   // SAFETY: slugOverrides preserves field type and structure satisfies TextField.
   const slugFieldConfig: TextField = {
-    index: true,
-    label: "Slug",
     name: "slug",
     type: "text",
+    index: true,
+    label: "Slug",
     unique: true,
     ...slugOverrides,
     admin: {

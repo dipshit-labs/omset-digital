@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 import type { CityItem, ProvinceItem, SubdistrictItem } from "../types";
+
+import { useCallback, useEffect, useState } from "react";
 
 export interface ResolvedAddress {
   cityId: number;

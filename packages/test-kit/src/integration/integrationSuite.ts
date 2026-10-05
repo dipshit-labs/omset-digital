@@ -1,12 +1,13 @@
 import type { SuiteAPI, TestAPI } from "vitest";
+import type { TestPayloadConfigOverrides } from "../payload/createTestPayload";
+import type { TestKitFixtures } from "./integrationTest";
+
 import { describe } from "vitest";
 
-import type { TestPayloadConfigOverrides } from "../payload/createTestPayload";
 import {
   buildIntegrationTestRunner,
   setFilePayloadConfig,
 } from "./integrationTest";
-import type { TestKitFixtures } from "./integrationTest";
 
 export { describe } from "vitest";
 

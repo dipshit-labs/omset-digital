@@ -1,23 +1,24 @@
+import type { ThemeManifestDefinition } from "../types";
+
 import { describe, expect, it } from "vitest";
 
-import type { ThemeManifestDefinition } from "../types";
 import { toClientThemeManifest } from "./toClientThemeManifest";
 
 describe(toClientThemeManifest, () => {
   it("extracts public manifest properties for client consumption", () => {
     const manifest: ThemeManifestDefinition = {
+      name: "Default Theme",
       author: "Platform Team",
       description: "Default Storefront Theme",
-      name: "Default Theme",
       sections: [],
       slug: "default",
       version: "1.0.0",
       settings: [
         {
-          defaultValue: "#ffffff",
-          label: "Background",
           name: "background",
           type: "color",
+          defaultValue: "#ffffff",
+          label: "Background",
         },
       ],
     };
@@ -29,10 +30,10 @@ describe(toClientThemeManifest, () => {
       slug: "default",
       settings: [
         {
-          defaultValue: "#ffffff",
-          label: "Background",
           name: "background",
           type: "color",
+          defaultValue: "#ffffff",
+          label: "Background",
         },
       ],
     });

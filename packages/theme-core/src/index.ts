@@ -1,12 +1,4 @@
 export {
-  evaluateFieldCssValue,
-  evaluateThemeCssVars,
-  type EvaluateThemeCssVarsOptions,
-} from "./utils/evaluateThemeCssVars";
-
-export { toClientThemeManifest } from "./utils/toClientThemeManifest";
-
-export {
   calculateDerivedRadii,
   DEFAULT_MERCHANT_TOKENS,
   DEFAULT_THEME_TOKENS,
@@ -16,20 +8,20 @@ export {
   MERCHANT_THEME_VARIABLES,
   type MerchantThemeVariable,
   THEME_CSS_VARIABLES,
-  type ThemeCssVars,
   type ThemeCssVariable,
+  type ThemeCssVars,
   type ThemeTokens,
   type ThemeVariable,
 } from "./tokens";
 
 export {
-  defineSection,
-  defineTheme,
   type AnySectionDefinition,
   type ArraySettingField,
   type BaseSettingField,
   type BlocksSettingField,
   type ColorSettingField,
+  defineSection,
+  defineTheme,
   type GroupSettingField,
   type LinkSettingField,
   type LinkSettingValue,
@@ -46,8 +38,8 @@ export {
   type TemplatePresetDefinition,
   type TemplateSectionInstance,
   type TemplateType,
-  type TextSettingField,
   type TextareaSettingField,
+  type TextSettingField,
   type ThemeClientManifest,
   type ThemeManifestDefinition,
   type ThemeSettingsRecord,
@@ -55,3 +47,11 @@ export {
   type ToggleSettingField,
   type UploadSettingField,
 } from "./types";
+
+export {
+  evaluateFieldCssValue,
+  evaluateThemeCssVars,
+  type EvaluateThemeCssVarsOptions,
+} from "./utils/evaluateThemeCssVars";
+
+export { toClientThemeManifest } from "./utils/toClientThemeManifest";

@@ -1,9 +1,9 @@
+import { describe, expect, it } from "vitest";
+
 import {
   evaluateThemeCssVars,
   MERCHANT_THEME_VARIABLES,
 } from "@repo/theme-core";
-import { describe, expect, it } from "vitest";
-
 import { defaultTheme, heroSection, homePreset } from "./index";
 
 describe("default-theme package", () => {

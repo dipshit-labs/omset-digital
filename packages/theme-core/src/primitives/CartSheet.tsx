@@ -1,6 +1,16 @@
 "use client";
 
 import type { HTMLAttributes, ReactElement } from "react";
+import type {
+  SheetCloseProps,
+  SheetContentProps,
+  SheetDescriptionProps,
+  SheetFooterProps,
+  SheetHeaderProps,
+  SheetProps,
+  SheetTitleProps,
+  SheetTriggerProps,
+} from "./Sheet";
 
 import { cn } from "../utils/cn";
 import {
@@ -12,16 +22,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./Sheet";
-import type {
-  SheetCloseProps,
-  SheetContentProps,
-  SheetDescriptionProps,
-  SheetFooterProps,
-  SheetHeaderProps,
-  SheetProps,
-  SheetTitleProps,
-  SheetTriggerProps,
 } from "./Sheet";
 
 export type CartSheetProps = SheetProps;

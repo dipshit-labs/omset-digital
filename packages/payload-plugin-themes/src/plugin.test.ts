@@ -1,5 +1,6 @@
-import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Block, CollectionConfig, Config, Field } from "payload";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
+
 import { describe, expect, it } from "vitest";
 
 import { themesPlugin } from "./index";
@@ -14,18 +15,18 @@ const sampleManifest: ThemeManifestDefinition = {
       slug: "banner",
       settings: [
         {
-          label: "Title",
           name: "title",
           type: "text",
+          label: "Title",
         },
       ],
     },
   ],
   settings: [
     {
-      label: "Accent Color",
       name: "accentColor",
       type: "color",
+      label: "Accent Color",
     },
   ],
 };
@@ -158,14 +159,14 @@ describe(themesPlugin, () => {
       version: "1.0.0",
       settings: [
         {
-          label: "Accent Color",
           name: "accentColor",
           type: "color",
+          label: "Accent Color",
         },
         {
-          label: "Modern Only Setting",
           name: "modernSetting",
           type: "text",
+          label: "Modern Only Setting",
         },
       ],
     };

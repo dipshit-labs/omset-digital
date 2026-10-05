@@ -5,6 +5,7 @@ import type {
   SelectField,
   TextField,
 } from "payload";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { createStoreCredentialsCollection } from "./storeCredentials";
@@ -170,9 +171,9 @@ describe("storeCredentials collection factory", () => {
 
       expect(updateMock).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: 42,
           collection: "stores",
           context: { skipSync: true },
-          id: 42,
           data: {
             activePaymentProvider: "midtrans",
             activeShippingProvider: "rajaongkir",

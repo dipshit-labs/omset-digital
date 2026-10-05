@@ -1,6 +1,7 @@
-import type { Variant } from "@repo/types";
-import { Factory } from "fishery";
 import type { Payload } from "payload";
+import type { Variant } from "@repo/types";
+
+import { Factory } from "fishery";
 
 export interface VariantTransientParams {
   payload?: Payload;
@@ -28,9 +29,9 @@ export const variantFactory = Factory.define<Variant, VariantTransientParams>(
     });
 
     return {
+      id: sequence,
       _status: "published",
       createdAt: new Date().toISOString(),
-      id: sequence,
       options: [],
       product: 1,
       store: 1,

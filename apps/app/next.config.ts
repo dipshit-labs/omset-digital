@@ -1,9 +1,9 @@
+import type { NextConfig } from "next";
+
 // oxlint-disable unicorn/prefer-import-meta-properties
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 import { withPayload } from "@payloadcms/next/withPayload";
-import type { NextConfig } from "next";
 
 import "@/env";
 

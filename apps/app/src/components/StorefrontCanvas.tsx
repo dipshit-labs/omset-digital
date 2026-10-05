@@ -1,8 +1,9 @@
 // oxlint-disable shadcn/no-inline-styles
-import { renderThemeSections } from "@repo/theme-core/utils";
-import type { CSSProperties, ReactElement, ReactNode } from "react";
 
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 import type { StorefrontContext } from "@/lib/storefront";
+
+import { renderThemeSections } from "@repo/theme-core/utils";
 
 export interface StorefrontCanvasProps {
   children?: ReactNode;

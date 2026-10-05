@@ -1,6 +1,7 @@
-import type { Product } from "@repo/types";
-import { Factory } from "fishery";
 import type { Payload } from "payload";
+import type { Product } from "@repo/types";
+
+import { Factory } from "fishery";
 
 export interface ProductTransientParams {
   payload?: Payload;
@@ -29,9 +30,9 @@ export const productFactory = Factory.define<Product, ProductTransientParams>(
     });
 
     return {
+      id: sequence,
       _status: "published",
       createdAt: new Date().toISOString(),
-      id: sequence,
       slug: `product-${sequence}`,
       store: 1,
       title: `Product ${sequence}`,

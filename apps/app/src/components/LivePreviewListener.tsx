@@ -1,12 +1,14 @@
 "use client";
 
-import { ThemeLivePreviewListener } from "@repo/payload-plugin-themes/client";
+import type { ReactElement } from "react";
 import type {
   ThemeClientManifest,
   ThemeManifestDefinition,
 } from "@repo/theme-core/types";
+
 import { useRouter } from "next/navigation";
-import type { ReactElement } from "react";
+
+import { ThemeLivePreviewListener } from "@repo/payload-plugin-themes/client";
 
 export interface LivePreviewListenerProps {
   manifest?: ThemeClientManifest | ThemeManifestDefinition;

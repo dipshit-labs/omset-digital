@@ -1,8 +1,9 @@
+import type { PgLiteAdapterInstance } from "./pglite";
+
 import { PGlite } from "@electric-sql/pglite";
 import { describe, expect, it } from "vitest";
 
 import { createPgLiteAdapter } from "./pglite";
-import type { PgLiteAdapterInstance } from "./pglite";
 
 describe(
   "@repo/test-kit createPgLiteAdapter adapter lifecycle seam",

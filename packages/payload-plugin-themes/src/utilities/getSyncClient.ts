@@ -1,5 +1,4 @@
 import type { Payload } from "payload";
-
 import type { ThemeSyncPayload } from "../types";
 
 // SAFETY: Payload instance conforms to structural ThemeSyncPayload contract.

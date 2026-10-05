@@ -1,6 +1,6 @@
 export {
-  describe,
   defineIntegrationSuite,
+  describe,
   integrationSuite,
   setTestPayloadConfig,
 } from "./integration/integrationSuite";
@@ -21,17 +21,17 @@ export type {
   TestPayloadConfigOverrides,
 } from "./payload/createTestPayload";
 
-export { destroyTestPayload } from "./payload/destroyTestPayload";
-export { resetDatabase, resetPostgresDatabase } from "./payload/resetDatabase";
-export type { PostgresAdapterLike } from "./payload/resetDatabase";
 export { createTestReq } from "./payload/createTestReq";
 export type {
   CreateReqFn,
   CreateTestReqOptions,
 } from "./payload/createTestReq";
-
 export { createTestDatabase } from "./payload/database";
 export type {
   TestDatabaseAdapter,
   TestDatabaseDriver,
 } from "./payload/database";
+export { destroyTestPayload } from "./payload/destroyTestPayload";
+
+export { resetDatabase, resetPostgresDatabase } from "./payload/resetDatabase";
+export type { PostgresAdapterLike } from "./payload/resetDatabase";

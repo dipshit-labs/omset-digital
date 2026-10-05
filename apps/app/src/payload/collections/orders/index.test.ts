@@ -1,10 +1,10 @@
-import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
 import type { Field, JSONField, PayloadRequest, SelectField } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { canWrite } from "@/payload/access/canWrite";
 import { enforceStoreOnCreate } from "@/payload/hooks/enforceStoreOnCreate";
-
+import { preventPaymentStatusReversion } from "@repo/payload-plugin-commerce/hooks";
 import { Orders } from "./index";
 
 const createMockReq = (user: PayloadRequest["user"]): PayloadRequest => {
@@ -99,10 +99,10 @@ describe("Orders collection", () => {
     const updateAccess = paymentMetadata?.access?.update;
 
     const adminReq = createMockReq({
+      id: 1,
       collection: "users",
       createdAt: "2026-10-01T00:00:00Z",
       email: "admin@example.com",
-      id: 1,
       updatedAt: "2026-10-01T00:00:00Z",
     });
     const anonReq = createMockReq(null);

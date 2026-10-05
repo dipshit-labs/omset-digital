@@ -1,5 +1,6 @@
-import { Accordion as BaseUIAccordion } from "@base-ui/react/accordion";
 import type { ReactElement } from "react";
+
+import { Accordion as BaseUIAccordion } from "@base-ui/react/accordion";
 
 import { cn } from "../utils/cn";
 

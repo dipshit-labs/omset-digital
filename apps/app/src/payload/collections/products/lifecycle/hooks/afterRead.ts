@@ -1,5 +1,5 @@
-import type { Product } from "@repo/types";
 import type { CollectionAfterReadHook } from "payload";
+import type { Product } from "@repo/types";
 
 import { findDefaultVariant } from "../variant";
 /**

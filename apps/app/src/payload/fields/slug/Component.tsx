@@ -1,5 +1,8 @@
 "use client";
 
+import type { TextFieldClientProps } from "payload";
+import type React from "react";
+
 import {
   Button,
   FieldLabel,
@@ -8,9 +11,7 @@ import {
   useForm,
   useFormFields,
 } from "@payloadcms/ui";
-import type { TextFieldClientProps } from "payload";
 import { slugify } from "payload/shared";
-import type React from "react";
 import { useCallback, useEffect } from "react";
 
 import "./styles.css";
@@ -73,8 +74,8 @@ const SlugComponent: React.FC<SlugComponentProps> = ({
       e.preventDefault();
 
       dispatchFields({
-        path: checkboxFieldPath,
         type: "UPDATE",
+        path: checkboxFieldPath,
         value: !isLocked,
       });
     },

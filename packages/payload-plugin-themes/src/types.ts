@@ -1,8 +1,8 @@
+import type { CollectionConfig } from "payload";
 import type {
   ThemeManifestDefinition,
   ThemeSettingValue,
 } from "@repo/theme-core";
-import type { CollectionConfig } from "payload";
 
 export interface ThemesPluginSlugs {
   templates?: string;

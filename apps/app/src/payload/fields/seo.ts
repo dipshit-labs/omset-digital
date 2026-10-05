@@ -1,3 +1,5 @@
+import type { CollapsibleField } from "payload";
+
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -5,21 +7,20 @@ import {
   OverviewField,
   PreviewField,
 } from "@payloadcms/plugin-seo/fields";
-import type { CollapsibleField } from "payload";
 
 // TODO: Improve this fields
 // TODO: Add generator function
 const seoField = (): CollapsibleField => ({
-  label: "Search engine listing",
   type: "collapsible",
+  label: "Search engine listing",
   admin: {
     initCollapsed: true,
   },
   fields: [
     {
-      label: false,
       name: "meta",
       type: "group",
+      label: false,
       fields: [
         MetaTitleField({}),
         MetaDescriptionField({}),

@@ -1,5 +1,6 @@
-import { Input as BaseUIInput } from "@base-ui/react/input";
 import type { ComponentProps, ReactElement } from "react";
+
+import { Input as BaseUIInput } from "@base-ui/react/input";
 
 import { cn } from "../utils/cn";
 

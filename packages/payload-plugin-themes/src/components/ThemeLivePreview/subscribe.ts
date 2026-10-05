@@ -1,4 +1,4 @@
-import { evaluateThemeCssVars } from "@repo/theme-core";
+import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import type {
   TemplateSectionInstance,
   ThemeClientManifest,
@@ -6,8 +6,8 @@ import type {
   ThemeSettingsRecord,
 } from "@repo/theme-core";
 
+import { evaluateThemeCssVars } from "@repo/theme-core";
 import { isThemePreviewMessage } from "../../utilities/isThemePreviewMessage";
-import type { ThemeDocumentEventMessage } from "../../utilities/isThemePreviewMessage";
 import { ready } from "./ready";
 
 export interface ThemeLivePreviewUpdate {

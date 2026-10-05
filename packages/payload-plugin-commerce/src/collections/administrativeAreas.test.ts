@@ -1,4 +1,5 @@
 import type { Field, NumberField, TextField } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { createAdministrativeAreasCollection } from "./administrativeAreas";

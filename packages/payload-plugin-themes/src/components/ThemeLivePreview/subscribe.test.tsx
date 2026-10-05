@@ -1,14 +1,15 @@
+import type { MockInstance } from "vitest";
+import type { ThemeLivePreviewUpdate } from "./subscribe";
 import type {
   TemplateSectionInstance,
   ThemeManifestDefinition,
 } from "@repo/theme-core";
-import type { MockInstance } from "vitest";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { isThemePreviewMessage } from "../../utilities/isThemePreviewMessage";
 import { ready } from "./ready";
 import { subscribeThemeLivePreview } from "./subscribe";
-import type { ThemeLivePreviewUpdate } from "./subscribe";
 
 const mockManifest: ThemeManifestDefinition = {
   name: "Mock Theme",
@@ -17,18 +18,18 @@ const mockManifest: ThemeManifestDefinition = {
   version: "1.0.0",
   settings: [
     {
+      name: "primaryColor",
+      type: "color",
       cssVar: "--primary",
       defaultValue: "#000000",
       label: "Primary Color",
-      name: "primaryColor",
-      type: "color",
     },
     {
+      name: "fontSize",
+      type: "number",
       cssVar: "--font-size",
       defaultValue: 16,
       label: "Font Size",
-      name: "fontSize",
-      type: "number",
       unit: "px",
     },
   ],
@@ -48,8 +49,8 @@ describe(ready, () => {
 
     expect(postMessageSpy).toHaveBeenCalledWith(
       {
-        ready: true,
         type: "payload-live-preview",
+        ready: true,
       },
       "http://localhost:3000"
     );
@@ -74,8 +75,8 @@ describe(ready, () => {
 
     expect(postMessageSpy).toHaveBeenCalledWith(
       {
-        ready: true,
         type: "payload-live-preview",
+        ready: true,
       },
       "*"
     );
@@ -157,8 +158,8 @@ describe(subscribeThemeLivePreview, () => {
       new MessageEvent("message", {
         origin: "http://malicious-site.com",
         data: {
-          data: { settings: { primaryColor: "#ff0000" } },
           type: "payload-live-preview",
+          data: { settings: { primaryColor: "#ff0000" } },
         },
       })
     );
@@ -168,8 +169,8 @@ describe(subscribeThemeLivePreview, () => {
       new MessageEvent("message", {
         origin: "http://localhost:3000",
         data: {
-          data: { settings: { primaryColor: "#ff0000" } },
           type: "other-event",
+          data: { settings: { primaryColor: "#ff0000" } },
         },
       })
     );
@@ -192,8 +193,8 @@ describe(subscribeThemeLivePreview, () => {
       new MessageEvent("message", {
         origin: "http://localhost:3000",
         data: {
-          collectionSlug: "themes",
           type: "payload-live-preview",
+          collectionSlug: "themes",
           data: {
             settings: {
               fontSize: 20,
@@ -229,13 +230,13 @@ describe(subscribeThemeLivePreview, () => {
 
     const newSections: TemplateSectionInstance[] = [
       {
-        blockType: "mock_hero",
         id: "section-1",
+        blockType: "mock_hero",
         settings: { title: "Hello World" },
       },
       {
-        blockType: "mock_banner",
         id: "section-2",
+        blockType: "mock_banner",
         settings: { text: "Announce" },
       },
     ];
@@ -244,8 +245,8 @@ describe(subscribeThemeLivePreview, () => {
       new MessageEvent("message", {
         origin: "http://localhost:3000",
         data: {
-          collectionSlug: "templates",
           type: "payload-live-preview",
+          collectionSlug: "templates",
           data: {
             sections: newSections,
           },
@@ -278,8 +279,8 @@ describe(subscribeThemeLivePreview, () => {
       new MessageEvent("message", {
         origin: "http://localhost:3000",
         data: {
-          event: "save",
           type: "payload-document-event",
+          event: "save",
         },
       })
     );
@@ -321,7 +322,7 @@ describe(subscribeThemeLivePreview, () => {
 describe(isThemePreviewMessage, () => {
   it("identifies payload-live-preview and payload-document-event as valid theme preview messages", () => {
     const livePreviewEvent = new MessageEvent("message", {
-      data: { data: {}, type: "payload-live-preview" },
+      data: { type: "payload-live-preview", data: {} },
     });
     const docEvent = new MessageEvent("message", {
       data: { type: "payload-document-event" },

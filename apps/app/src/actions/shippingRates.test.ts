@@ -1,8 +1,9 @@
-import { createInMemoryRateCache } from "@repo/payload-plugin-commerce/actions";
+import type { ShippingRatesPayloadClient } from "./shippingRates";
+
 import { describe, expect, it, vi } from "vitest";
 
+import { createInMemoryRateCache } from "@repo/payload-plugin-commerce/actions";
 import { createShippingRatesAction, resolveRateCache } from "./shippingRates";
-import type { ShippingRatesPayloadClient } from "./shippingRates";
 
 interface MockQueryArgs {
   collection: string;
@@ -11,8 +12,8 @@ interface MockQueryArgs {
 describe("shippingRates server actions", () => {
   it("getShippingRates invokes calculateShippingRates with injected payload and cache", async () => {
     const mockStore = {
-      activeShippingProvider: "rajaongkir",
       id: 1,
+      activeShippingProvider: "rajaongkir",
       slug: "test-store",
       originAddress: {
         cityId: 501,
@@ -49,8 +50,8 @@ describe("shippingRates server actions", () => {
         rajaongkir: {
           results: [
             {
-              code: "jne",
               name: "Jalur Nugraha Ekakurir (JNE)",
+              code: "jne",
               costs: [
                 {
                   cost: [{ etd: "1-2", note: "", value: 12_000 }],

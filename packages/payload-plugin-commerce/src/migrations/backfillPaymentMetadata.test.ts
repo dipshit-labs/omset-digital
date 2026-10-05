@@ -1,4 +1,5 @@
 import type { FieldHookArgs, Payload } from "payload";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -245,8 +246,8 @@ describe(backfillOrdersPaymentMetadata, () => {
 
     expect(updateMock).toHaveBeenCalledTimes(2);
     expect(updateMock).toHaveBeenCalledWith({
-      collection: "orders",
       id: 1,
+      collection: "orders",
       overrideAccess: true,
       data: {
         paymentMetadata: {
@@ -257,8 +258,8 @@ describe(backfillOrdersPaymentMetadata, () => {
       },
     });
     expect(updateMock).toHaveBeenCalledWith({
-      collection: "orders",
       id: 4,
+      collection: "orders",
       overrideAccess: true,
       data: {
         paymentMetadata: {

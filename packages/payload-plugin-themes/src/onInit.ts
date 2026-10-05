@@ -1,10 +1,10 @@
 import type { Payload } from "payload";
-
 import type {
   SyncThemesOptions,
   ThemeSyncDoc,
   ThemeSyncPayload,
 } from "./types";
+
 import { getSyncClient } from "./utilities/getSyncClient";
 import { syncTemplatesForTheme } from "./utilities/syncTemplatesForTheme";
 import { syncThemeForStore } from "./utilities/syncThemeForStore";

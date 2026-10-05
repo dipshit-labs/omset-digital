@@ -1,38 +1,22 @@
 export {
-  activePaymentProviderField,
-  activeShippingProviderField,
-  commercePlugin,
-  credentialsManagerField,
-  originAddressField,
-} from "./plugin";
+  getAdministrativeAreasDb,
+  getCities,
+  getProvinces,
+  getSubdistricts,
+  setAdministrativeAreasDb,
+} from "./actions/administrativeAreas";
 
-export { paymentMetadataField } from "./fields/paymentMetadata";
 export { createAdministrativeAreasCollection } from "./collections/administrativeAreas";
 export { createPackagesCollection } from "./collections/packages";
-
-export {
-  getAdministrativeAreasSeedData,
-  type AdministrativeAreaSeedRecord,
-} from "./data/seedData";
-
 export {
   seedAdministrativeAreas,
   type SeedAdministrativeAreasOptions,
 } from "./data/seed";
 
 export {
-  getCities,
-  getProvinces,
-  getSubdistricts,
-  getAdministrativeAreasDb,
-  setAdministrativeAreasDb,
-} from "./actions/administrativeAreas";
-
-export {
-  backfillOrdersPaymentMetadata,
-  populatePaymentMetadataAfterRead,
-  resolveLegacyPaymentMetadata,
-} from "./migrations/backfillPaymentMetadata";
+  type AdministrativeAreaSeedRecord,
+  getAdministrativeAreasSeedData,
+} from "./data/seedData";
 
 export {
   CANONICAL_PAYMENT_STATUSES,
@@ -42,3 +26,19 @@ export {
 } from "./exports/hooks";
 
 export type { PaymentStatus } from "./exports/hooks";
+
+export { paymentMetadataField } from "./fields/paymentMetadata";
+
+export {
+  backfillOrdersPaymentMetadata,
+  populatePaymentMetadataAfterRead,
+  resolveLegacyPaymentMetadata,
+} from "./migrations/backfillPaymentMetadata";
+
+export {
+  activePaymentProviderField,
+  activeShippingProviderField,
+  commercePlugin,
+  credentialsManagerField,
+  originAddressField,
+} from "./plugin";

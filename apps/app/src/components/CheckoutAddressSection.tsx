@@ -1,14 +1,14 @@
 "use client";
 
-import { AddressSelector } from "@repo/payload-plugin-commerce/client";
-import type { ResolvedAddress } from "@repo/payload-plugin-commerce/client";
 import type { ReactElement } from "react";
+import type { ResolvedAddress } from "@repo/payload-plugin-commerce/client";
 
 import {
   getCities,
   getProvinces,
   getSubdistricts,
 } from "@/actions/administrativeAreas";
+import { AddressSelector } from "@repo/payload-plugin-commerce/client";
 
 export interface CheckoutAddressSectionProps {
   className?: string;

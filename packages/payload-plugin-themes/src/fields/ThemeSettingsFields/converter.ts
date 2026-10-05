@@ -1,3 +1,5 @@
+import type { Block, Field } from "payload";
+import type { ConvertFieldOptions } from "../../types";
 import type {
   AnySectionDefinition,
   ArraySettingField,
@@ -13,16 +15,13 @@ import type {
   ToggleSettingField,
   UploadSettingField,
 } from "@repo/theme-core";
-import type { Block, Field } from "payload";
-
-import type { ConvertFieldOptions } from "../../types";
 
 const convertTextField = (setting: TextSettingField): Field => ({
+  name: setting.name,
+  type: "text",
   defaultValue: setting.defaultValue,
   label: setting.label,
-  name: setting.name,
   required: setting.required,
-  type: "text",
   admin: {
     description: setting.admin?.description,
     placeholder: setting.placeholder,
@@ -30,11 +29,11 @@ const convertTextField = (setting: TextSettingField): Field => ({
 });
 
 const convertTextareaField = (setting: TextareaSettingField): Field => ({
+  name: setting.name,
+  type: "textarea",
   defaultValue: setting.defaultValue,
   label: setting.label,
-  name: setting.name,
   required: setting.required,
-  type: "textarea",
   admin: {
     description: setting.admin?.description,
     placeholder: setting.placeholder,
@@ -42,13 +41,13 @@ const convertTextareaField = (setting: TextareaSettingField): Field => ({
 });
 
 const convertNumberField = (setting: NumberSettingField): Field => ({
+  name: setting.name,
+  type: "number",
   defaultValue: setting.defaultValue,
   label: setting.label,
   max: setting.max,
   min: setting.min,
-  name: setting.name,
   required: setting.required,
-  type: "number",
   admin: {
     description: setting.admin?.description,
     step: setting.step,
@@ -56,22 +55,22 @@ const convertNumberField = (setting: NumberSettingField): Field => ({
 });
 
 const convertToggleField = (setting: ToggleSettingField): Field => ({
-  defaultValue: setting.defaultValue,
-  label: setting.label,
   name: setting.name,
   type: "checkbox",
+  defaultValue: setting.defaultValue,
+  label: setting.label,
   admin: {
     description: setting.admin?.description,
   },
 });
 
 const convertSelectField = (setting: SelectSettingField): Field => ({
+  name: setting.name,
+  type: "select",
   defaultValue: setting.defaultValue,
   label: setting.label,
-  name: setting.name,
   options: setting.options,
   required: setting.required,
-  type: "select",
   admin: {
     description: setting.admin?.description,
   },
@@ -87,11 +86,11 @@ const convertUploadField = (
     "media") as "media";
 
   return {
-    label: setting.label,
     name: setting.name,
+    type: "upload",
+    label: setting.label,
     relationTo,
     required: setting.required,
-    type: "upload",
     admin: {
       description: setting.admin?.description,
     },
@@ -99,31 +98,31 @@ const convertUploadField = (
 };
 
 const convertLinkField = (setting: LinkSettingField): Field => ({
-  label: setting.label,
   name: setting.name,
   type: "group",
+  label: setting.label,
   admin: {
     description: setting.admin?.description,
   },
   fields: [
     {
+      name: "url",
+      type: "text",
       defaultValue: setting.defaultValue?.url,
       label: "URL",
-      name: "url",
       required: setting.required,
-      type: "text",
     },
     {
-      defaultValue: setting.defaultValue?.label,
-      label: "Label",
       name: "label",
       type: "text",
+      defaultValue: setting.defaultValue?.label,
+      label: "Label",
     },
     {
-      defaultValue: setting.defaultValue?.newTab ?? false,
-      label: "Open in new tab",
       name: "newTab",
       type: "checkbox",
+      defaultValue: setting.defaultValue?.newTab ?? false,
+      label: "Open in new tab",
     },
   ],
 });
@@ -133,10 +132,10 @@ const convertGroupField = (
   convert: (f: SettingField, opts?: ConvertFieldOptions) => Field,
   options?: ConvertFieldOptions
 ): Field => ({
-  fields: setting.fields.map((f) => convert(f, options)),
-  label: setting.label,
   name: setting.name,
   type: "group",
+  fields: setting.fields.map((f) => convert(f, options)),
+  label: setting.label,
   admin: {
     description: setting.admin?.description,
   },
@@ -147,12 +146,12 @@ const convertArrayField = (
   convert: (f: SettingField, opts?: ConvertFieldOptions) => Field,
   options?: ConvertFieldOptions
 ): Field => ({
+  name: setting.name,
+  type: "array",
   fields: setting.fields.map((f) => convert(f, options)),
   label: setting.label,
   maxRows: setting.maxRows,
   minRows: setting.minRows,
-  name: setting.name,
-  type: "array",
   admin: {
     description: setting.admin?.description,
   },
@@ -183,10 +182,10 @@ export const settingFieldToPayloadField = (
     }
     case "color": {
       return {
-        defaultValue: setting.defaultValue,
-        label: setting.label,
         name: setting.name,
         type: "text",
+        defaultValue: setting.defaultValue,
+        label: setting.label,
         admin: {
           description: setting.admin?.description,
         },
@@ -203,12 +202,12 @@ export const settingFieldToPayloadField = (
     }
     case "richText": {
       return {
+        name: setting.name,
+        type: "richText",
         // SAFETY: RichText editor default value payload conforms to lexical editor state.
         defaultValue: setting.defaultValue as never,
         label: setting.label,
-        name: setting.name,
         required: setting.required,
-        type: "richText",
         admin: {
           description: setting.admin?.description,
         },
@@ -222,9 +221,9 @@ export const settingFieldToPayloadField = (
     }
     case "blocks": {
       return {
-        label: setting.label,
         name: setting.name,
         type: "blocks",
+        label: setting.label,
         admin: {
           description: setting.admin?.description,
         },
@@ -272,10 +271,10 @@ const sectionToPayloadBlock = (
 
   if (section.blocks && section.blocks.length > 0) {
     fields.push({
-      blocks: section.blocks.map((b) => childBlockToPayloadBlock(b, options)),
-      label: "Blocks",
       name: "blocks",
       type: "blocks",
+      blocks: section.blocks.map((b) => childBlockToPayloadBlock(b, options)),
+      label: "Blocks",
     });
   }
 

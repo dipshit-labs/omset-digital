@@ -1,6 +1,6 @@
-import { createTestReq } from "@repo/test-kit";
 import { describe, expect, it } from "vitest";
 
+import { createTestReq } from "@repo/test-kit";
 import { paymentMetadataField } from "./paymentMetadata";
 
 describe("paymentMetadata field definition", () => {
@@ -13,9 +13,9 @@ describe("paymentMetadata field definition", () => {
     const readAccess = paymentMetadataField.access?.read;
     const mockAdminReq = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         email: "admin@example.com",
-        id: 1,
       },
     });
     const mockAnonReq = createTestReq();
@@ -37,9 +37,9 @@ describe("paymentMetadata field definition", () => {
     const updateAccess = paymentMetadataField.access?.update;
     const mockAdminReq = createTestReq({
       user: {
+        id: 1,
         collection: "users",
         email: "admin@example.com",
-        id: 1,
       },
     });
     const mockAnonReq = createTestReq();

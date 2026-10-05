@@ -1,12 +1,13 @@
-import { APIError } from "payload";
 import type { CollectionBeforeValidateHook, PayloadRequest } from "payload";
+import type { PaymentStatus } from "./paymentStatus";
+
+import { APIError } from "payload";
 import { describe, expect, it } from "vitest";
 
 import {
   isValidPaymentStatusTransition,
   preventPaymentStatusReversion,
 } from "./paymentStatus";
-import type { PaymentStatus } from "./paymentStatus";
 
 type HookArgs = Parameters<CollectionBeforeValidateHook>[0];
 

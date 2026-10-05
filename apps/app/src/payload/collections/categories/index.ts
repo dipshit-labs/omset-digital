@@ -19,14 +19,14 @@ export const Categories: CollectionConfig = {
   fields: [
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
     },
     ...slugField("name"),
     {
       name: "description",
-      required: false,
       type: "text",
+      required: false,
     },
   ],
   hooks: {

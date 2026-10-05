@@ -1,8 +1,8 @@
-import type { ThemeManifestDefinition } from "@repo/theme-core";
 import type { Block, CollectionConfig, CollectionSlug, Field } from "payload";
+import type { CreateTemplatesCollectionOptions } from "../types";
+import type { ThemeManifestDefinition } from "@repo/theme-core";
 
 import { manifestToPayloadBlocks } from "../fields/ThemeSettingsFields/converter";
-import type { CreateTemplatesCollectionOptions } from "../types";
 import { generateThemePreviewPath } from "../utilities/generateThemePreviewPath";
 import { resolveTenantStoreSlug } from "../utilities/resolveTenantStoreSlug";
 
@@ -23,10 +23,10 @@ export const createTemplatesCollection = (
   );
 
   const sectionsField: Field = {
-    blocks: allBlocks,
-    label: "Sections",
     name: "sections",
     type: "blocks",
+    blocks: allBlocks,
+    label: "Sections",
     admin: {
       description: "Ordered sections composing this template layout",
     },
@@ -35,17 +35,17 @@ export const createTemplatesCollection = (
   const fields: Field[] = [
     {
       name: "name",
-      required: true,
       type: "text",
+      required: true,
       admin: {
         description: "Template display name (e.g. Home, Product Details)",
       },
     },
     {
-      defaultValue: "home",
       name: "type",
-      required: true,
       type: "select",
+      defaultValue: "home",
+      required: true,
       admin: {
         description: "The route type this layout template applies to",
       },
@@ -58,10 +58,10 @@ export const createTemplatesCollection = (
     },
     {
       name: "theme",
+      type: "relationship",
       // SAFETY: themesSlug dynamically resolves to the configured themes CollectionSlug.
       relationTo: (options.themesSlug ?? "themes") as CollectionSlug,
       required: true,
-      type: "relationship",
       admin: {
         description: "Installed theme this template belongs to",
       },

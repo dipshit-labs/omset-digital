@@ -9,16 +9,16 @@ export default defineProject({
     projects: [
       {
         test: {
+          name: "unit",
           environment: "node",
           include: ["src/**/*.test.ts"],
-          name: "unit",
         },
       },
       {
         test: {
+          name: "ui",
           environment: "jsdom",
           include: ["src/**/*.test.tsx"],
-          name: "ui",
         },
       },
     ],

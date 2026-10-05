@@ -1,5 +1,6 @@
-import type { Product, Variant, VariantOption } from "@repo/types";
 import type { PayloadRequest } from "payload";
+import type { Product, Variant, VariantOption } from "@repo/types";
+
 import { extractID } from "payload/shared";
 
 interface FindDefaultVariantOptions {
@@ -138,9 +139,9 @@ export const cleanupDefaultVariant = async (
 
   if (hasOptionBearingVariant) {
     await req.payload.delete({
+      id: defaultVariant.id,
       collection: "variants",
       context: { ...req.context, "products:skipDefaultVariantSync": true },
-      id: defaultVariant.id,
       overrideAccess: true,
       req,
     });

@@ -1,9 +1,10 @@
-import configPromise from "@payload-config";
-import type { User } from "@repo/types";
-import { draftMode } from "next/headers";
-import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
 import type { Payload } from "payload";
+import type { User } from "@repo/types";
+
+import configPromise from "@payload-config";
+import { draftMode } from "next/headers";
+import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 import { getSafeRedirect } from "payload/shared";
 

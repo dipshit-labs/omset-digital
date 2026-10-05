@@ -1,6 +1,7 @@
+import type { FieldHook, Where } from "payload";
+
 import { getTenantFromCookie } from "@payloadcms/plugin-multi-tenant/utilities";
 import { ValidationError } from "payload";
-import type { FieldHook, Where } from "payload";
 
 import { getCollectionIDType, getUserStoreIDs } from "@/payload/lib/ids";
 

@@ -1,8 +1,8 @@
-import { defineSection } from "@repo/theme-core";
+import type { HeroSettings, HeroTagBlock } from "./Hero";
 import type { SettingField } from "@repo/theme-core";
 
+import { defineSection } from "@repo/theme-core";
 import { Hero } from "./Hero";
-import type { HeroSettings, HeroTagBlock } from "./Hero";
 
 export { Hero } from "./Hero";
 export type { HeroSettings, HeroTagBlock } from "./Hero";
@@ -11,52 +11,52 @@ export type { HeroCtaClientProps } from "./HeroCtaClient";
 
 export const heroSettings: SettingField[] = [
   {
-    label: "Eyebrow",
     name: "eyebrow",
     type: "text",
+    label: "Eyebrow",
   },
   {
-    label: "Heading",
     name: "heading",
-    required: true,
     type: "text",
+    label: "Heading",
+    required: true,
   },
   {
-    label: "Subheading",
     name: "subheading",
     type: "textarea",
+    label: "Subheading",
   },
   {
-    label: "Call to Action",
     name: "cta",
     type: "group",
+    label: "Call to Action",
     fields: [
       {
-        defaultValue: "Explore",
-        label: "Button Label",
         name: "label",
         type: "text",
+        defaultValue: "Explore",
+        label: "Button Label",
       },
       {
-        defaultValue: "/products",
-        label: "Target URL",
         name: "url",
         type: "text",
+        defaultValue: "/products",
+        label: "Target URL",
       },
       {
-        defaultValue: false,
-        label: "Open in new tab",
         name: "newTab",
         type: "toggle",
+        defaultValue: false,
+        label: "Open in new tab",
       },
     ],
   },
 ];
 
 export const heroSection = defineSection<HeroSettings, HeroTagBlock>({
+  name: "Minimal Hero",
   Component: Hero,
   description: "Minimal typography-focused hero section with optional tags",
-  name: "Minimal Hero",
   settings: heroSettings,
   slug: "hero",
   blocks: [
@@ -64,10 +64,10 @@ export const heroSection = defineSection<HeroSettings, HeroTagBlock>({
       slug: "tag",
       fields: [
         {
-          label: "Tag Label",
           name: "label",
-          required: true,
           type: "text",
+          label: "Tag Label",
+          required: true,
         },
       ],
       labels: {

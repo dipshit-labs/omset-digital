@@ -1,7 +1,7 @@
-import type { SectionProps } from "@repo/theme-core";
-import { cn } from "@repo/theme-core/utils";
 import type { ReactElement } from "react";
+import type { SectionProps } from "@repo/theme-core";
 
+import { cn } from "@repo/theme-core/utils";
 import { HeroCtaClient } from "./HeroCtaClient";
 
 export interface HeroSettings {

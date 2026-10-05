@@ -1,10 +1,11 @@
+import { expect } from "vitest";
+
 import {
   defineIntegrationSuite,
   describe,
   integrationSuite,
   it,
 } from "@repo/test-kit";
-import { expect } from "vitest";
 
 describe("@repo/test-kit fixture", () => {
   it("provides usable injected payload fixture", async ({ payload }) => {
@@ -56,7 +57,7 @@ customSuite.describe("defineIntegrationSuite runner", () => {
     async ({ createReq, payload }) => {
       const customReq = createReq({
         headers: new Headers({ "x-tenant-id": "tenant-99" }),
-        user: { email: "admin@example.com", id: "user-1" },
+        user: { id: "user-1", email: "admin@example.com" },
       });
       expect(customReq.headers.get("x-tenant-id")).toBe("tenant-99");
       expect(customReq.user?.email).toBe("admin@example.com");

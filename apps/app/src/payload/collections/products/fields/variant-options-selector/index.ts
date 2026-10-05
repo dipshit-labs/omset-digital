@@ -3,12 +3,12 @@ import type { RelationshipField } from "payload";
 import { validateVariantOptions } from "./validate";
 
 const variantOptionsSelectorField = (): RelationshipField => ({
+  name: "options",
+  type: "relationship",
   hasMany: true,
   label: "Variant Options",
-  name: "options",
   relationTo: "variantOptions",
   required: false,
-  type: "relationship",
   validate: validateVariantOptions,
   admin: {
     components: {

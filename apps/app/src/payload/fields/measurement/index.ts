@@ -1,7 +1,7 @@
 import type { GroupField, NumberField, Option, SelectField } from "payload";
+import type { MeasurementType } from "./constants";
 
 import { UNIT_PRESETS } from "./constants";
-import type { MeasurementType } from "./constants";
 
 export interface MeasurementFieldOverrides {
   unitOverrides?: Partial<SelectField>;
@@ -31,12 +31,12 @@ const measurementField = ({
 
   // SAFETY: valueOverrides does not override field type; spread preserves NumberField compatibility.
   const valueField: NumberField = {
+    name: "value",
+    type: "number",
     defaultValue: 0,
     label,
     min: 0,
-    name: "value",
     required,
-    type: "number",
     ...valueOverrides,
     admin: {
       placeholder: "0",
@@ -46,11 +46,11 @@ const measurementField = ({
 
   // SAFETY: unitOverrides preserves field type and options conform to the Option array contract.
   const unitField: SelectField = {
+    name: "unit",
+    type: "select",
     defaultValue: fallbackDefault,
     label: false,
-    name: "unit",
     required,
-    type: "select",
     ...unitOverrides,
     options: options as Option[],
     admin: {
@@ -64,16 +64,16 @@ const measurementField = ({
   } as SelectField;
 
   return {
-    label: false,
     name,
     type: "group",
+    label: false,
     admin: {
       hideGutter: true,
     },
     fields: [
       {
-        fields: [valueField, unitField],
         type: "row",
+        fields: [valueField, unitField],
       },
     ],
   };

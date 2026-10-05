@@ -1,17 +1,18 @@
-import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
-import { generateMidtransSignature } from "@repo/commerce-adapters/payments";
-import { encryptCredential } from "@repo/commerce-adapters/utils";
-import { commercePlugin } from "@repo/payload-plugin-commerce";
-import { describe, it, setTestPayloadConfig } from "@repo/test-kit";
-import type { Config, Order, Store } from "@repo/types";
-import { NextRequest } from "next/server";
 import type { Payload } from "payload";
+import type { Config, Order, Store } from "@repo/types";
+
+import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
+import { NextRequest } from "next/server";
 import { expect } from "vitest";
 
 import { POST } from "@/app/api/webhooks/[provider]/[storeSlug]/route";
 import { Orders } from "@/payload/collections/orders";
 import { Stores } from "@/payload/collections/stores";
 import { Users } from "@/payload/collections/users";
+import { generateMidtransSignature } from "@repo/commerce-adapters/payments";
+import { encryptCredential } from "@repo/commerce-adapters/utils";
+import { commercePlugin } from "@repo/payload-plugin-commerce";
+import { describe, it, setTestPayloadConfig } from "@repo/test-kit";
 
 const MIDTRANS_SERVER_KEY = "SB-Mid-server-TEST12345";
 const XENDIT_SECRET_KEY = "xnd_development_secret_12345";
@@ -59,8 +60,8 @@ const seedMidtransFixture = async ({
   const store = (await payload.create({
     collection: "stores",
     data: {
-      activePaymentProvider: "midtrans",
       name: storeName,
+      activePaymentProvider: "midtrans",
       slug: storeSlug,
       subscription: { status: "trial" },
       theme: "default",
@@ -112,8 +113,8 @@ const seedXenditFixture = async ({
   const store = (await payload.create({
     collection: "stores",
     data: {
-      activePaymentProvider: "xendit",
       name: storeName,
+      activePaymentProvider: "xendit",
       slug: storeSlug,
       subscription: { status: "trial" },
       theme: "default",
@@ -261,9 +262,9 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
       {
         method: "POST",
         body: JSON.stringify({
+          id: "inv-case-xendit-1",
           amount: 200_000,
           external_id: "ORDER-CASE-XENDIT",
-          id: "inv-case-xendit-1",
           status: "PAID",
         }),
         headers: {
@@ -319,8 +320,8 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
     const store = (await payload.create({
       collection: "stores",
       data: {
-        activePaymentProvider: "xendit",
         name: "Toko Provider Mismatch",
+        activePaymentProvider: "xendit",
         slug: "toko-mismatch",
         subscription: { status: "trial" },
         theme: "default",
@@ -412,8 +413,8 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
 
     // SAFETY: Orders collection findByID returns Order document.
     const updatedOrder = (await payload.findByID({
-      collection: "orders",
       id: order.id,
+      collection: "orders",
     })) as Order;
 
     expect(updatedOrder.paymentStatus).toBe("paid");
@@ -443,13 +444,13 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
       {
         method: "POST",
         body: JSON.stringify({
+          id: "inv-xendit-valid-200",
           amount: 350_000,
           created: "2026-10-02T15:00:00.000Z",
           currency: "IDR",
           description: "Payment for Order #ORDER-XENDIT-SETTLE",
           expiry_date: "2026-10-03T15:00:00.000Z",
           external_id: "ORDER-XENDIT-SETTLE",
-          id: "inv-xendit-valid-200",
           merchant_name: "Toko Xendit Valid",
           paid_amount: 350_000,
           paid_at: "2026-10-02T15:10:00.000Z",
@@ -487,14 +488,14 @@ describe("Unified Webhook Route Handler (/api/webhooks/[provider]/[storeSlug])",
 
     // SAFETY: Orders collection findByID returns Order document.
     const updatedOrder = (await payload.findByID({
-      collection: "orders",
       id: order.id,
+      collection: "orders",
     })) as Order;
 
     expect(updatedOrder.paymentStatus).toBe("paid");
     expect(updatedOrder.paymentMetadata).toMatchObject({
-      amount: 350_000,
       id: "inv-xendit-valid-200",
+      amount: 350_000,
       provider: "xendit",
       status: "PAID",
     });

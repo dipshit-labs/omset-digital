@@ -7,8 +7,8 @@ export const seed = async (payload: SeedParameters): Promise<void> => {
     collection: "stores",
     draft: false,
     data: {
-      customDomain: "trial.localhost",
       name: "Store 1",
+      customDomain: "trial.localhost",
       slug: "trial",
       subscription: { status: "trial" },
       theme: "default",

@@ -1,17 +1,18 @@
-import { server } from "@repo/test-kit/msw";
+import type { CourierCostResult } from "./types";
+
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
+import { server } from "@repo/test-kit/msw";
 import { RajaOngkirClient } from "./client";
-import type { CourierCostResult } from "./types";
 
 describe(RajaOngkirClient, () => {
   const mockApiKey = "mock-rajaongkir-api-key-12345";
 
   const mockCostResults: CourierCostResult[] = [
     {
-      code: "jne",
       name: "Jalur Nugraha Ekakurir (JNE)",
+      code: "jne",
       costs: [
         {
           cost: [{ etd: "1-2", note: "", value: 18_000 }],

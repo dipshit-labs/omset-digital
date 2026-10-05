@@ -1,7 +1,3 @@
-import { Buffer } from "node:buffer";
-
-import { boolean, minLength, number, object, optional, string } from "zod/mini";
-
 import type {
   CreatePaymentSessionInput,
   ParsedPaymentStatus,
@@ -12,12 +8,16 @@ import type {
   PaymentSession,
   PaymentStatus,
 } from "../types";
+import type { XenditConfig } from "./types";
+
+import { Buffer } from "node:buffer";
+import { boolean, minLength, number, object, optional, string } from "zod/mini";
+
 import { PaymentWebhookError } from "../types";
 import {
   verifyXenditCallbackToken,
   verifyXenditHmacSignature,
 } from "./signature";
-import type { XenditConfig } from "./types";
 
 interface XenditInvoicePayload {
   amount: number;
@@ -77,13 +77,13 @@ const mapXenditStatus = (status: string | undefined): PaymentStatus => {
 };
 
 const xenditStatusResponseSchema = object({
+  id: string().check(minLength(1)),
   amount: number(),
   created: optional(string()),
   currency: optional(string()),
   description: optional(string()),
   expiry_date: optional(string()),
   external_id: string().check(minLength(1)),
-  id: string().check(minLength(1)),
   invoice_url: optional(string()),
   merchant_name: optional(string()),
   paid_amount: optional(number()),
@@ -143,6 +143,7 @@ interface RawXenditMetadata {
 }
 
 const toPaymentMetadata = (data: RawXenditMetadata): PaymentMetadata => ({
+  id: data.id,
   amount: data.amount,
   created: data.created,
   currency: data.currency,
@@ -150,7 +151,6 @@ const toPaymentMetadata = (data: RawXenditMetadata): PaymentMetadata => ({
   event: data.event,
   expiryDate: data.expiry_date,
   externalId: data.external_id,
-  id: data.id,
   invoiceUrl: data.invoice_url,
   isHigh: data.is_high,
   merchantName: data.merchant_name,
@@ -208,15 +208,16 @@ const getWebhookHeader = (
 };
 
 const xenditWebhookDataSchema = object({
+  id: optional(string()),
   amount: optional(number()),
   currency: optional(string()),
   external_id: optional(string()),
-  id: optional(string()),
   reference_id: optional(string()),
   status: optional(string()),
 });
 
 const XenditWebhookSchema = object({
+  id: optional(string()),
   amount: optional(number()),
   created: optional(string()),
   currency: optional(string()),
@@ -224,7 +225,6 @@ const XenditWebhookSchema = object({
   description: optional(string()),
   event: optional(string()),
   external_id: optional(string()),
-  id: optional(string()),
   is_high: optional(boolean()),
   merchant_name: optional(string()),
   paid_amount: optional(number()),
@@ -531,13 +531,13 @@ export class XenditClient implements PaymentProvider {
         paymentStatus,
         providerEventId,
         metadata: toPaymentMetadata({
+          id: providerEventId,
           amount: data.amount ?? data.data?.amount,
           created: data.created,
           currency: data.currency ?? data.data?.currency,
           description: data.description,
           event: data.event,
           external_id: orderId,
-          id: providerEventId,
           is_high: data.is_high,
           merchant_name: data.merchant_name,
           paid_amount: data.paid_amount,

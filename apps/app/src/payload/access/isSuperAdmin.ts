@@ -1,5 +1,5 @@
-import type { User } from "@repo/types";
 import type { Access, FieldAccess } from "payload";
+import type { User } from "@repo/types";
 
 const isSuperAdmin = (user: User | null): boolean =>
   Boolean(user?.roles?.includes("super-admin"));

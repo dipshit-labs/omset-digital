@@ -1,4 +1,5 @@
 import type { Condition, NamedGroupField } from "payload";
+
 import { describe, expect, it } from "vitest";
 
 import { virtualCatalogFields } from "./virtualCatalogFields";

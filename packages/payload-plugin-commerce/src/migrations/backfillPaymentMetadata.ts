@@ -1,6 +1,5 @@
 // oxlint-disable no-await-in-loop
 import type { CollectionSlug, FieldHook, Payload } from "payload";
-
 import type {
   BackfillPaymentMetadataOptions,
   BackfillPaymentMetadataResult,
@@ -245,8 +244,8 @@ export const backfillOrdersPaymentMetadata = async (
         updatesToRun.push(async () => {
           // SAFETY: Payload update input matches orders schema with backfilled polymorphic paymentMetadata.
           await payload.update({
-            collection,
             id: targetId,
+            collection,
             overrideAccess: true,
             data: {
               paymentMetadata: migrated,
