@@ -4,7 +4,7 @@ import type { StoreCredentials } from "../../src/types";
 import { expect } from "vitest";
 
 import { decryptCredential, isCiphertext } from "@repo/commerce-adapters/utils";
-import { defineIntegrationSuite } from "@repo/test-kit";
+import { integrationSuite } from "@repo/test-kit";
 import { createStoreCredentialsCollection } from "../../src/collections/storeCredentials";
 import { storeCredentialsFactory } from "../factories/storeCredentialsFactory";
 
@@ -30,7 +30,7 @@ const storeCredentialsCollection = createStoreCredentialsCollection({
   secretOrResolver: TEST_SECRET,
 });
 
-const { describe, it } = defineIntegrationSuite({
+const { describe, it } = integrationSuite({
   collections: [storesCollection, storeCredentialsCollection],
 });
 

@@ -2,7 +2,7 @@ import type { CollectionConfig, Payload } from "payload";
 
 import { expect } from "vitest";
 
-import { defineIntegrationSuite } from "@repo/test-kit";
+import { integrationSuite } from "@repo/test-kit";
 import { createPackagesCollection } from "../../src/collections/packages";
 import { packageFactory } from "../factories/packageFactory";
 
@@ -38,7 +38,7 @@ const storesCollection: CollectionConfig = {
 
 const packagesCollection = createPackagesCollection();
 
-const { describe, it } = defineIntegrationSuite({
+const { describe, it } = integrationSuite({
   collections: [storesCollection, packagesCollection],
 });
 
